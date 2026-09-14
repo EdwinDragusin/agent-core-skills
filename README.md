@@ -2,7 +2,7 @@
 
 [![Licencia](https://img.shields.io/badge/licencia-MIT-blue.svg)](LICENSE)
 [![Ecosistema](https://img.shields.io/badge/ecosistema-Antigravity%202.0-8A2BE2.svg)](#instalación-y-configuración)
-[![Runtime](https://img.shields.io/badge/runtime-Deno%202.0%20%7C%20Node.js%2018%2B-green.svg)](#instalación-y-configuración)
+[![Stack](https://img.shields.io/badge/stack-Agnóstico%20%7C%20Multiplataforma-green.svg)](#instalación-y-configuración)
 [![Filosofia](https://img.shields.io/badge/arquitectura-Zero--Trust-red.svg)](#visión-general-y-motivación)
 [![Estandar](https://img.shields.io/badge/standard--readme-conforme-success.svg)](https://github.com/RichardLitt/standard-readme)
 
@@ -23,6 +23,11 @@ Suite integral de habilidades operativas, directrices arquitectónicas, reglas d
   - [6. Control de Versiones Avanzado](#6-control-de-versiones-avanzado)
 - [Skills Externas y de Terceros](#skills-externas-y-de-terceros)
 - [Instalación y Configuración](#instalación-y-configuración)
+  - [Autoconfiguración Asistida por Agente](#autoconfiguración-asistida-por-agente)
+  - [Requisitos del Sistema](#requisitos-del-sistema)
+  - [Despliegue Manual en el Entorno Global](#despliegue-manual-en-el-entorno-global)
+  - [Despliegue a Nivel de Proyecto (Workspace)](#despliegue-a-nivel-de-proyecto-workspace)
+  - [Configuración de Servidores MCP Recomendada](#configuración-de-servidores-mcp-recomendada)
 - [Guía de Uso y Activación](#guía-de-uso-y-activación)
 - [Gobernanza Git y Contribución](#gobernanza-git-y-contribución)
 - [Auditoría Automatizada](#auditoría-automatizada)
@@ -229,26 +234,63 @@ Las siguientes 3 habilidades complementarias están configuradas en el entorno l
 
 ## Instalación y Configuración
 
+### Autoconfiguración Asistida por Agente
+
+Puedes delegar la instalación, clonación y verificación de este catálogo directamente a tu agente de IA (Antigravity u otro agente con acceso a terminal y Git). Proporciónale el siguiente prompt:
+
+> [!TIP]
+> **Prompt para el Agente:**
+> ```text
+> Configura e integra el catálogo de skills de gobernanza desde el repositorio oficial:
+> https://github.com/EdwinDragusin/agent-core-skills.git
+> 
+> Sigue estos pasos para la instalación:
+> 1. Detecta el sistema operativo y el directorio de usuario ($HOME o %USERPROFILE%).
+> 2. Determina el alcance deseado:
+>    - Despliegue Global (predeterminado): Clona el repositorio en la carpeta global de skills de Antigravity:
+>      - Windows (PowerShell): "$HOME\.gemini\config\skills"
+>      - macOS / Linux: "$HOME/.gemini/config/skills"
+>      (Si el directorio ya existe y contiene un repositorio Git, realiza un `git pull origin main` para sincronizar la versión más reciente; de lo contrario, clónalo).
+>    - Despliegue por Proyecto (Workspace): Clona o copia las skills en la carpeta `.agents/skills/` en la raíz del proyecto actual.
+> 3. Entorno agnóstico: Este catálogo es completamente independiente del lenguaje o runtime (compatible con proyectos en Node.js, Python, Go, Rust, Java, C#, PHP, Deno o Bun). No asumas dependencias exclusivas de un solo runtime.
+> 4. Comprueba la integridad inspeccionando que los archivos `SKILL.md` estén presentes y reporta la lista de skills habilitadas.
+> ```
+
+Repositorio oficial: [EdwinDragusin/agent-core-skills](https://github.com/EdwinDragusin/agent-core-skills) (URL de clonación: `https://github.com/EdwinDragusin/agent-core-skills.git`).
+
 ### Requisitos del Sistema
-- **Runtime**: [Deno 2.0+](https://deno.com/) o [Node.js 18+](https://nodejs.org/).
-- **Control de Versiones**: Git 2.38+ (para soporte nativo de `rebase --update-refs` y `range-diff`).
-- **Plataforma de Agentes**: Google Antigravity o agentes compatibles con el protocolo de Skills/Customizations.
 
-### Despliegue de Skills en el Entorno Global
+- **Stack y Lenguajes**: Agnóstico y universal. Las skills contienen especificaciones arquitectónicas, directrices operativas y protocolos en Markdown que gobiernan el razonamiento de los agentes en cualquier stack de programación (Node.js, TypeScript/JavaScript, Python, Go, Rust, C#, PHP, Java, bases de datos SQL/NoSQL, etc.).
+- **Control de Versiones**: Git 2.38+ (para clonación, sincronización y soporte nativo de ramas apiladas y rebases avanzados).
+- **Plataforma de Agentes**: Google Antigravity o asistentes de IA compatibles con el protocolo de Skills y Customizaciones (`~/.gemini/config/skills` o `.agents/skills`).
 
-Para que Antigravity reconozca este catálogo de forma global, clonar o vincular este repositorio en el directorio de configuración del usuario:
+### Despliegue Manual en el Entorno Global
+
+Para que Antigravity reconozca este catálogo de forma global en todas tus sesiones y proyectos, clona el repositorio en el directorio de configuración del usuario:
 
 ```bash
 # En Windows (PowerShell)
-git clone <URL_DEL_REPOSITORIO> "$HOME\.gemini\config\skills"
+git clone https://github.com/EdwinDragusin/agent-core-skills.git "$HOME\.gemini\config\skills"
 
 # En macOS / Linux
-git clone <URL_DEL_REPOSITORIO> "$HOME/.gemini/config/skills"
+git clone https://github.com/EdwinDragusin/agent-core-skills.git "$HOME/.gemini/config/skills"
+```
+
+### Despliegue a Nivel de Proyecto (Workspace)
+
+Si deseas incorporar estas habilidades únicamente en un proyecto específico para compartirlas con tu equipo mediante control de versiones:
+
+```bash
+# Crear directorio de skills del proyecto
+mkdir -p .agents/skills
+
+# Clonar o incorporar el repositorio
+git clone https://github.com/EdwinDragusin/agent-core-skills.git .agents/skills
 ```
 
 ### Configuración de Servidores MCP Recomendada
 
-Para habilitar la interoperabilidad de las skills de memoria y documentación, configurar los servidores en `mcp_config.json`:
+Para habilitar la interoperabilidad de las skills de memoria estructural y documentación en Obsidian, configurar los servidores en `mcp_config.json`:
 
 ```json
 {
