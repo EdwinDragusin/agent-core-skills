@@ -1,0 +1,22 @@
+# Normalizacion de finales de linea.
+#
+# El repositorio almacena todo el texto con LF. Sin esta regla, un checkout en
+# Windows con `core.autocrlf=true` escribe CRLF en la copia de trabajo y
+# `deno fmt --check` (primer paso de `deno task ci`) falla con
+# "Text differed by line endings" aunque el contenido versionado sea correcto.
+#
+# `eol=lf` fuerza LF tambien en la copia de trabajo, independientemente de la
+# configuracion local de cada desarrollador.
+* text=auto eol=lf
+
+# Binarios: sin conversion de finales de linea ni diff de texto.
+# Ninguno esta versionado hoy; la regla es preventiva para adjuntos de prueba
+# (PDF generados por Gotenberg, imagenes de reactivos segun GAP-15).
+*.pdf binary
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.woff binary
+*.woff2 binary
