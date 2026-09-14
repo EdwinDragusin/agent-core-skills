@@ -1,3 +1,12 @@
 defuddle/
 graphify/
 json-canvas/
+
+# OS metadata
+Thumbs.db
+.DS_Store
+desktop.ini
+
+# Temp / logs
+*.log
+.tmp/
