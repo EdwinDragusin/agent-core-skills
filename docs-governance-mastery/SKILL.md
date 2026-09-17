@@ -97,6 +97,11 @@ herramientas del servidor MCP de Obsidian:
 > archivos (`write_to_file`, `replace_file_content`) sin pasar por Obsidian MCP.
 > Esto garantiza la integridad del vault y los enlaces bidireccionales.
 
+### Registro Sistemático de ADRs ante Cambios de Impacto
+
+Todo cambio con impacto considerable en el sistema (nuevas clases base transversales, alteración de invariantes, adición/sustitución de dependencias, contratos de API o mutación de fronteras arquitectónicas) detona obligatoriamente la creación de un ADR numerado secuencialmente en `docs/adr/`.
+Si no se detecta un vault de Obsidian en el espacio de trabajo, el agente propondrá inmediatamente inicializar la estructura canónica `docs/`.
+
 ---
 
 ## Flujo de Trabajo en 6 Fases
@@ -127,6 +132,7 @@ flowchart TD
     -   Buscar en el vault de Obsidian carpetas como `docs/`, `arquitectura/`,
         `adr/`, `guias/`, `referencia/`, `tutoriales/` usando `list_directory`
         y `search_notes`.
+    -   **Guarda de ausencia de vault**: Si no existe un vault de Obsidian ni carpeta `docs/` en el proyecto, proponer de inmediato al usuario la creación e inicialización de uno con la estructura canónica recomendada.
     -   Identificar si existe documentación arc42 previa (buscar secciones
         como "Introducción y Metas", "Vista de Bloques", "Decisiones
         Arquitectónicas").
@@ -167,6 +173,13 @@ según la solicitud del usuario y la fase actual del SDLC.
     -   ¿Es una auditoría del estado actual?
     -   ¿Es un registro de decisión arquitectónica?
     -   ¿Es documentación orientada al usuario (Diátaxis)?
+
+    **Triggers Mandatorios para Generación de ADR**:
+    Un cambio califica como "impacto considerable o arquitectónico" y exige redactar un ADR cuando cumple cualquiera de los siguientes criterios:
+    -   **Abstracciones y Clases Base**: Introducción o modificación de tipos base transversales (ej. jerarquías de errores como `ErrorDominio`, interfaces de puertos núcleo, clases de persistencia base).
+    -   **Invariantes y Reglas de Dominio**: Alteración de políticas de negocio que afecten a múltiples entidades, flujos de estados (FSM) o contratos de respuesta.
+    -   **Fronteras y Dependencias**: Cambios en reglas de Clean Architecture o FSD, o incorporación/reemplazo de dependencias y librerías externas.
+    -   **Resiliencia y Seguridad**: Modificación de esquemas de manejo global de excepciones, autenticación, autorización, tokens o políticas de concurrencia/transaccionalidad.
 
 3.  **Protocolo de Clarificación Automática**:
 
