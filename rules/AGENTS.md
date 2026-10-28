@@ -20,8 +20,8 @@
 | 1 | `product-architect` | 10 notas Diataxis + BDD en vault. Modo Greenfield (entrevista) o Brownfield/Reverse-Spec (extraccion MCP + Delta). Handoff flag `is_baseline_only`. Cero codigo. | `brainstorming`, `spec-driven-development`, `interview-me`, `docs-governance-mastery`, `codebase-memory-mastery` |
 | 2 | `system-architect` | 8 notas arc42 + DBML (`04-modelo-de-datos-y-contratos.md`), ADR Nygard, Grill-Me de stack. `is_baseline_only == true`: cierra con `07-deuda-tecnica-y-riesgos.md` (`ponytail-audit`) sin ramas. `false`: worktree, scaffolding Clean/FSD y plan atomico con `[PARALELO]` y matriz Conventional Commits. | `writing-plans`, `planning-and-task-breakdown`, `domain-driven-design`, `api-and-interface-design`, `git-workflow-mastery` |
 | 3A | `core-builder` | Backend paralelo (Teamwork) TDD Red-Green-Refactor, RFC 9457, Docs-as-Code Obsidian, committer diferido e `index_repository`. Handoff: `has_frontend == true` a 3B; `false` a 4. | `test-driven-development`, `qa-testing-mastery`, `subagent-driven-development`, `exception-resilience-mastery`, `ponytail` |
-| 3B | `ui-builder` | Si `has_frontend == true`: FSD paralelo, 4 estados FSM, WCAG 2.1 AA. Gatekeeper obligatorio con `ux-auditor` (APPROVE/REJECT contra 10 antipatrones) previo a committer e indexacion. | `ui-ux-mastery`, `frontend-ui-engineering`, `browser-testing-with-devtools`, `doubt-driven-development` |
-| 4 | `qa-reviewer` | Auditoria independiente sin editar codigo: BDD, Blast Radius, E2E, RFC 9457, OWASP. Dictamen `PASS`/`FAIL` en `docs/auditorias/` via `obsidian`. | `code-review-and-quality`, `doubt-driven-development`, `security-and-hardening` |
+| 3B | `ui-builder` | Si `has_frontend == true`: FSD paralelo, 4 estados FSM, WCAG 2.1 AA. Gatekeeper obligatorio: servidor dev/compose activo + subagente `ux-auditor` con `playwright` vivo (APPROVE/REJECT contra 11 antipatrones) con capturas de pantalla previo a committer e indexacion. | `ui-ux-mastery`, `frontend-ui-engineering`, `browser-testing-with-devtools`, `doubt-driven-development` |
+| 4 | `qa-reviewer` | Auditoria independiente sin editar codigo: BDD, Blast Radius, E2E con `playwright` vivo, RFC 9457, OWASP. Dictamen `PASS`/`FAIL` en `docs/auditorias/` via `obsidian`. Exige seccion obligatoria de capturas reales y consola limpia. | `code-review-and-quality`, `doubt-driven-development`, `security-and-hardening` |
 | 5 | `release-engineer` | Suite verde, integracion Trunk-Based autorizada, tags SemVer, worktrees limpios, `index_status` limpio. | `verification-before-completion`, `git-workflow-mastery`, `caveman` |
 
 ## 4. Protocolo del Agente Principal (Orquestador Estricto)
@@ -31,4 +31,8 @@
   1. Inicio (`"inicia el pipeline/proyecto"`): Invoca `invoke_subagent(TypeName="product-architect")`.
   2. Recepcion reactiva: Resume el handoff recibido y solicita confirmacion en compuertas clave (DoD Fase 1, Plan Fase 2, PASS Fase 4, Merge Fase 5).
   3. Aprobacion: Despacha la siguiente fase (`system-architect` -> `core-builder`/`ui-builder` -> `qa-reviewer` -> `release-engineer`).
+- **Compuertas Bloqueantes de Handoff (Cero Tolerancia a Omisiones):**
+  - Si `has_frontend == true`:
+    1. El Orquestador **rechaza de inmediato** el handoff de Fase 3B si `ui-builder` no incluye el dictamen formal `APPROVE` emitido por `ux-auditor`. Si `ui-builder` omitio invocarlo, el Orquestador despacha obligatoriamente a `ux-auditor` via `invoke_subagent` antes de autorizar a `qa-reviewer`.
+    2. El Orquestador **rechaza de inmediato** el dictamen `PASS` de Fase 4 si `qa-reviewer` no incluye la seccion obligatoria de `Evidencia Playwright E2E Vivo` (rutas navegadas en `http://localhost:3000`, capturas de pantalla generadas y volcado de `browser_console_messages` libre de errores).
 - **Invocacion Quirurgica:** Si el usuario solicita una fase o subagente puntual, despachalo via `invoke_subagent` sin resolverlo en la sesion principal.

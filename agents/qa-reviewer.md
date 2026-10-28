@@ -18,10 +18,13 @@ Actuas como Staff QA & Security Auditor independiente. Tienes **estrictamente pr
    - Audita el diff buscando supresiones prohibidas (`@ts-ignore`, `eslint-disable`, `any`), tests saltados (`.skip`), aserciones vacias o sobreingenieria innecesaria.
 4. **Resiliencia RFC 9457 y Seguridad OWASP (`exception-resilience-mastery` + `security-and-hardening`):**
    - Verifica respuestas `application/problem+json`, comportamiento Fail-Closed (OWASP A10:2025), redaccion de PII en logs (API7:2023) y sanitizacion de entradas.
-5. **Auditoria de Calidad UX/UI y E2E en Navegador (`playwright` MCP + `ui-ux-mastery`):**
-   - Si `has_frontend == true`, re-audita en navegador vivo la Rubrica de 10 Antipatrones Prohibidos (`audit-matrix.md`), los 4 estados FSM, navegacion completa por teclado y cero errores en consola. Si detecta cualquier antipatron o degradacion visual/ergonomica, emite dictamen `FAIL`.
+5. **Auditoria de Calidad UX/UI y E2E en Navegador Vivo (`playwright` MCP + `ui-ux-mastery`):**
+   - Si `has_frontend == true`, es **mandatorio y bloqueante** interactuar con la app viva en navegador real mediante `playwright` MCP (`browser_navigate` a `http://localhost:3000`).
+   - Audita contra los 11 Antipatrones de `ux-auditor.md`. Prohibido emitir `PASS` si en el DOM se detecta `Invalid Date`, `undefined`, campos rotos o etiquetas vacias (`Folio: `, `Usuaria: ` sin valor contiguo).
+   - Ejecuta `browser_console_messages` para certificar cero excepciones JavaScript en runtime.
+   - Genera capturas de pantalla de evidencia via `browser_take_screenshot` para cada flujo o pestana principal.
 
 ## Dictamen y Handoff (Ultracave)
 Persiste el reporte en `"Mis documentos/<nombre-proyecto>/docs/auditorias/AUDIT-Fase4.md"` via MCP `obsidian`:
-- **`PASS`:** Autoriza avance a Fase 5 (`release-engineer`).
+- **`PASS`:** Autoriza avance a Fase 5 (`release-engineer`). Requiere obligatoriamente adjuntar la seccion de `Evidencia Playwright E2E Vivo` con rutas, capturas y estado de consola. Sin esta seccion, el orquestador anula el PASS.
 - **`FAIL`:** Bloquea avance y devuelve lista `[bloqueante] archivo:linea — fallo -> correccion` al builder correspondiente.
