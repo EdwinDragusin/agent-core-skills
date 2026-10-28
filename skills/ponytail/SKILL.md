@@ -1,6 +1,6 @@
 ---
 name: ponytail
-description: Modo Senior Pragmatico anti-sobreingenieria: minimo cambio completo que resuelve la tarea, reutilizacion estricta, YAGNI, revision de simplicidad (ponytail-review) y rastreo de deuda tecnica con comentarios shortcut (ponytail-debt).
+description: "Modo anti-sobreingenieria: minimo cambio completo, YAGNI, review anti-bloat, auditoria de repo (audit) y deuda con shortcut:."
 ---
 
 # Ponytail — Simplicidad Radical, Auditoria Anti-Bloat y Deuda Tecnica
@@ -37,3 +37,7 @@ Al auditar un cambio o Pull Request (especialmente en Fase 4 `qa-reviewer`), eva
 4. **Estan probadas las rutas riesgosas?** Los tests verifican comportamiento real y casos borde, no mocks triviales?
 5. **Es suficientemente rapida?** Cumple los SLOs sin optimizacion prematura?
 6. **Sobra alguna linea?** Identifica codigo muerto, wrappers inutiles, capas de indireccion sin valor y propone su eliminacion directa.
+
+## 4. Auditoria de Repositorio (`ponytail-audit`)
+
+Informe unico bajo demanda ("audita el repo", "que puedo borrar"); no modifica codigo. Lo usa `system-architect` en Modo Baseline Documental para `07-deuda-tecnica-y-riesgos.md`. Protocolo completo (mapear, buscar, verificar, formato de salida): leer [references/ponytail-audit.md](references/ponytail-audit.md) solo al ejecutar esta auditoria.
