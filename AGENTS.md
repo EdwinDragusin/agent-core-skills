@@ -9,17 +9,26 @@
 
 ## 2. Protocolo de Servidores MCP
 
-- **`codebase-memory-mcp` (estatico):** Herramientas de grafo antes que grep/glob (`search_graph`, `trace_path`, `get_code_snippet`, `check_index_coverage`, `query_graph`, `get_architecture`). Tiers de evidencia: Scout, Verify (default), Auditor. `index_repository` obligatorio al cierre de Fase 3A y 3B.
-- **`playwright` (estatico):** Verificacion empirica de UI en navegador real. Obligatorio en Fase 3B (4 estados FSM, WCAG 2.1 AA) y Fase 4 (E2E de criterios BDD).
-- **`obsidian` (`@bitbonsai/mcpvault@latest`, dinamico en Fase 1):** Sin ruta global fija. `product-architect` pregunta el nombre clave del proyecto, propone `"Mis documentos/<nombre-proyecto>/docs"` (`$HOME/Documents/<nombre-proyecto>/docs`), crea la estructura de carpetas e inicializa el MCP en esa ruta exacta antes de la primera nota.
+- **`codebase-memory-mcp` (estatico):** Grafo antes que grep/glob (`search_graph`, `trace_path`, `get_code_snippet`, `check_index_coverage`, `query_graph`, `get_architecture`). Tiers: Scout, Verify (default), Auditor. `index_repository` obligatorio al cierre de Fase 3A y 3B.
+- **`playwright` (estatico):** UI en navegador real. Obligatorio en Fase 3B (4 estados FSM, WCAG 2.1 AA) y Fase 4 (E2E BDD).
+- **`obsidian` (`@bitbonsai/mcpvault@latest`, dinamico en Fase 1):** `product-architect` propone `"Mis documentos/<nombre-proyecto>/docs"`, crea carpetas e inicializa el MCP en esa ruta exacta antes de la primera nota.
 
-## 3. Pipeline SDLC (subagentes en `agents/`; su protocolo completo se carga al invocarlos)
+## 3. Pipeline SDLC (subagentes en `agents/`; protocolo completo al invocarlos)
 
 | Fase | Subagente | Entregable / DoD | Skills clave |
 | :--- | :--- | :--- | :--- |
-| 1 | `product-architect` | 10 notas Diataxis + BDD Gherkin en el vault, aprobadas por el usuario. Modo Greenfield (entrevista) o Brownfield/Reverse-Spec (extraccion con `codebase-memory-mcp` + Entrevista Delta). Handoff con flag `is_baseline_only`. Prohibido codigo de produccion. | `brainstorming`, `spec-driven-development`, `interview-me`, `docs-governance-mastery`, `codebase-memory-mastery` |
-| 2 | `system-architect` | 8 notas arc42 + DBML (`04-modelo-de-datos-y-contratos.md`), ADR Nygard, Grill-Me de stack. `is_baseline_only == true`: cierra con `07-deuda-tecnica-y-riesgos.md` (`ponytail-audit`) sin ramas ni cambios de codigo. `false`: worktree, scaffolding Clean Architecture/FSD y plan atomico con `[PARALELO]` y matriz de Conventional Commits. | `writing-plans`, `planning-and-task-breakdown`, `domain-driven-design`, `api-and-interface-design`, `git-workflow-mastery` |
-| 3A | `core-builder` | Backend en paralelo (Teamwork) bajo TDD Red-Green-Refactor, errores RFC 9457, Docs-as-Code en Obsidian, committer diferido e `index_repository`. Handoff: `has_frontend == true` a 3B; `false` a 4. | `test-driven-development`, `qa-testing-mastery`, `subagent-driven-development`, `exception-resilience-mastery`, `ponytail` |
-| 3B | `ui-builder` | Solo si `has_frontend == true`: FSD en paralelo, 4 estados FSM, WCAG 2.1 AA. Gatekeeper adversarial obligatorio con subagente `ux-auditor` (APPROVE/REJECT contra 10 antipatrones) previo a committer e indexacion. | `ui-ux-mastery`, `frontend-ui-engineering`, `browser-testing-with-devtools`, `doubt-driven-development` |
-| 4 | `qa-reviewer` | Auditoria independiente (prohibido editar codigo de produccion): BDD, Blast Radius, E2E, RFC 9457, OWASP. Dictamen `PASS`/`FAIL` en `docs/auditorias/` via `obsidian`. | `code-review-and-quality`, `doubt-driven-development`, `security-and-hardening` |
-| 5 | `release-engineer` | Suite final en verde, integracion Trunk-Based autorizada por el usuario, tags SemVer, worktrees limpios, `index_status` limpio. | `verification-before-completion`, `git-workflow-mastery`, `caveman` |
+| 1 | `product-architect` | 10 notas Diataxis + BDD en vault. Modo Greenfield (entrevista) o Brownfield/Reverse-Spec (extraccion MCP + Delta). Handoff flag `is_baseline_only`. Cero codigo. | `brainstorming`, `spec-driven-development`, `interview-me`, `docs-governance-mastery`, `codebase-memory-mastery` |
+| 2 | `system-architect` | 8 notas arc42 + DBML (`04-modelo-de-datos-y-contratos.md`), ADR Nygard, Grill-Me de stack. `is_baseline_only == true`: cierra con `07-deuda-tecnica-y-riesgos.md` (`ponytail-audit`) sin ramas. `false`: worktree, scaffolding Clean/FSD y plan atomico con `[PARALELO]` y matriz Conventional Commits. | `writing-plans`, `planning-and-task-breakdown`, `domain-driven-design`, `api-and-interface-design`, `git-workflow-mastery` |
+| 3A | `core-builder` | Backend paralelo (Teamwork) TDD Red-Green-Refactor, RFC 9457, Docs-as-Code Obsidian, committer diferido e `index_repository`. Handoff: `has_frontend == true` a 3B; `false` a 4. | `test-driven-development`, `qa-testing-mastery`, `subagent-driven-development`, `exception-resilience-mastery`, `ponytail` |
+| 3B | `ui-builder` | Si `has_frontend == true`: FSD paralelo, 4 estados FSM, WCAG 2.1 AA. Gatekeeper obligatorio con `ux-auditor` (APPROVE/REJECT contra 10 antipatrones) previo a committer e indexacion. | `ui-ux-mastery`, `frontend-ui-engineering`, `browser-testing-with-devtools`, `doubt-driven-development` |
+| 4 | `qa-reviewer` | Auditoria independiente sin editar codigo: BDD, Blast Radius, E2E, RFC 9457, OWASP. Dictamen `PASS`/`FAIL` en `docs/auditorias/` via `obsidian`. | `code-review-and-quality`, `doubt-driven-development`, `security-and-hardening` |
+| 5 | `release-engineer` | Suite verde, integracion Trunk-Based autorizada, tags SemVer, worktrees limpios, `index_status` limpio. | `verification-before-completion`, `git-workflow-mastery`, `caveman` |
+
+## 4. Protocolo del Agente Principal (Orquestador Estricto)
+
+- **Rol Supervisor (Prohibido Trabajo Obrero):** En tareas de ciclo SDLC, la sesion principal actua como Supervisor/Dispatcher. Prohibido redactar specs, disenar DBML o codificar en el chat; delega cada fase a su subagente dedicado via `invoke_subagent`.
+- **Pipeline Chaining Autonomo:**
+  1. Inicio (`"inicia el pipeline/proyecto"`): Invoca `invoke_subagent(TypeName="product-architect")`.
+  2. Recepcion reactiva: Resume el handoff recibido y solicita confirmacion en compuertas clave (DoD Fase 1, Plan Fase 2, PASS Fase 4, Merge Fase 5).
+  3. Aprobacion: Despacha la siguiente fase (`system-architect` -> `core-builder`/`ui-builder` -> `qa-reviewer` -> `release-engineer`).
+- **Invocacion Quirurgica:** Si el usuario solicita una fase o subagente puntual, despachalo via `invoke_subagent` sin resolverlo en la sesion principal.
