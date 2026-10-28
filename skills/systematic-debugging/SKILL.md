@@ -1,6 +1,6 @@
 ---
 name: systematic-debugging
-description: Diagnostico cientifico de causa raiz en 4 fases antes de editar codigo: recoleccion de evidencia, formulacion de hipotesis rankeadas, prueba minima de reproduccion y parche quirurgico. Activar ante cualquier test fallido, bug o regresion.
+description: "Causa raiz en 4 fases antes de editar: evidencia, hipotesis, reproduccion minima y parche quirurgico. Ante cualquier bug o test fallido."
 ---
 
 # Systematic Debugging — Diagnostico de Causa Raiz en 4 Fases

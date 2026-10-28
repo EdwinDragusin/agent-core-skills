@@ -1,6 +1,6 @@
 ---
 name: caveman
-description: Economia cognitiva y de tokens de alta senal: modo de comunicacion adaptativo sin relleno narrativo, commits convencionales comprimidos a la intencion (caveman-commit), compresion de archivos de memoria (caveman-compress) y handoffs inter-agente (ultracave).
+description: "Comunicacion telegrafica sin relleno, commits convencionales comprimidos (caveman-commit), compresion de memoria y handoffs ultracave."
 ---
 
 # Caveman — Comunicacion de Alta Senal y Compresion de Tokens

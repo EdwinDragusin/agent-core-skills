@@ -1,6 +1,6 @@
 ---
 name: security-and-hardening
-description: Endurece el codigo contra vulnerabilidades OWASP Top 10: validacion en fronteras, autenticacion y sesiones seguras, prevencion de inyecciones, manejo de secretos, proteccion de PII y auditoria de dependencias.
+description: "Endurece contra OWASP Top 10: validacion en fronteras, authn/sesiones, inyecciones, secretos, PII y dependencias."
 ---
 
 # Security and Hardening — Seguridad por Diseno y Auditoria OWASP

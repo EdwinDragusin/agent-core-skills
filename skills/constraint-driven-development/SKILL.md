@@ -1,6 +1,6 @@
 ---
 name: constraint-driven-development
-description: Establece la barra de calidad del proyecto como un contrato inquebrantable e impide que los agentes la rebajen silenciosamente: prohibe supresiones de tipos/linter, tests saltados, aserciones eliminadas o stubs vacios.
+description: "Fija la barra de calidad como contrato: prohibe supresiones de linter/tipos, tests saltados y stubs vacios."
 ---
 
 # Constraint-Driven Development — Contrato de Barra de Calidad Innegociable

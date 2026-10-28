@@ -1,6 +1,6 @@
 ---
 name: api-and-interface-design
-description: Disena APIs estables, contratos entre modulos y fronteras frontend/backend: recursos REST/GraphQL/RPC, esquemas tipados, idempotencia, paginacion, evolucion compatible y errores RFC 9457.
+description: "Disena APIs y contratos estables: REST/GraphQL/RPC, tipos, idempotencia, paginacion, evolucion compatible y errores RFC 9457."
 ---
 
 # API and Interface Design — Contratos Estables y Fronteras de Modulos

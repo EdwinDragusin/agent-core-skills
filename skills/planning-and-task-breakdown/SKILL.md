@@ -1,6 +1,6 @@
 ---
 name: planning-and-task-breakdown
-description: Descompone especificaciones en grafos ordenados de tareas implementables: aisla dependencias verticales/horizontales, dimensiona entregas verificables e identifica lotes de ejecucion en paralelo.
+description: "Descompone especificaciones en grafo de tareas verificables e identifica lotes ejecutables en paralelo."
 ---
 
 # Planning and Task Breakdown — Descomposicion y Grafo de Tareas

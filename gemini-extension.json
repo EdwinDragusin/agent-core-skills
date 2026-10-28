@@ -1,6 +1,6 @@
 {
   "name": "agent-core-skills",
-  "description": "Framework integral de gobernanza Zero-Trust, 6 subagentes SDLC y 31 skills de ingenieria de software.",
+  "description": "Framework integral de gobernanza Zero-Trust, 6 subagentes SDLC y 32 skills de ingenieria de software.",
   "version": "2.0.0",
   "contextFileName": "AGENTS.md"
 }

@@ -1,6 +1,6 @@
 ---
 name: domain-driven-design
-description: Modela software alrededor del dominio de negocio utilizando Bounded Contexts, Agregados, Entidades, Value Objects, Eventos de Dominio, Lenguaje Ubicuo y Context Mapping. Activar al disenar modelos de dominio, dividir monolitos, definir fronteras de modulos o estructurar persistencia relacional en DBML.
+description: "Modela por dominio: Bounded Contexts, Agregados, Value Objects, Eventos, Lenguaje Ubicuo y persistencia en DBML."
 ---
 
 # Domain-Driven Design (DDD) — Diseno Estrategico y Tactico

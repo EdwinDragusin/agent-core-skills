@@ -1,6 +1,6 @@
 ---
 name: browser-testing-with-devtools
-description: Verifica interfaces web en un navegador real mediante el servidor MCP de Playwright (y/o Chrome DevTools): inspecciona DOM y arbol de accesibilidad, comprueba los 4 estados de UI, captura errores de consola y valida flujos E2E.
+description: "Verifica UI en navegador real via MCP playwright: DOM, accesibilidad, 4 estados, consola y flujos E2E."
 ---
 
 # Browser Testing with Playwright & DevTools MCP — Verificacion Real en Navegador
