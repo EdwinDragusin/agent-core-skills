@@ -1,6 +1,6 @@
 ---
 name: dispatching-parallel-agents
-description: Despacha multiples subagentes concurrentes en paralelo (Modo Teamwork) cuando existen 2 o mas tareas o fallos independientes sin estado compartido ni dependencias secuenciales.
+description: "Despacha subagentes en paralelo (Teamwork) cuando hay 2+ tareas independientes sin estado compartido."
 ---
 
 # Dispatching Parallel Agents — Ejecucion Concurrente en Equipo (Teamwork)

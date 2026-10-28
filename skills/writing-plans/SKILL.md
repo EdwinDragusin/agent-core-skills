@@ -1,6 +1,6 @@
 ---
 name: writing-plans
-description: Redacta planes de implementacion atomicos antes de tocar codigo: mapea fronteras de archivos, firmas de tipos, casos de prueba y pasos verificables de 2 a 5 minutos etiquetando tareas paralelizables.
+description: "Planes atomicos antes de tocar codigo: fronteras de archivos, firmas, tests y pasos de 2-5 min con tareas [PARALELO]."
 ---
 
 # Writing Plans — Planes de Implementacion Atomicos
