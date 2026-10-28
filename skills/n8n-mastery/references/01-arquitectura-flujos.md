@@ -1,4 +1,4 @@
-﻿# 01 · Arquitectura y Diseño de Flujos n8n
+# 01 · Arquitectura y Diseño de Flujos n8n
 
 ## Principio de Responsabilidad Única
 

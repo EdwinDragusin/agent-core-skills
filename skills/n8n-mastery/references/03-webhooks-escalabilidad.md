@@ -1,4 +1,4 @@
-﻿# 03 · Webhooks, Escalabilidad y PostgreSQL en n8n
+# 03 · Webhooks, Escalabilidad y PostgreSQL en n8n
 
 ## Webhooks: Asíncrono vs Síncrono
 

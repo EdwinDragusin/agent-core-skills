@@ -1,4 +1,4 @@
-﻿---
+---
 name: code-documentation-mastery
 description: >-
   Implementa, audita y estandariza la documentación in-code y contratos de API pública con criterio de

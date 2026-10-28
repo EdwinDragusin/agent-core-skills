@@ -15,7 +15,7 @@ Plugin nativo y framework integral de gobernanza arquitectónica, orquestación 
 
 - [Visión General y Motivación](#visión-general-y-motivación)
 - [Arquitectura del Plugin y Ecosistema](#arquitectura-del-plugin-y-ecosistema)
-- [Modos Operativos Permanentes (AGENTS.md)](#modos-operativos-permanentes-agentsmd)
+- [Guía de Uso y Modos Operativos (AGENTS.md)](#guía-de-uso-y-modos-operativos-agentsmd)
 - [Pipeline de 6 Subagentes por Fase del SDLC](#pipeline-de-6-subagentes-por-fase-del-sdlc)
 - [Orquestación de Servidores MCP por Fase](#orquestación-de-servidores-mcp-por-fase)
 - [Catálogo de 31 Skills Versionadas](#catálogo-de-31-skills-versionadas)
@@ -96,7 +96,7 @@ flowchart TB
 
 ---
 
-## Modos Operativos Permanentes (AGENTS.md)
+## Guía de Uso y Modos Operativos (AGENTS.md)
 
 Al activar el plugin, [`rules/AGENTS.md`](rules/AGENTS.md) (y [`CLAUDE.md`](CLAUDE.md) / [`AGENTS.md`](AGENTS.md) en la raíz) inyecta cuatro mandatos globales:
 

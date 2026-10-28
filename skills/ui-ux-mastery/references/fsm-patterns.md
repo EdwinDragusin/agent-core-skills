@@ -1,4 +1,4 @@
-﻿# FSM Patterns -- Maquinas de Estado por Tipo de Componente
+# FSM Patterns -- Maquinas de Estado por Tipo de Componente
 
 Este archivo define los contratos de Maquina de Estados Finitos (FSM) para los
 componentes de interaccion mas comunes. Usar XState o una implementacion manual

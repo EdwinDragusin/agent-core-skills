@@ -1,4 +1,4 @@
-﻿---
+---
 name: ui-ux-mastery
 description: >-
   Arquitectura de interfaces, diseño UX de nivel senior y craft premium de interacción y movimiento.

@@ -1,0 +1,12 @@
+#!/usr/bin/env sh
+# Git Hook: pre-push — Bloqueo de git push directo hacia main o master
+
+while read local_ref local_sha remote_ref remote_sha; do
+  if [ "$remote_ref" = "refs/heads/main" ] || [ "$remote_ref" = "refs/heads/master" ]; then
+    echo "[BLOQUEADO] Prohibido hacer push directo a '$remote_ref'."
+    echo "Accion requerida: Sube tu rama (git push -u origin <tu-rama>) e integra exclusivamente mediante Pull Request."
+    exit 1
+  fi
+done
+
+exit 0

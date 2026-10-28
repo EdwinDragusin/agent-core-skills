@@ -1,0 +1,73 @@
+name: CI Governance & Quality Gate
+
+on:
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  governance-check:
+    name: governance-check
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Deno
+        uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.x
+
+      - name: Validar Conventional Commits en el Pull Request
+        if: github.event_name == 'pull_request'
+        run: |
+          BASE_SHA="${{ github.event.pull_request.base.sha }}"
+          HEAD_SHA="${{ github.event.pull_request.head.sha }}"
+          echo "Auditando commits en el rango ${BASE_SHA}..${HEAD_SHA}"
+          COMMITS=$(git log --format="%s" "${BASE_SHA}..${HEAD_SHA}")
+          while IFS= read -r msg; do
+            [ -z "$msg" ] && continue
+            if echo "$msg" | grep -qE "^(Merge|Revert) "; then
+              continue
+            fi
+            if ! echo "$msg" | grep -qE "^(feat|fix|docs|style|refactor|test|chore|schema|perf|ci|build)(\([a-zA-Z0-9_-]+\))?!?: .+"; then
+              echo "::error::Commit invalido segun Conventional Commits: '$msg'"
+              exit 1
+            fi
+          done <<< "$COMMITS"
+          echo "Todos los commits del PR cumplen Conventional Commits."
+
+      - name: Validar Manifiestos JSON Multi-Agente
+        run: |
+          for f in plugin.json mcp_config.json gemini-extension.json .claude-plugin/plugin.json .claude-plugin/marketplace.json .cursor-plugin/plugin.json .codex-plugin/plugin.json; do
+            if [ ! -f "$f" ]; then
+              echo "::error::Falta manifiesto obligatorio: $f"
+              exit 1
+            fi
+            jq empty "$f"
+            echo "[OK] Manifiesto JSON valido: $f"
+          done
+
+      - name: Validar Frontmatter de Subagentes y Skills
+        run: |
+          for f in agents/*.md skills/*/SKILL.md; do
+            if ! sed '1s/^\xEF\xBB\xBF//' "$f" | head -n 1 | tr -d '\r' | grep -q "^---$"; then
+              echo "::error::Falta bloque YAML frontmatter en $f"
+              exit 1
+            fi
+            if ! grep -q "^name:" "$f" || ! grep -q "^description:" "$f"; then
+              echo "::error::Falta propiedad 'name' o 'description' en $f"
+              exit 1
+            fi
+          done
+          echo "[OK] Todos los subagentes y skills poseen frontmatter valido."
+
+      - name: Ejecutar Validador Determinista de README.md
+        run: |
+          deno run --allow-read ./skills/readme-architecture-mastery/scripts/validate_readme.ts ./README.md

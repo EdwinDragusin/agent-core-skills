@@ -1,4 +1,4 @@
-﻿# 05 · Nodos Personalizados en TypeScript
+# 05 · Nodos Personalizados en TypeScript
 
 ## Cuándo Crear un Nodo Personalizado
 

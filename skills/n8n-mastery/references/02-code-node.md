@@ -1,4 +1,4 @@
-﻿# 02 · Nodo de Codigo (Code Node) en n8n
+# 02 · Nodo de Codigo (Code Node) en n8n
 
 ## JavaScript vs Python: Tabla Comparativa
 

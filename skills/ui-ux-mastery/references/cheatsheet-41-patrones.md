@@ -1,4 +1,4 @@
-﻿# Cheatsheet Maestro -- 41 Patrones UX Engine Senior
+# Cheatsheet Maestro -- 41 Patrones UX Engine Senior
 
 Fuente: DesignMotion System Blueprint (41 patrones base de 73 casos de uso documentados).
 Este archivo es la memoria procedimental del agente. Consultar antes de instanciar cualquier componente.

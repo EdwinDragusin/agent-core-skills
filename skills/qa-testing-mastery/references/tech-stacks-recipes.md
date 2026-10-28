@@ -1,4 +1,4 @@
-﻿# Recetarios de Tecnologías y Código para Pruebas de Alta Fidelidad
+# Recetarios de Tecnologías y Código para Pruebas de Alta Fidelidad
 
 Patrones y recetas listas para producción para Express, Sequelize (v6 y v7), Vitest/Jest, Supertest, Pact.js v3, Faker, Autocannon y k6.
 

@@ -1,4 +1,4 @@
-﻿# Accesibilidad y Metricas -- Reglas de Cumplimiento WCAG 2.1 / 2.2
+# Accesibilidad y Metricas -- Reglas de Cumplimiento WCAG 2.1 / 2.2
 
 Este archivo codifica los umbrales y reglas de accesibilidad que el agente debe
 verificar antes de declarar cualquier componente como completo. Son contratos de

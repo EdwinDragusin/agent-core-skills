@@ -1,4 +1,4 @@
-﻿# Marco Arquitectónico: El Diamante de Pruebas y Persistencia
+# Marco Arquitectónico: El Diamante de Pruebas y Persistencia
 
 Guía técnica de referencia sobre la arquitectura de pruebas para backends modernos basados en Node.js (Express), React y Sequelize con motores relacionales como PostgreSQL o MySQL.
 

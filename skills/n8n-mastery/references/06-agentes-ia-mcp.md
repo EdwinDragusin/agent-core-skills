@@ -1,4 +1,4 @@
-﻿# 06 · Agentes IA y Protocolo MCP en n8n
+# 06 · Agentes IA y Protocolo MCP en n8n
 
 ## Topologia de Conexion para Agentes LangChain
 

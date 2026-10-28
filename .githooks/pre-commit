@@ -1,0 +1,12 @@
+#!/usr/bin/env sh
+# Git Hook: pre-commit — Bloqueo de commits directos en main/master y control de atomicidad
+
+BRANCH=$(git rev-parse --abbrev-ref HEAD 2>/dev/null)
+
+if [ "$BRANCH" = "main" ] || [ "$BRANCH" = "master" ]; then
+  echo "[BLOQUEADO] Prohibido realizar commits directos en la rama '$BRANCH'."
+  echo "Accion requerida: Crea una rama de trabajo (git checkout -b feat/nombre-cambio) y abre un Pull Request."
+  exit 1
+fi
+
+exit 0

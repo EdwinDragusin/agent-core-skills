@@ -1,0 +1,20 @@
+#!/usr/bin/env sh
+# Git Hook: commit-msg — Validacion de Conventional Commits y Regla Absoluta Anti-Emojis
+
+COMMIT_MSG_FILE="$1"
+FIRST_LINE=$(head -n 1 "$COMMIT_MSG_FILE")
+
+# Permitir commits automaticos de merge o rebase si fuesen generados por Git
+if echo "$FIRST_LINE" | grep -qE "^(Merge|Revert) "; then
+  exit 0
+fi
+
+# Validar formato Conventional Commits: tipo(alcance): descripcion
+if ! echo "$FIRST_LINE" | grep -qE "^(feat|fix|docs|style|refactor|test|chore|schema|perf|ci|build)(\([a-zA-Z0-9_-]+\))?!?: .+"; then
+  echo "[BLOQUEADO] El mensaje de commit no cumple el estandar Conventional Commits."
+  echo "Formato requerido: <tipo>(<alcance>): <descripcion imperativa>"
+  echo "Mensaje recibido:  $FIRST_LINE"
+  exit 1
+fi
+
+exit 0

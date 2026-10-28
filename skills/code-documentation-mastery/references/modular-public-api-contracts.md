@@ -1,4 +1,4 @@
-﻿# Contratos en APIs Públicas y Documentación Modular (FSD y Arquitecturas Basadas en Capas)
+# Contratos en APIs Públicas y Documentación Modular (FSD y Arquitecturas Basadas en Capas)
 
 En arquitecturas modulares (como Feature-Sliced Design, Clean Architecture o librerías por capas), el código se organiza en rebanadas (*slices*) y módulos cohesivos. La documentación in-code debe explicitar la **API pública** y los límites de cada segmento.
 

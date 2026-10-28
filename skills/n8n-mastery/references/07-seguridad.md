@@ -1,4 +1,4 @@
-﻿# 07 · Seguridad y Zero Trust en n8n
+# 07 · Seguridad y Zero Trust en n8n
 
 ## CVEs Documentados: Vulnerabilidades Criticas
 

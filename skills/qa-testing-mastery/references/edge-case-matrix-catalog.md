@@ -1,4 +1,4 @@
-﻿# Catálogo de Heurísticas y Taxonomía de Casos Borde (Edge Cases)
+# Catálogo de Heurísticas y Taxonomía de Casos Borde (Edge Cases)
 
 Catálogo exhaustivo para el diseño de casos de prueba y matrices de riesgo en aplicaciones web fullstack (Express, React, Sequelize, PostgreSQL/MySQL).
 

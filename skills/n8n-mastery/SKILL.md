@@ -1,4 +1,4 @@
-﻿---
+---
 name: n8n-mastery
 description: >-
   Arquitectura, desarrollo y mejores practicas avanzadas para la plataforma de

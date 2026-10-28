@@ -1,4 +1,4 @@
-﻿# 04 · API REST de n8n y DevOps
+# 04 · API REST de n8n y DevOps
 
 ## Anatomia del JSON de un Flujo n8n
 
