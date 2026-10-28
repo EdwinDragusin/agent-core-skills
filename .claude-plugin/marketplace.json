@@ -1,0 +1,13 @@
+{
+  "name": "agent-core-skills-marketplace",
+  "owner": {
+    "name": "Edwin Dragusin"
+  },
+  "plugins": [
+    {
+      "name": "agent-core-skills",
+      "source": "./",
+      "description": "Framework integral de gobernanza Zero-Trust, 6 subagentes SDLC y 31 skills de ingenieria de software."
+    }
+  ]
+}
