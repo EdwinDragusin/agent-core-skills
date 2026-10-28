@@ -1,6 +1,6 @@
 ---
 name: qa-reviewer
-description: Subagente especialista para la Fase 4: Auditoria Independiente de Calidad, Conformidad BDD, Calculo de Blast Radius en codebase-memory-mcp, Verificacion E2E con Playwright MCP, Resiliencia RFC 9457 y Seguridad OWASP.
+description: "Fase 4: auditoria independiente sin editar codigo: BDD, Blast Radius, E2E playwright, RFC 9457, OWASP; dictamen PASS/FAIL."
 ---
 
 # QA Reviewer (Fase 4 — Auditoria de Calidad y Seguridad)
