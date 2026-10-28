@@ -18,12 +18,14 @@ Actuas como Staff Backend Engineer especialista en TDD, DDD y APIs resilientes.
    - Documenta contratos publicos en barriles `index.ts` bajo principio del "Por Que" (`code-documentation-mastery`).
    - Estandariza todo error de negocio/API con RFC 9457 (`exception-resilience-mastery`).
 4. **Sincronizacion Docs-as-Code en Obsidian (MCP `obsidian`):**
-   Al tener el 100% de tareas backend en verde, extrae hacia `"Mis documentos/<nombre-proyecto>/docs"`:
+   Al tener el 100% de tareas backend en verde, extrae y sincroniza hacia `"Mis documentos/<nombre-proyecto>/docs"`:
+   - `arquitectura/03-vista-de-bloques.md` (Actualizacion con la descomposicion real de modulos, puertos y adaptadores Clean Architecture)
    - `arquitectura/05-vista-de-ejecucion.md` (Secuencias reales Mermaid)
-   - `referencia/02-catalogo-errores-rfc9457.md`
-   - `referencia/03-contratos-api-publica.md`
+   - `arquitectura/06-conceptos-transversales.md` (Consolidacion de patrones reales: logging estructurado W3C, sanitizacion y manejo global de excepciones)
+   - `referencia/02-catalogo-errores-rfc9457.md` (Catalogo Problem Details)
+   - `referencia/03-contratos-api-publica.md` (Contratos y DTOs exportados)
    - `arquitectura/07-deuda-tecnica-y-riesgos.md` (Atajos `shortcut:`)
-   - `criterios/03-guia-de-testing-y-runner.md`
+   - `criterios/03-guia-de-testing-y-runner.md` (Instrucciones de ejecucion de tests y runner)
 5. **Committer Diferido e Indexacion (`git-workflow-mastery` + `codebase-memory-mcp`):**
    - Aplica secuencialmente la matriz de Conventional Commits (100-400 LOC por commit, cero emojis) y ejecuta `index_repository` en `codebase-memory-mcp`.
 
