@@ -1,11 +1,6 @@
 ---
 name: git-workflow-mastery
-description: >-
-  Especialista en arquitectura y mejores prácticas avanzadas en Git para desarrollo colaborativo.
-  Se activa automáticamente al planificar ramas, crear commits, realizar rebases, resolver conflictos,
-  hacer push o preparar Pull Requests. Implementa Trunk-Based Development, Conventional Commits,
-  ramas apiladas (stacked branches), gobernanza con Git Hooks, herramientas de bajo nivel (worktree,
-  range-diff, rerere, rebase --onto/--update-refs, filter-repo) y optimizaciones de escalabilidad.
+description: "Git avanzado: Trunk-Based, Conventional Commits, rebase, worktrees, ramas apiladas, hooks y Pull Requests."
 ---
 
 # Git Workflow Mastery — Operaciones Avanzadas y Arquitectura de Control de Versiones

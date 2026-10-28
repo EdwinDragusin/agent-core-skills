@@ -1,6 +1,6 @@
 ---
 name: brainstorming
-description: Pensamiento arquitectonico previo a cualquier trabajo creativo o de construccion: cuestiona supuestos, identifica el por que y para quien, evalua enfoques alternativos con sus trade-offs y acuerda el diseno antes de escribir codigo.
+description: "Antes de construir algo nuevo: cuestiona supuestos, evalua alternativas con trade-offs y acuerda el diseno."
 ---
 
 # Brainstorming Arquitectonico — Pensar Antes de Construir

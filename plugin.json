@@ -1,5 +1,5 @@
 {
   "name": "agent-core-skills",
   "version": "2.0.0",
-  "description": "Framework integral de gobernanza Zero-Trust, orquestacion SDLC en 5 fases con subagentes en paralelo, integracion MCP (Obsidian dinamico, Codebase Memory, Playwright) y catalogo de 31 skills de ingenieria de software."
+  "description": "Framework integral de gobernanza Zero-Trust, orquestacion SDLC en 5 fases con subagentes en paralelo, integracion MCP (Obsidian dinamico, Codebase Memory, Playwright) y catalogo de 32 skills de ingenieria de software."
 }

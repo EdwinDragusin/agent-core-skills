@@ -7,7 +7,7 @@
 [![Filosofia](https://img.shields.io/badge/arquitectura-Zero--Trust%20%7C%20Ponytail%20%7C%20Caveman-red.svg)](#visión-general-y-motivación)
 [![Estandar](https://img.shields.io/badge/standard--readme-conforme-success.svg)](https://github.com/RichardLitt/standard-readme)
 
-Plugin nativo y framework integral de gobernanza arquitectónica, orquestación de **6 subagentes especializados en 5 fases del SDLC**, integración con **3 servidores MCP** (`obsidian`, `codebase-memory-mcp`, `playwright`) y catálogo de **31 skills de ingeniería de software en español** comprimidas en alta densidad de tokens (`caveman-compress`). Compatible de forma nativa con **Google Antigravity** y universalmente instalable en **Claude Code, Cursor, OpenAI Codex, Gemini CLI y OpenCode**.
+Plugin nativo y framework integral de gobernanza arquitectónica, orquestación de **6 subagentes especializados en 5 fases del SDLC**, integración con **3 servidores MCP** (`obsidian`, `codebase-memory-mcp`, `playwright`) y catálogo de **32 skills de ingeniería de software en español** comprimidas en alta densidad de tokens (`caveman-compress`). Compatible de forma nativa con **Google Antigravity** y universalmente instalable en **Claude Code, Cursor, OpenAI Codex, Gemini CLI y OpenCode**.
 
 ---
 
@@ -18,7 +18,7 @@ Plugin nativo y framework integral de gobernanza arquitectónica, orquestación 
 - [Guía de Uso y Modos Operativos (AGENTS.md)](#guía-de-uso-y-modos-operativos-agentsmd)
 - [Pipeline de 6 Subagentes por Fase del SDLC](#pipeline-de-6-subagentes-por-fase-del-sdlc)
 - [Orquestación de Servidores MCP por Fase](#orquestación-de-servidores-mcp-por-fase)
-- [Catálogo de 31 Skills Versionadas](#catálogo-de-31-skills-versionadas)
+- [Catálogo de 32 Skills Versionadas](#catálogo-de-32-skills-versionadas)
   - [1. Gobernanza Arquitectónica y Documentación](#1-gobernanza-arquitectónica-y-documentación)
   - [2. Especificación, Dominio (DDD) y Planificación](#2-especificación-dominio-ddd-y-planificación)
   - [3. Orquestación Paralela, Ejecución Lean y Debugging](#3-orquestación-paralela-ejecución-lean-y-debugging)
@@ -61,7 +61,7 @@ flowchart TB
         R_EMOJI["Regla Absoluta Anti-Emojis"]
     end
 
-    subgraph LAYER_AGENTS["Capa 2: Pipeline de 6 Subagentes SDLC (agents/ & rules/)"]
+    subgraph LAYER_AGENTS["Capa 2: Pipeline de 6 Subagentes SDLC (agents/)"]
         F1["Fase 1: product-architect (PRD & Diataxis)"]
         F2["Fase 2: system-architect (DDD, DBML & arc42)"]
         F3A["Fase 3A: core-builder (Backend TDD Paralelo)"]
@@ -74,13 +74,13 @@ flowchart TB
         F4 -->|"PASS"| F5
     end
 
-    subgraph LAYER_SKILLS["Capa 3: Catalogo de 31 Skills en Espanol (skills/)"]
+    subgraph LAYER_SKILLS["Capa 3: Catalogo de 32 Skills en Espanol (skills/)"]
         S_SPEC["Specs, DDD & Planes (7 skills)"]
         S_EXEC["Orquestacion, Lean & Debug (7 skills)"]
         S_QUAL["TDD, RFC 9457 & OWASP (4 skills)"]
         S_DOCS["arc42, Diataxis, Obsidian & TSDoc (6 skills)"]
         S_UI["FSD, UX 120fps & Browser Testing (3 skills)"]
-        S_GIT["Git DAG, Worktrees, Migraciones & n8n (4 skills)"]
+        S_GIT["Git DAG, Worktrees & Migraciones (3 skills)"]
     end
 
     subgraph LAYER_MCP["Capa 4: Servidores MCP (mcp_config.json + Dinamico)"]
@@ -109,7 +109,7 @@ Al activar el plugin, [`rules/AGENTS.md`](rules/AGENTS.md) (y [`CLAUDE.md`](CLAU
 
 ## Pipeline de 6 Subagentes por Fase del SDLC
 
-Los subagentes están definidos en [`agents/`](agents/) y gobernados por [`rules/`](rules/):
+Los subagentes están definidos en [`agents/`](agents/) con su protocolo completo (se carga solo al invocarlos); [`rules/AGENTS.md`](rules/AGENTS.md) conserva unicamente el resumen permanente:
 
 | Fase | Subagente (`agents/`) | Misión Principal | Entregables en Vault Obsidian (`Mis documentos/<proyecto>/docs`) |
 | :--- | :--- | :--- | :--- |
@@ -135,12 +135,11 @@ El archivo [`mcp_config.json`](mcp_config.json) declara los servidores estático
 
 ---
 
-## Catálogo de 31 Skills Versionadas
+## Catálogo de 32 Skills Versionadas
 
 Todas las skills residen en [`skills/`](skills/) en español de alta densidad:
 
 ### 1. Gobernanza Arquitectónica y Documentación
-- **[readme-architecture-mastery](skills/readme-architecture-mastery/SKILL.md):** Auditoría de 7 dimensiones para `README.md`, `AGENTS.md`, `CLAUDE.md` y `llms.txt` con validador determinista en Deno (`validate_readme.ts`).
 - **[docs-governance-mastery](skills/docs-governance-mastery/SKILL.md):** Gobernanza documental combinando los 12 capítulos de **arc42** (ISO/IEC/IEEE 42010), los 4 cuadrantes de **Diátaxis**, esquemas **DBML** y grafos en Obsidian.
 - **[code-documentation-mastery](skills/code-documentation-mastery/SKILL.md):** Estándar in-code JSDoc/TSDoc bajo principio del "Por Qué" y contratos públicos en barriles `index.ts`.
 
@@ -157,12 +156,14 @@ Todas las skills residen en [`skills/`](skills/) en español de alta densidad:
 - **[subagent-driven-development](skills/subagent-driven-development/SKILL.md):** Despacho de subagentes frescos con contexto aislado por tarea y revisión en dos etapas.
 - **[dispatching-parallel-agents](skills/dispatching-parallel-agents/SKILL.md):** Ejecución concurrente en equipo (`/teamwork`) para tareas independientes sin estado compartido.
 - **[source-driven-development](skills/source-driven-development/SKILL.md):** Anclaje obligatorio en documentación oficial y tipos instalados antes de implementar APIs de librerías.
-- **[ponytail](skills/ponytail/SKILL.md):** Simplicidad radical anti-sobreingeniería (`ponytail` core), revisión anti-bloat (`ponytail-review`) y registro de deuda técnica (`ponytail-debt` con `shortcut:`).
+- **[ponytail](skills/ponytail/SKILL.md):** Simplicidad radical anti-sobreingeniería (`ponytail` core), revisión anti-bloat (`ponytail-review`), auditoría de repositorio (`ponytail-audit`) y registro de deuda técnica (`ponytail-debt` con `shortcut:`).
 - **[caveman](skills/caveman/SKILL.md):** Comunicación de alta señal sin relleno, handoffs `ultracave`, `caveman-commit` y compresión documental `caveman-compress`.
 - **[systematic-debugging](skills/systematic-debugging/SKILL.md):** Diagnóstico científico de causa raíz en 4 fases mediante hipótesis rankeadas antes de aplicar parches.
 - **[safe-refactor](skills/safe-refactor/SKILL.md):** Reestructuración y simplificación de código preservando el 100% del comportamiento observable con verificación en verde.
 
 ### 4. Calidad, TDD, Resiliencia RFC 9457 y Seguridad OWASP
+- **[test-driven-development](skills/test-driven-development/SKILL.md):** Ciclo Red-Green-Refactor, patron Prove-It para bugs, piramide de pruebas y antipatrones prohibidos.
+- **[code-review-and-quality](skills/code-review-and-quality/SKILL.md):** Revision de codigo en 5 ejes (correccion, legibilidad, arquitectura, seguridad, rendimiento) con hallazgos clasificados.
 - **[qa-testing-mastery](skills/qa-testing-mastery/SKILL.md):** Diamante de Pruebas, ciclo TDD Red-Green-Refactor estricto, aislamiento transaccional, matrices de casos borde, Pact.js y pruebas de carga.
 - **[constraint-driven-development](skills/constraint-driven-development/SKILL.md):** Contrato de barra de calidad inquebrantable: prohíbe `@ts-ignore`, `eslint-disable`, `any`, tests saltados o aserciones eliminadas.
 - **[doubt-driven-development](skills/doubt-driven-development/SKILL.md):** Revisión adversarial en contexto fresco orientada a refutar decisiones arquitectónicas riesgosas.
@@ -175,8 +176,6 @@ Todas las skills residen en [`skills/`](skills/) en español de alta densidad:
 
 ### 6. Ecosistema Obsidian y Gestión de Bóvedas
 - **[obsidian-markdown](skills/obsidian-markdown/SKILL.md):** Sintaxis Obsidian Flavored Markdown, wikilinks bidireccionales, callouts, propiedades YAML y Mermaid.
-- **[obsidian-bases](skills/obsidian-bases/SKILL.md):** Modelado de vistas relacionales en archivos `.base` con filtros, fórmulas y sumarios.
-- **[obsidian-cli](skills/obsidian-cli/SKILL.md):** Automatización de bóvedas y desarrollo de plugins mediante la CLI de Obsidian.
 
 ### 7. Ingeniería Frontend (FSD), UX a 120 FPS y Verificación en Navegador
 - **[ui-ux-mastery](skills/ui-ux-mastery/SKILL.md):** Diseño centrado en intención, Máquinas de Estado Finito (FSM), 41 patrones de interacción, Umbral Doherty (<400ms), WCAG 2.1 AA y física de movimiento a 120 FPS.
@@ -187,7 +186,9 @@ Todas las skills residen en [`skills/`](skills/) en español de alta densidad:
 - **[git-workflow-mastery](skills/git-workflow-mastery/SKILL.md):** Operaciones avanzadas en DAG, `git worktree`, stacked branches (`--update-refs`), `rerere`, `range-diff`, Trunk-Based Development y committer diferido.
 - **[finishing-a-development-branch](skills/finishing-a-development-branch/SKILL.md):** Protocolo de cierre, rebase lineal, integración en `main` o Pull Request y limpieza de worktrees en Fase 5.
 - **[migration](skills/migration/SKILL.md):** Migraciones reversibles sin tiempo de inactividad mediante el patrón Expand-Migrate-Contract para bases de datos y APIs.
-- **[n8n-mastery](skills/n8n-mastery/SKILL.md):** Arquitectura de flujos en n8n, Code Nodes, Queue Mode, nodos personalizados en TypeScript e integración con servidores MCP.
+
+> [!NOTE]
+> Skills opcionales (`readme-architecture-mastery`, `obsidian-bases`, `obsidian-cli`, `n8n-mastery`) viven en el plugin independiente `agent-core-extras`. Se instalan aparte y no consumen contexto del core.
 
 ---
 
@@ -211,7 +212,7 @@ Proporciona el siguiente prompt a tu agente de IA para que instale y configure a
 
 ### Opción A: Instalación Nativa en Google Antigravity
 
-Clona el repositorio directamente en el directorio de plugins de Antigravity para activar en un solo paso las reglas permanentes (`rules/AGENTS.md`), los 6 subagentes (`agents/`), las 31 skills (`skills/`) y los servidores MCP (`mcp_config.json`):
+Clona el repositorio directamente en el directorio de plugins de Antigravity para activar en un solo paso las reglas permanentes (`rules/AGENTS.md`), los 6 subagentes (`agents/`), las 32 skills (`skills/`) y los servidores MCP (`mcp_config.json`):
 
 ```bash
 # Windows (PowerShell)
@@ -254,14 +255,14 @@ Todo cambio en este repositorio se rige por las siguientes normas:
 
 ## Auditoría Automatizada
 
-Ejecuta el validador determinista de `readme-architecture-mastery` para certificar la integridad estructural y de seguridad del repositorio:
+Ejecuta el validador determinista [`scripts/validate_readme.ts`](scripts/validate_readme.ts) (mismo motor que la skill `readme-architecture-mastery` del plugin `agent-core-extras`) para certificar la integridad estructural y de seguridad del repositorio:
 
 ```bash
 # Escaneo estatico de cumplimiento de las 7 dimensiones
-deno run --allow-read ./skills/readme-architecture-mastery/scripts/validate_readme.ts ./README.md
+deno run --allow-read ./scripts/validate_readme.ts ./README.md
 
 # Modo de auto-remediacion segura
-deno run --allow-read --allow-write ./skills/readme-architecture-mastery/scripts/validate_readme.ts --fix ./README.md
+deno run --allow-read --allow-write ./scripts/validate_readme.ts --fix ./README.md
 ```
 
 ---

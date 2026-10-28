@@ -1,6 +1,6 @@
 ---
 name: migration
-description: Ejecuta migraciones reversibles y sin tiempo de inactividad (Zero-Downtime) mediante el patron Expand-Migrate-Contract para esquemas de base de datos (DBML/SQL), contratos de API, configuraciones y dependencias.
+description: "Migraciones reversibles sin downtime (Expand-Migrate-Contract) para esquemas DBML/SQL, APIs, configuracion y dependencias."
 ---
 
 # Migration — Transiciones Compatibles y Patron Expand/Contract

@@ -1,6 +1,6 @@
 ---
 name: finishing-a-development-branch
-description: Guia el cierre formal de una rama de desarrollo o worktree cuando todas las tareas e inspecciones de calidad han pasado en verde: verificacion final, opciones de integracion Trunk-Based y limpieza segura.
+description: "Cierre formal de rama o worktree en verde: verificacion final, integracion Trunk-Based y limpieza segura."
 ---
 
 # Finishing a Development Branch — Cierre e Integracion de Rama
