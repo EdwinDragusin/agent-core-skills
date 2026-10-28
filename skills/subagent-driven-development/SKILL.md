@@ -1,6 +1,6 @@
 ---
 name: subagent-driven-development
-description: Ejecuta planes de implementacion despachando un subagente fresco con contexto aislado por cada tarea atomica, seguido de verificacion de conformidad con la especificacion y calidad de codigo.
+description: "Ejecuta planes con un subagente fresco por tarea atomica, seguido de revision de conformidad y calidad."
 ---
 
 # Subagent-Driven Development — Ejecucion Aislada por Tarea

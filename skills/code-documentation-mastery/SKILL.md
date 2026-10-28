@@ -1,10 +1,6 @@
 ---
 name: code-documentation-mastery
-description: >-
-  Implementa, audita y estandariza la documentación in-code y contratos de API pública con criterio de
-  ingeniería de software: orden canónico de etiquetas JSDoc/TSDoc, tipado exhaustivo (TypeScript nativo,
-  JS puro, No Build Step), principio del "Por Qué", contratos en APIs públicas para arquitecturas modulares
-  (Feature-Sliced Design, capas DDD), documentación de interfaces UI y validación en CI.
+description: "Documentacion in-code y contratos de API publica: TSDoc/JSDoc canonico, principio del Por Que, FSD/DDD, validacion en CI."
 ---
 
 # Code Documentation Mastery — JSDoc, TSDoc y Contratos en APIs Modulares

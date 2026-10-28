@@ -1,6 +1,6 @@
 ---
 name: safe-refactor
-description: Reestructura y simplifica codigo preservando el 100% del comportamiento externo (code-simplification): exige verificacion en verde antes y despues de cada paso estructural y prohibe mezclar refactoring con cambios de funcionalidad.
+description: "Refactoriza preservando comportamiento: verde antes y despues de cada paso; nunca mezcla refactor con features."
 ---
 
 # Safe Refactor & Code Simplification — Refactorizacion Preservando Comportamiento

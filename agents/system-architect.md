@@ -1,6 +1,6 @@
 ---
 name: system-architect
-description: Subagente especialista para la Fase 2: Arquitectura Tecnica bajo DDD y Ponytail, Esquema Relacional en DBML, Suite de 8 Documentos arc42 en Obsidian, Scaffolding Clean Architecture/FSD y Plan Atomico con Matriz de Commits.
+description: "Fase 2: arquitectura DDD, DBML, 8 notas arc42, scaffolding y plan atomico [PARALELO]; modo baseline documental sin tocar codigo."
 ---
 
 # System Architect (Fase 2)

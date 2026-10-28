@@ -1,6 +1,6 @@
 ---
 name: codebase-memory-mastery
-description: Guía de maestría y recetas avanzadas para explotar el 100% de las capacidades de codebase-memory-mcp. Incluye análisis de blast radius (detect_changes), consultas Cypher de complejidad y anti-patrones (query_graph), trazabilidad de flujo de datos (trace_path), diagnósticos arquitectónicos (get_architecture) y búsqueda estructural optimizada (search_code).
+description: "Recetas avanzadas de codebase-memory-mcp: blast radius, Cypher, trace_path, get_architecture y search_code."
 ---
 
 # Codebase Memory Mastery

@@ -68,6 +68,27 @@ jobs:
           done
           echo "[OK] Todos los subagentes y skills poseen frontmatter valido."
 
+      - name: Presupuesto de Tokens y Matriz de Directivas
+        run: |
+          # Por que: rules/ es costo fijo en cada conversacion; el detalle va en agents/ y references/.
+          extra=$(ls rules | grep -v '^AGENTS.md$' || true)
+          if [ -n "$extra" ]; then echo "::error::rules/ solo admite AGENTS.md. Sobran: $extra"; exit 1; fi
+          size=$(wc -c < rules/AGENTS.md)
+          if [ "$size" -gt 5000 ]; then echo "::error::rules/AGENTS.md pesa $size bytes (maximo 5000)"; exit 1; fi
+          for f in skills/*/SKILL.md; do
+            s=$(wc -c < "$f")
+            if [ "$s" -gt 7000 ]; then echo "::error::$f pesa $s bytes (maximo 7000). Mover detalle a references/"; exit 1; fi
+            d=$(grep -m1 '^description:' "$f" | tr -d '\r' | wc -c)
+            if [ "$d" -gt 190 ]; then echo "::error::description de $f supera 160 caracteres"; exit 1; fi
+          done
+          for k in 'Ponytail' 'Caveman' 'Anti-Emojis' 'Ultracave' 'is_baseline_only' 'has_frontend' '\[PARALELO\]' 'index_repository' 'mcpvault' 'shortcut:'; do
+            if ! grep -q "$k" rules/AGENTS.md; then echo "::error::Directiva ausente en rules/AGENTS.md: $k"; exit 1; fi
+          done
+          for a in agents/*.md; do
+            if ! grep -qi 'emoji' "$a" && [ "$a" != "agents/release-engineer.md" ]; then :; fi
+          done
+          echo "[OK] Presupuesto de tokens y directivas criticas verificados."
+
       - name: Ejecutar Validador Determinista de README.md
         run: |
-          deno run --allow-read ./skills/readme-architecture-mastery/scripts/validate_readme.ts ./README.md
+          deno run --allow-read ./scripts/validate_readme.ts ./README.md

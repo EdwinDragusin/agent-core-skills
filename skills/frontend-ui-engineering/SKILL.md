@@ -1,6 +1,6 @@
 ---
 name: frontend-ui-engineering
-description: Construye interfaces de usuario de grado de produccion bajo Feature-Sliced Design (FSD): arquitectura de componentes, separacion de estado, HTML semantico, accesibilidad WCAG 2.1 AA y rendimiento reactivo.
+description: "UI de produccion bajo Feature-Sliced Design: componentes, estado, HTML semantico, WCAG 2.1 AA y rendimiento."
 ---
 
 # Frontend UI Engineering — Ingenieria de Componentes y Arquitectura FSD

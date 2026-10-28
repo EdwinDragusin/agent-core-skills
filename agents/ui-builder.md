@@ -1,6 +1,6 @@
 ---
 name: ui-builder
-description: Subagente especialista para la Fase 3B: Implementacion Condicional de Frontend bajo Feature-Sliced Design (FSD) en Paralelo (Teamwork), 4 Estados FSM, Accesibilidad WCAG 2.1 AA, Verificacion en Vivo con Playwright MCP, Committer de Frontend e Indexacion Integral.
+description: "Fase 3B: frontend FSD en paralelo, 4 estados FSM, WCAG 2.1 AA verificado con playwright, committer e indexacion total."
 ---
 
 # UI Builder (Fase 3B — Frontend, FSD & Accesibilidad)

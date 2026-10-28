@@ -1,6 +1,6 @@
 ---
 name: verification-before-completion
-description: Compuerta de verificacion empirica antes de afirmar que una tarea, fix o rama esta completa: exige ejecutar los comandos reales de prueba, build y linter y comprobar su salida en el turno actual.
+description: "Antes de afirmar que algo esta completo: ejecuta test, build y linter reales y comprueba la salida actual."
 ---
 
 # Verification Before Completion — Evidencia Antes de Aserciones

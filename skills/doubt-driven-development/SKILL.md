@@ -1,6 +1,6 @@
 ---
 name: doubt-driven-development
-description: Somete toda decision arquitectonica o de implementacion no trivial a una revision adversarial con contexto fresco orientada a refutar supuestos antes de darlos por validos.
+description: "Revision adversarial con contexto fresco de toda decision no trivial para refutar supuestos antes de aceptarla."
 ---
 
 # Doubt-Driven Development — Revision Adversarial de Supuestos

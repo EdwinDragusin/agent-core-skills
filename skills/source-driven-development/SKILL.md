@@ -1,6 +1,6 @@
 ---
 name: source-driven-development
-description: Ancla toda decision de implementacion en documentacion oficial y definiciones reales de tipos: prohibe programar APIs de librerias, frameworks o runtimes de memoria para erradicar codigo obsoleto o alucinado.
+description: "Ancla la implementacion en documentacion oficial y tipos reales; prohibe programar APIs de memoria."
 ---
 
 # Source-Driven Development — Implementacion Anclada en Fuentes Primarias

@@ -1,6 +1,6 @@
 ---
 name: spec-driven-development
-description: Escribe especificaciones estructuradas antes de codificar: descompone requerimientos complejos en Mapas de Capacidades aciclicos y aplica el flujo bloqueante SPECIFY -> PLAN -> TASKS -> IMPLEMENT.
+description: "Especifica antes de codificar: mapa de capacidades y flujo bloqueante SPECIFY, PLAN, TASKS, IMPLEMENT (Greenfield y Reverse-Spec)."
 ---
 
 # Spec-Driven Development — Desarrollo Guiado por Especificacion

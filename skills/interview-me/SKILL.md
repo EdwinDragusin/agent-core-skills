@@ -1,6 +1,6 @@
 ---
 name: interview-me
-description: Extrae la intencion real del usuario mediante entrevista quirurgica hasta alcanzar 95% de confianza antes de disenar o programar, combinando pensamiento divergente y convergente (idea-refine).
+description: "Entrevista quirurgica hasta 95% de confianza sobre la intencion real antes de disenar o programar."
 ---
 
 # Interview Me — Interrogatorio Quirurgico de Requerimientos y Stack

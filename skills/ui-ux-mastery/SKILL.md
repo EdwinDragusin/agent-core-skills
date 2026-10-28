@@ -1,10 +1,6 @@
 ---
 name: ui-ux-mastery
-description: >-
-  Arquitectura de interfaces, diseño UX de nivel senior y craft premium de interacción y movimiento.
-  Gobierna el diseño de frontend desde la intención del usuario y máquinas de estado finito (FSM),
-  41 patrones de interacción, reglas de carga (Doherty <400ms), accesibilidad WCAG 2.1, hasta la ejecución
-  de craft: física de movimiento con resortes, presupuesto estricto de 120 FPS, acabado óptico y micro-interacciones.
+description: "Diseno UX senior: FSM de interfaz, 41 patrones de interaccion, Doherty <400ms, WCAG 2.1, movimiento y 120 FPS."
 ---
 
 # UI & UX Mastery — Arquitectura de Interfaces, Experiencia de Usuario y Craft de Movimiento
