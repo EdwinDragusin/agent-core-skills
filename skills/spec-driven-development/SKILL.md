@@ -32,3 +32,19 @@ Toda especificacion (persistida en el vault de Obsidian bajo el estandar Diataxi
 3. **Reglas de Negocio e Invariantes:** Condiciones que siempre deben ser verdaderas antes y despues de cada operacion.
 4. **Criterios de Aceptacion Verificables (BDD Gherkin):** Escenarios `Given / When / Then` cubriendo flujo principal, limites de datos y casos de error.
 5. **Restricciones No Funcionales:** Latencia, seguridad, concurrencia y compatibilidad.
+
+## 4. Modo Dual: Greenfield vs. Reverse-Spec (Brownfield)
+
+1. **Modo Greenfield (Iniciativa Nueva):**
+   - Entrevista estructurada (`interview-me` via `ask_question`).
+   - Redaccion incremental de las 10 notas Diataxis desde cero.
+2. **Modo Brownfield / Reverse-Spec (Base de Codigo Existente):**
+   - Inferencia automatica previa mediante `codebase-memory-mcp`:
+     | Artefacto Diataxis en Obsidian | Fuente en Grafo de Codigo (`codebase-memory-mcp`) |
+     | :--- | :--- |
+     | `referencia/01-glosario-ubicuo.md` | `search_graph(label="Class\|Interface\|Type\|Enum")`: Entidades y tipos publicos |
+     | `especificaciones/01-alcance-y-epicas.md` | `get_architecture()`: Modulos raiz, Bounded Contexts y paquetes |
+     | `especificaciones/02-historias-usuario.md` | `search_graph(label="Route")`: Endpoints, controllers y vistas UI |
+     | `especificaciones/03-politicas-e-invariantes.md` | `search_graph`: Validadores, middleware guards, asserts y excepciones |
+     | `criterios/01-escenarios-bdd.md` | Suites de pruebas existentes (`*.test.*`, `*.spec.*`) y flujos trazados con `trace_path` |
+   - **Entrevista Delta:** Se consulta al usuario exclusivamente la vision/intencion de negocio no plasmada en codigo (`explicacion/`) y si el objetivo es *Modo Baseline Documental* (cierre en Fase 2 sin tocar codigo) o *Modo Evolucion / Feature* (continua el flujo SDLC completo).
