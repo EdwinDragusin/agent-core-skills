@@ -1,34 +1,36 @@
-# Antigravity Governance Skills — Ecosistema de Gobernanza y Habilidades para Agentes de IA
+# Agent Core Skills & SDLC Subagents — Plugin Universal de Gobernanza e Ingeniería Agéntica
 
 [![Licencia](https://img.shields.io/badge/licencia-MIT-blue.svg)](LICENSE)
-[![Ecosistema](https://img.shields.io/badge/ecosistema-Antigravity%202.0-8A2BE2.svg)](#instalación-y-configuración)
+[![Version](https://img.shields.io/badge/version-2.0.0-success.svg)](plugin.json)
+[![Ecosistema](https://img.shields.io/badge/ecosistema-Antigravity%20%7C%20Claude%20%7C%20Cursor%20%7C%20Codex-8A2BE2.svg)](#instalación-y-configuración)
 [![Stack](https://img.shields.io/badge/stack-Agnóstico%20%7C%20Multiplataforma-green.svg)](#instalación-y-configuración)
-[![Filosofia](https://img.shields.io/badge/arquitectura-Zero--Trust-red.svg)](#visión-general-y-motivación)
+[![Filosofia](https://img.shields.io/badge/arquitectura-Zero--Trust%20%7C%20Ponytail%20%7C%20Caveman-red.svg)](#visión-general-y-motivación)
 [![Estandar](https://img.shields.io/badge/standard--readme-conforme-success.svg)](https://github.com/RichardLitt/standard-readme)
 
-Suite integral de habilidades operativas, directrices arquitectónicas, reglas de gobernanza y herramientas de auditoría para agentes de inteligencia artificial en el entorno **Antigravity**. Diseñada bajo el principio de **cero confianza (Zero-Trust)** hacia suposiciones no verificadas y orientada a la erradicación de alucinaciones operativas en flujos de desarrollo de software.
+Plugin nativo y framework integral de gobernanza arquitectónica, orquestación de **6 subagentes especializados en 5 fases del SDLC**, integración con **3 servidores MCP** (`obsidian`, `codebase-memory-mcp`, `playwright`) y catálogo de **31 skills de ingeniería de software en español** comprimidas en alta densidad de tokens (`caveman-compress`). Compatible de forma nativa con **Google Antigravity** y universalmente instalable en **Claude Code, Cursor, OpenAI Codex, Gemini CLI y OpenCode**.
 
 ---
 
 ## Tabla de Contenidos
 
 - [Visión General y Motivación](#visión-general-y-motivación)
-- [Arquitectura del Ecosistema de Skills](#arquitectura-del-ecosistema-de-skills)
-- [Catálogo de Skills Nucleares Versionadas](#catálogo-de-skills-nucleares-versionadas)
+- [Arquitectura del Plugin y Ecosistema](#arquitectura-del-plugin-y-ecosistema)
+- [Modos Operativos Permanentes (AGENTS.md)](#modos-operativos-permanentes-agentsmd)
+- [Pipeline de 6 Subagentes por Fase del SDLC](#pipeline-de-6-subagentes-por-fase-del-sdlc)
+- [Orquestación de Servidores MCP por Fase](#orquestación-de-servidores-mcp-por-fase)
+- [Catálogo de 31 Skills Versionadas](#catálogo-de-31-skills-versionadas)
   - [1. Gobernanza Arquitectónica y Documentación](#1-gobernanza-arquitectónica-y-documentación)
-  - [2. Calidad, Testing y Resiliencia](#2-calidad-testing-y-resiliencia)
-  - [3. Memoria de Código y Grafos de Conocimiento](#3-memoria-de-código-y-grafos-de-conocimiento)
-  - [4. Ecosistema Obsidian y Gestión de Bóvedas](#4-ecosistema-obsidian-y-gestión-de-bóvedas)
-  - [5. Craft de Interacción y Experiencia de Usuario](#5-craft-de-interacción-y-experiencia-de-usuario)
-  - [6. Control de Versiones Avanzado](#6-control-de-versiones-avanzado)
-- [Skills Externas y de Terceros](#skills-externas-y-de-terceros)
+  - [2. Especificación, Dominio (DDD) y Planificación](#2-especificación-dominio-ddd-y-planificación)
+  - [3. Orquestación Paralela, Ejecución Lean y Debugging](#3-orquestación-paralela-ejecución-lean-y-debugging)
+  - [4. Calidad, TDD, Resiliencia RFC 9457 y Seguridad OWASP](#4-calidad-tdd-resiliencia-rfc-9457-y-seguridad-owasp)
+  - [5. Memoria Estructural y Grafos de Conocimiento](#5-memoria-estructural-y-grafos-de-conocimiento)
+  - [6. Ecosistema Obsidian y Gestión de Bóvedas](#6-ecosistema-obsidian-y-gestión-de-bóvedas)
+  - [7. Ingeniería Frontend (FSD), UX a 120 FPS y Verificación en Navegador](#7-ingeniería-frontend-fsd-ux-a-120-fps-y-verificación-en-navegador)
+  - [8. Control de Versiones Avanzado, Migraciones y Automatización](#8-control-de-versiones-avanzado-migraciones-y-automatización)
 - [Instalación y Configuración](#instalación-y-configuración)
   - [Autoconfiguración Asistida por Agente](#autoconfiguración-asistida-por-agente)
-  - [Requisitos del Sistema](#requisitos-del-sistema)
-  - [Despliegue Manual en el Entorno Global](#despliegue-manual-en-el-entorno-global)
-  - [Despliegue a Nivel de Proyecto (Workspace)](#despliegue-a-nivel-de-proyecto-workspace)
-  - [Configuración de Servidores MCP Recomendada](#configuración-de-servidores-mcp-recomendada)
-- [Guía de Uso y Activación](#guía-de-uso-y-activación)
+  - [Opción A: Instalación Nativa en Google Antigravity](#opción-a-instalación-nativa-en-google-antigravity)
+  - [Opción B: Instalación Multi-Agente (Claude Code, Cursor, Codex, OpenCode)](#opción-b-instalación-multi-agente-claude-code-cursor-codex-opencode)
 - [Gobernanza Git y Contribución](#gobernanza-git-y-contribución)
 - [Auditoría Automatizada](#auditoría-automatizada)
 - [Licencia](#licencia)
@@ -37,198 +39,155 @@ Suite integral de habilidades operativas, directrices arquitectónicas, reglas d
 
 ## Visión General y Motivación
 
-El desarrollo de software asistido por agentes de inteligencia artificial requiere un marco estricto de restricciones, contratos y procedimientos deterministas. Sin límites explícitos, los modelos de lenguaje tienden a incurrir en:
-- Drift documental y código muerto.
-- Violación silenciosa de límites arquitectónicos (ej. deep imports entre capas o slices).
-- Commits monolíticos acumulativos que degradan la trazabilidad de Git.
-- Falta de verificación empírica de contratos de red y persistencia.
+El desarrollo de software asistido por agentes requiere contratos explícitos, aislamiento de contexto y verificación empírica. Este plugin soluciona los fallos sistémicos de los modelos de lenguaje mediante cuatro pilares:
 
-Este repositorio proporciona un catálogo modular de **skills** que instruyen a los agentes en metodologías probadas de ingeniería de software:
-1. **Modelo Zero-Trust**: Obligación de inspeccionar fuentes primarias (archivos, AST, tipos, bases de datos) antes de emitir cualquier afirmación o refactorización.
-2. **Readme-Driven Development (RDD)** y arquitectura de documentación viva (arc42, Diátaxis, RFC 9457).
-3. **Trunk-Based Development** con atomicidad cuantitativa estricta (100 a 400 LOC por commit).
-4. **Resiliencia de Sistemas** y prevención de vulnerabilidades OWASP (A10:2025 y API7:2023).
+1. **Modelo Zero-Trust y Source-Driven:** Obligación de inspeccionar el grafo de código (`codebase-memory-mcp`), tipos instalados y documentación oficial antes de afirmar o codificar.
+2. **Filosofía Ponytail y Economía Caveman:** Mínimo código completo sin abstracción prematura (`ponytail`), respuestas directas con carga técnica intacta (`caveman`) y skills redactadas en español de alta densidad que ahorran entre 50% y 65% de tokens de contexto.
+3. **Documentación Viva Sincronizada (Diátaxis + arc42 + DBML):** Bóveda en Obsidian inicializada dinámicamente en `Mis documentos/<nombre-proyecto>/docs` desde la Fase 1 y alimentada automáticamente desde el código en las Fases 2, 3A y 3B.
+4. **Construcción TDD en Equipo Paralelo (`/teamwork`) y Barra Inquebrantable:** Subagentes concurrentes por tarea atómica (`dispatching-parallel-agents`) bajo ciclo Red-Green-Refactor y prohibición de rebajar umbrales o silenciar linters (`constraint-driven-development`).
 
 > [!IMPORTANT]
-> **Principio Cardinal de Evidencia Empírica**: Toda decisión de arquitectura, propuesta de código o afirmación sobre el estado de un proyecto debe basarse en la lectura e inspección directa de fuentes primarias, evitando cualquier inferencia o suposición de memoria.
+> **Principio Cardinal de Evidencia Empírica:** Prohibido declarar una tarea, prueba o rama como completada sin haber ejecutado el runner, compilador o verificación en navegador (`playwright`) en el turno actual con salida limpia verificada.
 
 ---
 
-## Arquitectura del Ecosistema de Skills
+## Arquitectura del Plugin y Ecosistema
 
 ```mermaid
 flowchart TB
-    subgraph AGENT["Agente de IA (Antigravity Core)"]
-        FSM["Maquina de Estados / Razonamiento"]
-        TOOLS["Tool Calling & Protocolos MCP"]
+    subgraph LAYER_RULES["Capa 1: Gobernanza Permanente (rules/AGENTS.md & CLAUDE.md)"]
+        R_PONY["Modo Ponytail (full)"]
+        R_CAVE["Modo Caveman Adaptativo & Ultracave"]
+        R_EMOJI["Regla Absoluta Anti-Emojis"]
     end
 
-    subgraph DOCS_TIER["Gobernanza Documental"]
-        S_README["readme-architecture-mastery"]
-        S_DOCS["docs-governance-mastery"]
-        S_CODE_DOC["code-documentation-mastery"]
+    subgraph LAYER_AGENTS["Capa 2: Pipeline de 6 Subagentes SDLC (agents/ & rules/)"]
+        F1["Fase 1: product-architect (PRD & Diataxis)"]
+        F2["Fase 2: system-architect (DDD, DBML & arc42)"]
+        F3A["Fase 3A: core-builder (Backend TDD Paralelo)"]
+        F3B["Fase 3B: ui-builder (Frontend FSD Paralelo)"]
+        F4["Fase 4: qa-reviewer (Auditoria & Blast Radius)"]
+        F5["Fase 5: release-engineer (Trunk-Based & SemVer)"]
+        F1 --> F2 --> F3A
+        F3A -->|"has_frontend == true"| F3B --> F4
+        F3A -->|"has_frontend == false"| F4
+        F4 -->|"PASS"| F5
     end
 
-    subgraph QUALITY_TIER["Calidad y Resiliencia"]
-        S_QA["qa-testing-mastery"]
-        S_EXC["exception-resilience-mastery"]
+    subgraph LAYER_SKILLS["Capa 3: Catalogo de 31 Skills en Espanol (skills/)"]
+        S_SPEC["Specs, DDD & Planes (7 skills)"]
+        S_EXEC["Orquestacion, Lean & Debug (7 skills)"]
+        S_QUAL["TDD, RFC 9457 & OWASP (4 skills)"]
+        S_DOCS["arc42, Diataxis, Obsidian & TSDoc (6 skills)"]
+        S_UI["FSD, UX 120fps & Browser Testing (3 skills)"]
+        S_GIT["Git DAG, Worktrees, Migraciones & n8n (4 skills)"]
     end
 
-    subgraph MEMORY_TIER["Memoria y Descubrimiento"]
-        S_MEM["codebase-memory-mastery"]
-        MCP_MEM["codebase-memory-mcp"]
+    subgraph LAYER_MCP["Capa 4: Servidores MCP (mcp_config.json + Dinamico)"]
+        MCP_OBS["obsidian (@bitbonsai/mcpvault — Dinamico en Fase 1)"]
+        MCP_MEM["codebase-memory-mcp (Grafo AST & Blast Radius)"]
+        MCP_PW["playwright (@playwright/mcp — Verificacion UI E2E)"]
     end
 
-    subgraph OBSIDIAN_TIER["Bovedas Obsidian"]
-        S_OBS_MD["obsidian-markdown"]
-        S_OBS_BASES["obsidian-bases"]
-        S_OBS_CLI["obsidian-cli"]
-        MCP_OBS["obsidian-mcp"]
-    end
-
-    subgraph FRONT_TIER["Frontend & Experiencia"]
-        S_UIUX["ui-ux-mastery"]
-    end
-
-    subgraph GIT_TIER["Control de Versiones"]
-        S_GIT["git-workflow-mastery"]
-    end
-
-    AGENT --> DOCS_TIER
-    AGENT --> QUALITY_TIER
-    AGENT --> MEMORY_TIER
-    AGENT --> OBSIDIAN_TIER
-    AGENT --> FRONT_TIER
-    AGENT --> GIT_TIER
-
-    S_MEM <--> MCP_MEM
-    S_OBS_MD <--> MCP_OBS
-    S_DOCS <--> MCP_OBS
+    LAYER_RULES --> LAYER_AGENTS
+    LAYER_AGENTS --> LAYER_SKILLS
+    LAYER_AGENTS <--> LAYER_MCP
 ```
 
 ---
 
-## Catálogo de Skills Nucleares Versionadas
+## Modos Operativos Permanentes (AGENTS.md)
 
-El repositorio contiene **11 skills nucleares** gestionadas bajo control de versiones, organizadas en 6 dimensiones de especialización:
+Al activar el plugin, [`rules/AGENTS.md`](rules/AGENTS.md) (y [`CLAUDE.md`](CLAUDE.md) / [`AGENTS.md`](AGENTS.md) en la raíz) inyecta cuatro mandatos globales:
+
+- **Modo Ponytail (`full`):** Escribir el mínimo código completo que resuelve el problema. Reutilizar código existente antes de dependencias; dependencias antes de código nuevo. Prohibida la abstracción prematura. Todo atajo deliberado se marca con `// shortcut:` y cada respuesta técnica cierra con 1-2 líneas declarando qué se omitió y riesgos latentes.
+- **Modo Caveman Adaptativo:** Respuesta técnica en la primera línea sin preámbulos conversacionales. En código y terminal: telegráfico; en diseño y arquitectura: prosa estructurada.
+- **Regla Absoluta Anti-Emojis:** Cero emojis en respuestas, código fuente, notas de Obsidian, diagramas Mermaid, commits o logs.
+- **Handoff Inter-Agente (`ultracave`):** Traspaso entre subagentes compuesto exclusivamente por payload técnico (rutas, tipos, comandos, hashes de commit).
+
+---
+
+## Pipeline de 6 Subagentes por Fase del SDLC
+
+Los subagentes están definidos en [`agents/`](agents/) y gobernados por [`rules/`](rules/):
+
+| Fase | Subagente (`agents/`) | Misión Principal | Entregables en Vault Obsidian (`Mis documentos/<proyecto>/docs`) |
+| :--- | :--- | :--- | :--- |
+| **Fase 1** | [`product-architect`](agents/product-architect.md) | Entrevista quirúrgica (`ask_question`), inicialización dinámica de carpeta y MCP `obsidian`, requerimientos e invariantes. | **10 notas Diátaxis:** `00-PRD-Master.md`, `explicacion/` (3), `especificaciones/` (3), `criterios/` (2 con BDD Gherkin) y `referencia/01-glosario-ubicuo.md`. |
+| **Fase 2** | [`system-architect`](agents/system-architect.md) | Diseño DDD, grill-me de stack, esquema relacional en **DBML**, scaffolding Clean Architecture/FSD y plan atómico con tareas `[PARALELO]`. | **8 notas arc42 en `arquitectura/`:** MOC, C4 contexto, estrategia, bloques, `04-modelo-de-datos-y-contratos.md` (con bloque ```` ```dbml ```` para `dbdiagram.io` y `DBML Visualizer`), secuencia, transversales y ADR Nygard. |
+| **Fase 3A** | [`core-builder`](agents/core-builder.md) | Construcción de backend y dominio mediante subagentes concurrentes en paralelo (`/teamwork`) bajo TDD Red-Green-Refactor, RFC 9457, committer diferido e indexación en `codebase-memory-mcp`. | **5 artefactos Docs-as-Code:** `05-vista-de-ejecucion.md` (secuencias reales), `02-catalogo-errores-rfc9457.md`, `03-contratos-api-publica.md`, `07-deuda-tecnica-y-riesgos.md` y `03-guia-de-testing-y-runner.md`. |
+| **Fase 3B** | [`ui-builder`](agents/ui-builder.md) | *(Condicional si `has_frontend == true`)* Construcción de UI bajo Feature-Sliced Design (FSD) en paralelo, 4 estados FSM, WCAG 2.1 AA, verificación con MCP `playwright`, committer e indexación total. | **4 artefactos Docs-as-Code UI:** actualización FSD en `03-vista-de-bloques.md`, `04-catalogo-componentes-ui.md`, `04-guia-testing-ui-y-accesibilidad.md` y anexo en `07-deuda-tecnica-y-riesgos.md`. |
+| **Fase 4** | [`qa-reviewer`](agents/qa-reviewer.md) | Auditoría independiente sin edición de código: validación BDD, cálculo de Blast Radius en `codebase-memory-mcp`, verificación E2E con `playwright`, RFC 9457 y seguridad OWASP. | Dictamen formal binario (`PASS` / `FAIL`) persistido en `docs/auditorias/AUDIT-Fase4.md`. |
+| **Fase 5** | [`release-engineer`](agents/release-engineer.md) | Compuerta `verification-before-completion`, integración Trunk-Based (rebase/merge limpio), tags SemVer, limpieza de worktrees y reindexación final. | Actualización de `06-vista-de-despliegue.md`, transición de ADRs a `Aceptado` y reporte de cierre. |
+
+---
+
+## Orquestación de Servidores MCP por Fase
+
+El archivo [`mcp_config.json`](mcp_config.json) declara los servidores estáticos (`codebase-memory-mcp` y `playwright`), mientras que `obsidian` se inicializa dinámicamente por proyecto:
+
+1. **`obsidian` (`@bitbonsai/mcpvault@latest` — Inicialización Dinámica en Fase 1):**
+   - Al arrancar el descubrimiento en Fase 1, `product-architect` pregunta al usuario el nombre clave del proyecto proponiendo la ruta `"Mis documentos/<nombre-proyecto>/docs"` (`$HOME/Documents/<nombre-proyecto>/docs`), crea físicamente el árbol de directorios e inicializa el servidor MCP apuntando a esa ruta exacta.
+2. **`codebase-memory-mcp` (Grafo de Conocimiento AST):**
+   - Utilizado en Fase 2 para auditar proyectos existentes, indexado obligatoriamente con `index_repository` al cierre de Fase 3A (backend) y Fase 3B (monorepo completo), y consultado en Fase 4 con `detect_changes`, `trace_path` y `check_index_coverage`.
+3. **`playwright` (`@playwright/mcp@latest` — Verificación Real en Navegador):**
+   - Utilizado en Fase 3B y Fase 4 para navegar la aplicación viva, comprobar los 4 estados FSM (`Loading`, `Error RFC 9457`, `Empty`, `Success`), auditar accesibilidad por teclado y asegurar cero errores en consola.
+
+---
+
+## Catálogo de 31 Skills Versionadas
+
+Todas las skills residen en [`skills/`](skills/) en español de alta densidad:
 
 ### 1. Gobernanza Arquitectónica y Documentación
+- **[readme-architecture-mastery](skills/readme-architecture-mastery/SKILL.md):** Auditoría de 7 dimensiones para `README.md`, `AGENTS.md`, `CLAUDE.md` y `llms.txt` con validador determinista en Deno (`validate_readme.ts`).
+- **[docs-governance-mastery](skills/docs-governance-mastery/SKILL.md):** Gobernanza documental combinando los 12 capítulos de **arc42** (ISO/IEC/IEEE 42010), los 4 cuadrantes de **Diátaxis**, esquemas **DBML** y grafos en Obsidian.
+- **[code-documentation-mastery](skills/code-documentation-mastery/SKILL.md):** Estándar in-code JSDoc/TSDoc bajo principio del "Por Qué" y contratos públicos en barriles `index.ts`.
 
-#### [readme-architecture-mastery](readme-architecture-mastery/SKILL.md)
-- **Propósito**: Audita de forma exhaustiva y estandariza la calidad estructural, técnica, visual y de seguridad de archivos `README.md`, `AGENTS.md`, `CLAUDE.md` y `llms.txt`.
-- **Capacidades Clave**:
-  - Evaluación de 7 dimensiones técnicas (standard-readme, divergencia de dominio, GFM avanzado, doc-testing, adaptabilidad para agentes y seguridad de cadena de suministro).
-  - Detección de caracteres invisibles zero-width, patrones de anulación o evasión de instrucciones del sistema, tuberías de ejecución directa y Base64 de longitud anómala (ClawHavoc).
-  - Validador determinista CLI ejecutable en Deno (`scripts/validate_readme.ts`) con modo `--fix`.
-- **Referencias**: [standard-readme spec](readme-architecture-mastery/references/01-standard-readme-spec.md), [matriz de divergencia](readme-architecture-mastery/references/02-domain-divergence-matrix.md), [seguridad y manifiestos IA](readme-architecture-mastery/references/05-ai-manifests-and-security.md).
+### 2. Especificación, Dominio (DDD) y Planificación
+- **[brainstorming](skills/brainstorming/SKILL.md):** Pensamiento arquitectónico previo al código: cuestionamiento de supuestos y evaluación de alternativas con trade-offs.
+- **[spec-driven-development](skills/spec-driven-development/SKILL.md):** Compuerta bloqueante `SPECIFY -> PLAN -> TASKS -> IMPLEMENT` y Mapas de Capacidades acíclicos.
+- **[interview-me](skills/interview-me/SKILL.md):** Interrogatorio quirúrgico paso a paso hasta alcanzar 95% de certeza sobre requerimientos y stack.
+- **[domain-driven-design](skills/domain-driven-design/SKILL.md):** Diseño estratégico y táctico DDD: Bounded Contexts, Agregados, Entidades, Value Objects, Eventos de Dominio y mapeo a DBML.
+- **[api-and-interface-design](skills/api-and-interface-design/SKILL.md):** Diseño de contratos estables REST/GraphQL/RPC, idempotencia, paginación y fronteras de módulos.
+- **[writing-plans](skills/writing-plans/SKILL.md):** Redacción de planes atómicos con tareas de 2 a 5 minutos, rutas exactas, firmas y pasos TDD.
+- **[planning-and-task-breakdown](skills/planning-and-task-breakdown/SKILL.md):** Descomposición de especificaciones en olas ordenadas de construcción, grafo de paralelismo (`[PARALELO]`) y matriz de commits.
 
-#### [docs-governance-mastery](docs-governance-mastery/SKILL.md)
-- **Propósito**: Administra y audita la base de conocimiento y documentación técnica combinando la estructura arquitectónica de **arc42** (12 capítulos, ISO/IEC/IEEE 42010) con los 4 cuadrantes de **Diátaxis** y grafos en Obsidian.
-- **Capacidades Clave**:
-  - Protocolo de auditoría integral en 8 dimensiones con reportes persistidos en `docs/auditorias/AUDIT-{NNN}-*.md`.
-  - Generación de Architecture Decision Records (ADRs) bajo formato Nygard.
-  - Diagramación viva exclusivamente en Mermaid.js.
-  - Preparación agéntica para RAG y LLM Wiki (heading-aware chunking H1->H2->H3).
-- **Referencias**: [guía de capítulos arc42](docs-governance-mastery/references/arc42-chapters-guide.md), [cuadrantes Diátaxis](docs-governance-mastery/references/diataxis-quadrants-guide.md), [esquemas frontmatter](docs-governance-mastery/references/frontmatter-schemas.md).
+### 3. Orquestación Paralela, Ejecución Lean y Debugging
+- **[subagent-driven-development](skills/subagent-driven-development/SKILL.md):** Despacho de subagentes frescos con contexto aislado por tarea y revisión en dos etapas.
+- **[dispatching-parallel-agents](skills/dispatching-parallel-agents/SKILL.md):** Ejecución concurrente en equipo (`/teamwork`) para tareas independientes sin estado compartido.
+- **[source-driven-development](skills/source-driven-development/SKILL.md):** Anclaje obligatorio en documentación oficial y tipos instalados antes de implementar APIs de librerías.
+- **[ponytail](skills/ponytail/SKILL.md):** Simplicidad radical anti-sobreingeniería (`ponytail` core), revisión anti-bloat (`ponytail-review`) y registro de deuda técnica (`ponytail-debt` con `shortcut:`).
+- **[caveman](skills/caveman/SKILL.md):** Comunicación de alta señal sin relleno, handoffs `ultracave`, `caveman-commit` y compresión documental `caveman-compress`.
+- **[systematic-debugging](skills/systematic-debugging/SKILL.md):** Diagnóstico científico de causa raíz en 4 fases mediante hipótesis rankeadas antes de aplicar parches.
+- **[safe-refactor](skills/safe-refactor/SKILL.md):** Reestructuración y simplificación de código preservando el 100% del comportamiento observable con verificación en verde.
 
-#### [code-documentation-mastery](code-documentation-mastery/SKILL.md)
-- **Propósito**: Estandariza la documentación in-code y contratos de API pública con criterio de ingeniería de software.
-- **Capacidades Clave**:
-  - Orden canónico de etiquetas JSDoc/TSDoc (`@module`, `@param`, `@returns`, `@throws`, `@example`, `@since`, `@deprecated`).
-  - Documentación de APIs públicas en barriles `index.ts` para arquitecturas modulares (Feature-Sliced Design y Clean Architecture).
-  - Principio del "Por Qué": el bloque `/** */` documenta el contrato y la intención de negocio; los comentarios regulares `//` explican la implementación interna.
-- **Referencias**: [contratos en APIs públicas](code-documentation-mastery/references/modular-public-api-contracts.md), [tipado JS puro](code-documentation-mastery/references/tipado-javascript-puro.md), [decisión JSDoc vs TSDoc](code-documentation-mastery/references/decision-jsdoc-vs-tsdoc.md).
+### 4. Calidad, TDD, Resiliencia RFC 9457 y Seguridad OWASP
+- **[qa-testing-mastery](skills/qa-testing-mastery/SKILL.md):** Diamante de Pruebas, ciclo TDD Red-Green-Refactor estricto, aislamiento transaccional, matrices de casos borde, Pact.js y pruebas de carga.
+- **[constraint-driven-development](skills/constraint-driven-development/SKILL.md):** Contrato de barra de calidad inquebrantable: prohíbe `@ts-ignore`, `eslint-disable`, `any`, tests saltados o aserciones eliminadas.
+- **[doubt-driven-development](skills/doubt-driven-development/SKILL.md):** Revisión adversarial en contexto fresco orientada a refutar decisiones arquitectónicas riesgosas.
+- **[exception-resilience-mastery](skills/exception-resilience-mastery/SKILL.md):** Resiliencia Fail-Closed (OWASP A10:2025), prevención de fugas API7:2023, estándar **RFC 9457**, W3C Trace Context y redacción de PII.
+- **[security-and-hardening](skills/security-and-hardening/SKILL.md):** Controles preventivos OWASP Top 10: validación en fronteras, consultas parametrizadas, sesiones seguras, prevención de BOLA/XSS/SSRF y secretos.
+- **[verification-before-completion](skills/verification-before-completion/SKILL.md):** Compuerta de evidencia empírica en terminal antes de declarar cualquier entrega como completada.
 
----
+### 5. Memoria Estructural y Grafos de Conocimiento
+- **[codebase-memory-mastery](skills/codebase-memory-mastery/SKILL.md):** Recetario avanzado de `codebase-memory-mcp`: análisis de Blast Radius (`detect_changes`), trazabilidad (`trace_path`) y consultas Cypher (`query_graph`).
 
-### 2. Calidad, Testing y Resiliencia
+### 6. Ecosistema Obsidian y Gestión de Bóvedas
+- **[obsidian-markdown](skills/obsidian-markdown/SKILL.md):** Sintaxis Obsidian Flavored Markdown, wikilinks bidireccionales, callouts, propiedades YAML y Mermaid.
+- **[obsidian-bases](skills/obsidian-bases/SKILL.md):** Modelado de vistas relacionales en archivos `.base` con filtros, fórmulas y sumarios.
+- **[obsidian-cli](skills/obsidian-cli/SKILL.md):** Automatización de bóvedas y desarrollo de plugins mediante la CLI de Obsidian.
 
-#### [qa-testing-mastery](qa-testing-mastery/SKILL.md)
-- **Propósito**: Auditoría de suites de prueba, detección dinámica del stack del proyecto y diseño de matrices agresivas de casos extremos (*edge cases*) bajo el paradigma del **Diamante de Pruebas**.
-- **Capacidades Clave**:
-  - Auto-detección de runtime (Deno, Node, Bun, Python, Rust, Go), ORM/drivers y runners (Vitest, Jest, Deno Test, Pytest).
-  - Aislamiento transaccional ultra-rápido con rollbacks automáticos en `afterEach` (CLS / transacciones de prueba).
-  - Detección de fallas críticas de dialecto (ej. SQLite en memoria para simular PostgreSQL en producción).
-  - Pruebas de contrato CDC con Pact.js v3 y pruebas de carga con SLOs en k6/Autocannon.
-- **Referencias**: [diamante de pruebas](qa-testing-mastery/references/testing-diamond-framework.md), [matriz de edge cases](qa-testing-mastery/references/edge-case-matrix-catalog.md), [recetas técnicas](qa-testing-mastery/references/tech-stacks-recipes.md).
+### 7. Ingeniería Frontend (FSD), UX a 120 FPS y Verificación en Navegador
+- **[ui-ux-mastery](skills/ui-ux-mastery/SKILL.md):** Diseño centrado en intención, Máquinas de Estado Finito (FSM), 41 patrones de interacción, Umbral Doherty (<400ms), WCAG 2.1 AA y física de movimiento a 120 FPS.
+- **[frontend-ui-engineering](skills/frontend-ui-engineering/SKILL.md):** Arquitectura Feature-Sliced Design (FSD), separación de estado (servidor, URL, local) y semántica accesible.
+- **[browser-testing-with-devtools](skills/browser-testing-with-devtools/SKILL.md):** Verificación empírica en navegador real mediante **Playwright MCP** y Chrome DevTools (DOM, árbol ARIA, 4 estados FSM y consola limpia).
 
-#### [exception-resilience-mastery](exception-resilience-mastery/SKILL.md)
-- **Propósito**: Evaluación forense, mitigación de fallos y resiliencia arquitectónica en el manejo de excepciones de extremo a extremo.
-- **Capacidades Clave**:
-  - Verificación del principio Fail-Closed y prevención de fugas de información interna en respuestas HTTP (OWASP A10:2025 y API7:2023).
-  - Estandarización de respuestas de error bajo RFC 9457 (`application/problem+json`).
-  - Observabilidad con W3C Trace Context (`traceparent`) y redacción obligatoria de PII en logs.
-  - Algoritmos de reintento con Exponential Backoff y Jitter, Circuit Breakers y Error Boundaries en frontend.
-- **Referencias**: [estándar RFC 9457](exception-resilience-mastery/references/rfc-9457-problem-details.md), [jerarquía de excepciones](exception-resilience-mastery/references/deno2-exception-hierarchy.md), [redacción PII y observabilidad](exception-resilience-mastery/references/pii-redaction-and-observability.md).
-
----
-
-### 3. Memoria de Código y Grafos de Conocimiento
-
-#### [codebase-memory-mastery](codebase-memory-mastery/SKILL.md)
-- **Propósito**: Recetario operativo y protocolos de explotación del servidor `codebase-memory-mcp` para análisis estructural de código fuente.
-- **Capacidades Clave**:
-  - Análisis de radio de impacto (*blast radius*) con `detect_changes` antes de refactorizaciones o Pull Requests.
-  - Detección de hotspots de complejidad ciclomática y cognitiva mediante consultas Cypher (`query_graph`).
-  - Trazabilidad de flujo de datos (`trace_path` con `mode: data_flow` o `cross_service`).
-  - Diagnóstico arquitectónico automatizado de ciclos y fronteras de módulos (`get_architecture`).
-- **Referencias**: [parámetros de herramientas](codebase-memory-mastery/references/parametros-herramientas.md), [recetas Cypher avanzadas](codebase-memory-mastery/references/recetas-cypher-avanzadas.md).
-
----
-
-### 4. Ecosistema Obsidian y Gestión de Bóvedas
-
-#### [obsidian-markdown](obsidian-markdown/SKILL.md)
-- **Propósito**: Creación y edición estructurada de notas en formato Obsidian Flavored Markdown.
-- **Capacidades Clave**: Enlaces internos bidireccionales (`[[Nota]]`, `[[Nota#Encabezado]]`, `[[Nota#^bloque]]`), transclusiones e incrustaciones (`![[Nota]]`, `![[imagen.png]]`), alertas y callouts semánticos (`> [!note]`, `> [!warning]`), frontmatter YAML y diagramas Mermaid.
-- **Referencias**: [propiedades YAML](obsidian-markdown/references/PROPERTIES.md), [incrustaciones](obsidian-markdown/references/EMBEDS.md), [catálogo de callouts](obsidian-markdown/references/CALLOUTS.md).
-
-#### [obsidian-bases](obsidian-bases/SKILL.md)
-- **Propósito**: Modelado y configuración de vistas de base de datos relacionales en archivos `.base` para Obsidian.
-- **Capacidades Clave**: Configuración de vistas (tabla, cartas, lista, mapa), filtros booleanos anidados (`and`, `or`, `not`), fórmulas dinámicas de cálculo y sumarios matemáticos/temporales.
-- **Referencias**: [referencia completa de funciones y fórmulas](obsidian-bases/references/FUNCTIONS_REFERENCE.md).
-
-#### [obsidian-cli](obsidian-cli/SKILL.md)
-- **Propósito**: Automatización de operaciones en la bóveda e inspección de desarrollo de plugins mediante la herramienta de línea de comandos de Obsidian.
-- **Capacidades Clave**: Creación y lectura de notas por CLI, actualización de propiedades, recarga de plugins (`obsidian plugin:reload`), captura de errores de consola y ejecución de JavaScript en el contexto de la aplicación.
-
----
-
-### 5. Craft de Interacción y Experiencia de Usuario
-
-#### [ui-ux-mastery](ui-ux-mastery/SKILL.md)
-- **Propósito**: Arquitectura de interfaces, razonamiento UX de nivel senior y ejecución cinético-estética de componentes frontend.
-- **Capacidades Clave**:
-  - Erradicación del antipatrón *Database-Shaped UI*; diseño centrado en la intención del usuario.
-  - Modelado de componentes con Máquinas de Estados Finitas (FSM) discretas (`idle` | `loading` | `success` | `error`).
-  - Catálogo de 41 patrones de interacción, reglas del Umbral Doherty (<400ms) y accesibilidad WCAG 2.1 AA/AAA.
-  - Presupuesto estricto de 120 FPS: animación exclusiva de `transform` y `opacity`, resortes amortiguados con `linear()` y respeto a `prefers-reduced-motion`.
-- **Referencias**: [catálogo de 41 patrones](ui-ux-mastery/references/cheatsheet-41-patrones.md), [patrones FSM](ui-ux-mastery/references/fsm-patterns.md), [tokens de movimiento](ui-ux-mastery/references/motion-tokens.md), [accesibilidad y métricas](ui-ux-mastery/references/accesibilidad-y-metricas.md).
-
----
-
-### 6. Control de Versiones Avanzado
-
-#### [git-workflow-mastery](git-workflow-mastery/SKILL.md)
-- **Propósito**: Operaciones avanzadas de Git de bajo nivel y arquitectura de control de versiones para desarrollo colaborativo.
-- **Capacidades Clave**:
-  - Inyección topológica de ramas apiladas (*stacked branches*) con `git rebase --onto` y rebases sincronizados con `--update-refs`.
-  - Ambientes de desarrollo y revisión aislados y concurrentes mediante `git worktree`.
-  - Reutilización de resoluciones de conflicto con `git rerere`.
-  - Auditoría de reescritura de historial ("diff de diffs") mediante `git range-diff`.
-- **Referencias**: [fundamentos DAG](git-workflow-mastery/references/fundamentos-dag.md), [herramientas avanzadas](git-workflow-mastery/references/herramientas-avanzadas.md), [Trunk-Based Development](git-workflow-mastery/references/trunk-based-development.md), [Conventional Commits](git-workflow-mastery/references/conventional-commits.md).
-
----
-
-## Skills Externas y de Terceros
-
-Las siguientes 3 habilidades complementarias están configuradas en el entorno local del usuario pero se encuentran **excluidas deliberadamente del control de versiones** del repositorio a través de [`.gitignore`](.gitignore), ya que corresponden a herramientas de terceros o paquetes desacoplados:
-
-| Carpeta Ignorada | Herramienta / Utilidad | Función Principal |
-| :--- | :--- | :--- |
-| `defuddle/` | Defuddle CLI | Extracción de contenido web limpio en Markdown eliminando anuncios y navegación para optimizar consumo de tokens. |
-| `graphify/` | Graphify Engine | Construcción de grafos de conocimiento multimodal, detección de comunidades Louvain y consultas GraphRAG. |
-| `json-canvas/` | JSON Canvas Spec | Especificación abierta JSON Canvas 1.0 para creación y edición programática de archivos espaciales `.canvas`. |
+### 8. Control de Versiones Avanzado, Migraciones y Automatización
+- **[git-workflow-mastery](skills/git-workflow-mastery/SKILL.md):** Operaciones avanzadas en DAG, `git worktree`, stacked branches (`--update-refs`), `rerere`, `range-diff`, Trunk-Based Development y committer diferido.
+- **[finishing-a-development-branch](skills/finishing-a-development-branch/SKILL.md):** Protocolo de cierre, rebase lineal, integración en `main` o Pull Request y limpieza de worktrees en Fase 5.
+- **[migration](skills/migration/SKILL.md):** Migraciones reversibles sin tiempo de inactividad mediante el patrón Expand-Migrate-Contract para bases de datos y APIs.
+- **[n8n-mastery](skills/n8n-mastery/SKILL.md):** Arquitectura de flujos en n8n, Code Nodes, Queue Mode, nodos personalizados en TypeScript e integración con servidores MCP.
 
 ---
 
@@ -236,149 +195,80 @@ Las siguientes 3 habilidades complementarias están configuradas en el entorno l
 
 ### Autoconfiguración Asistida por Agente
 
-Puedes delegar la instalación, clonación y verificación de este catálogo directamente a tu agente de IA (Antigravity u otro agente con acceso a terminal y Git). Proporciónale el siguiente prompt:
+Proporciona el siguiente prompt a tu agente de IA para que instale y configure automáticamente el plugin según el entorno que utilices:
 
 > [!TIP]
-> **Prompt para el Agente:**
+> **Prompt de Autoconfiguración Universal:**
 > ```text
-> Configura e integra el catálogo de skills de gobernanza desde el repositorio oficial:
-> https://github.com/EdwinDragusin/agent-core-skills.git
-> 
-> Sigue estos pasos para la instalación:
-> 1. Detecta el sistema operativo y el directorio de usuario ($HOME o %USERPROFILE%).
-> 2. Determina el alcance deseado:
->    - Despliegue Global (predeterminado): Clona el repositorio en la carpeta global de skills de Antigravity:
->      - Windows (PowerShell): "$HOME\.gemini\config\skills"
->      - macOS / Linux: "$HOME/.gemini/config/skills"
->      (Si el directorio ya existe y contiene un repositorio Git, realiza un `git pull origin main` para sincronizar la versión más reciente; de lo contrario, clónalo).
->    - Despliegue por Proyecto (Workspace): Clona o copia las skills en la carpeta `.agents/skills/` en la raíz del proyecto actual.
-> 3. Entorno agnóstico: Este catálogo es completamente independiente del lenguaje o runtime (compatible con proyectos en Node.js, Python, Go, Rust, Java, C#, PHP, Deno o Bun). No asumas dependencias exclusivas de un solo runtime.
-> 4. Comprueba la integridad inspeccionando que los archivos `SKILL.md` estén presentes y reporta la lista de skills habilitadas.
+> Instala y configura el plugin desde https://github.com/EdwinDragusin/agent-core-skills.git siguiendo los pasos para mi entorno actual:
+> 1. Si estoy en Google Antigravity:
+>    - Clona el repositorio en "$HOME/.gemini/config/plugins/agent-core-skills".
+>    - Verifica que plugin.json, mcp_config.json, rules/AGENTS.md, agents/ y skills/ esten presentes.
+> 2. Si estoy en Claude Code, Cursor, Codex u OpenCode:
+>    - Clona el repositorio e integra las skills en el directorio correspondiente (~/.claude/skills, ~/.cursor/skills o .agents/skills) y enlaza AGENTS.md / CLAUDE.md.
+> 3. Verifica la disponibilidad de los servidores MCP codebase-memory-mcp y @playwright/mcp@latest. Recuerda que el MCP de Obsidian (@bitbonsai/mcpvault@latest) se inicializa dinamicamente al comenzar la Fase 1 en "Mis documentos/<nombre-proyecto>/docs".
 > ```
 
-Repositorio oficial: [EdwinDragusin/agent-core-skills](https://github.com/EdwinDragusin/agent-core-skills) (URL de clonación: `https://github.com/EdwinDragusin/agent-core-skills.git`).
+### Opción A: Instalación Nativa en Google Antigravity
 
-### Requisitos del Sistema
-
-- **Stack y Lenguajes**: Agnóstico y universal. Las skills contienen especificaciones arquitectónicas, directrices operativas y protocolos en Markdown que gobiernan el razonamiento de los agentes en cualquier stack de programación (Node.js, TypeScript/JavaScript, Python, Go, Rust, C#, PHP, Java, bases de datos SQL/NoSQL, etc.).
-- **Control de Versiones**: Git 2.38+ (para clonación, sincronización y soporte nativo de ramas apiladas y rebases avanzados).
-- **Plataforma de Agentes**: Google Antigravity o asistentes de IA compatibles con el protocolo de Skills y Customizaciones (`~/.gemini/config/skills` o `.agents/skills`).
-
-### Despliegue Manual en el Entorno Global
-
-Para que Antigravity reconozca este catálogo de forma global en todas tus sesiones y proyectos, clona el repositorio en el directorio de configuración del usuario:
+Clona el repositorio directamente en el directorio de plugins de Antigravity para activar en un solo paso las reglas permanentes (`rules/AGENTS.md`), los 6 subagentes (`agents/`), las 31 skills (`skills/`) y los servidores MCP (`mcp_config.json`):
 
 ```bash
-# En Windows (PowerShell)
-git clone https://github.com/EdwinDragusin/agent-core-skills.git "$HOME\.gemini\config\skills"
+# Windows (PowerShell)
+git clone https://github.com/EdwinDragusin/agent-core-skills.git "$HOME\.gemini\config\plugins\agent-core-skills"
 
-# En macOS / Linux
-git clone https://github.com/EdwinDragusin/agent-core-skills.git "$HOME/.gemini/config/skills"
+# macOS / Linux
+git clone https://github.com/EdwinDragusin/agent-core-skills.git "$HOME/.gemini/config/plugins/agent-core-skills"
 ```
 
-### Despliegue a Nivel de Proyecto (Workspace)
+### Opción B: Instalación Multi-Agente (Claude Code, Cursor, Codex, OpenCode)
 
-Si deseas incorporar estas habilidades únicamente en un proyecto específico para compartirlas con tu equipo mediante control de versiones:
+El repositorio incluye manifiestos nativos en [`.claude-plugin/`](.claude-plugin/plugin.json), [`.cursor-plugin/`](.cursor-plugin/plugin.json), [`.codex-plugin/`](.codex-plugin/plugin.json) y [`gemini-extension.json`](gemini-extension.json):
 
 ```bash
-# Crear directorio de skills del proyecto
-mkdir -p .agents/skills
+# 1. Claude Code (via sistema de plugins o instalacion global)
+git clone https://github.com/EdwinDragusin/agent-core-skills.git "$HOME/.claude/plugins/agent-core-skills"
+cp "$HOME/.claude/plugins/agent-core-skills/ rules/AGENTS.md" "$HOME/.claude/CLAUDE.md"
 
-# Clonar o incorporar el repositorio
-git clone https://github.com/EdwinDragusin/agent-core-skills.git .agents/skills
-```
-
-### Configuración de Servidores MCP Recomendada
-
-Para habilitar la interoperabilidad de las skills de memoria estructural y documentación en Obsidian, configurar los servidores en `mcp_config.json`:
-
-```json
-{
-  "mcpServers": {
-    "codebase-memory-mcp": {
-      "command": "npx",
-      "args": ["-y", "codebase-memory-mcp"]
-    },
-    "obsidian": {
-      "command": "npx",
-      "args": ["-y", "@bitbonsai/mcpvault"]
-    }
-  }
-}
-```
-
----
-
-## Guía de Uso y Activación
-
-Las skills operan bajo un modelo híbrido de **activación contextual autónoma** y **ejecución explícita**:
-
-### Activación Autónoma por Escenario
-
-| Tarea que Realiza el Agente | Skills Activadas Automáticamente |
-| :--- | :--- |
-| Creación o edición de `README.md` / `AGENTS.md` | `readme-architecture-mastery` |
-| Creación de notas de arquitectura, ADRs o guías | `docs-governance-mastery`, `obsidian-markdown` |
-| Documentación de funciones, tipos o APIs públicas | `code-documentation-mastery` |
-| Diagnóstico de fallos, refactorings o Pull Requests | `codebase-memory-mastery`, `exception-resilience-mastery` |
-| Creación de suites de pruebas o diagnóstico de CI | `qa-testing-mastery` |
-| Diseño de componentes visuales o pantallas UI | `ui-ux-mastery` |
-| Planificación de ramas, commits, rebases o merges | `git-workflow-mastery` |
-
-### Invocación Manual y Ejemplos de Prompt
-
-```markdown
-# Auditoria de documentacion
-"Audita el README.md de este proyecto bajo las 7 dimensiones tecnicas y verifica si hay anclas rotas."
-
-# Auditoria de excepciones
-"Ejecuta una auditoria de resiliencia y manejo de excepciones en la capa de aplicacion verificando el cumplimiento de RFC 9457."
-
-# Diseno de pruebas y edge cases
-"Disena una matriz de casos extremos para el modulo de pagos y genera pruebas con aislamiento transaccional."
+# 2. Cursor IDE / OpenAI Codex / Proyecto Local (Workspace)
+mkdir -p .agents
+git clone https://github.com/EdwinDragusin/agent-core-skills.git .agents/agent-core-skills
+cp .agents/agent-core-skills/AGENTS.md ./AGENTS.md
 ```
 
 ---
 
 ## Gobernanza Git y Contribución
 
-Todo cambio o adición a este repositorio debe respetar las siguientes normas de gobernanza:
+Todo cambio en este repositorio se rige por las siguientes normas:
 
-1. **Trunk-Based Development**: Ramas de vida corta enfocadas en incrementos cohesivos. Prohibido el auto-merge directo a `main`.
-2. **Atomicidad de Commits**:
-   - Cada commit debe representar un incremento de **100 a 400 LOC** (límite estricto de 500 LOC).
-   - Prohibidos los commits monolíticos acumulativos (`git add .` indiscriminado).
-3. **Formato Conventional Commits**:
+1. **Trunk-Based Development:** Ramas efímeras integradas mediante rebase lineal. Prohibido el auto-merge directo a `main` sin revisión.
+2. **Atomicidad Cuantitativa de Commits:** Cada commit representa un incremento cohesivo de **100 a 400 LOC** (techo estricto de 500 LOC). Prohibido usar `git add .` monolítico.
+3. **Conventional Commits en Español (`caveman-commit`):**
+   ```text
+   <tipo>(<alcance>): <descripcion imperativa en minusculas sin punto final>
    ```
-   <tipo>(<alcance>): <descripcion imperativa en espanol>
-   ```
-   *Ejemplos:*
-   - `feat(readme): anadir regla de deteccion de curlbash`
-   - `docs(arc42): actualizar guia de capitulo 5 para arquitecturas FSD`
-   - `fix(qa): corregir rollback transaccional en pruebas de integracion`
-4. **Prohibición Total de Emojis**: Cero emojis en mensajes de commit, cuerpos de Pull Requests, código fuente o documentación técnica.
+4. **Prohibición Total de Emojis:** Cero emojis en commits, Pull Requests, código o documentación.
 
 ---
 
 ## Auditoría Automatizada
 
-El repositorio incluye herramientas deterministas para auditar y auto-corregir la documentación:
-
-### Validar README.md con Deno
+Ejecuta el validador determinista de `readme-architecture-mastery` para certificar la integridad estructural y de seguridad del repositorio:
 
 ```bash
-# Escaneo estatico de cumplimiento
-deno run --allow-read ./readme-architecture-mastery/scripts/validate_readme.ts ./README.md
+# Escaneo estatico de cumplimiento de las 7 dimensiones
+deno run --allow-read ./skills/readme-architecture-mastery/scripts/validate_readme.ts ./README.md
 
-# Modo de auto-remediacion segura (repara alertas GFM y caracteres invisibles)
-deno run --allow-read --allow-write ./readme-architecture-mastery/scripts/validate_readme.ts --fix ./README.md
+# Modo de auto-remediacion segura
+deno run --allow-read --allow-write ./skills/readme-architecture-mastery/scripts/validate_readme.ts --fix ./README.md
 ```
 
 ---
 
 ## Licencia
 
-Este proyecto está bajo la Licencia MIT. Para más información, consultar el archivo de licencia correspondiente.
+Este proyecto se distribuye bajo la Licencia MIT.
 
 ```text
 SPDX-License-Identifier: MIT
