@@ -61,11 +61,11 @@ flowchart TB
         R_EMOJI["Regla Absoluta Anti-Emojis"]
     end
 
-    subgraph LAYER_AGENTS["Capa 2: Pipeline de 6 Subagentes SDLC (agents/)"]
+    subgraph LAYER_AGENTS["Capa 2: Pipeline SDLC y Subagentes Especializados (agents/)"]
         F1["Fase 1: product-architect (PRD & Diataxis)"]
         F2["Fase 2: system-architect (DDD, DBML & arc42)"]
         F3A["Fase 3A: core-builder (Backend TDD Paralelo)"]
-        F3B["Fase 3B: ui-builder (Frontend FSD Paralelo)"]
+        F3B["Fase 3B: ui-builder & ux-auditor (FSD & A11y Gate)"]
         F4["Fase 4: qa-reviewer (Auditoria & Blast Radius)"]
         F5["Fase 5: release-engineer (Trunk-Based & SemVer)"]
         F1 --> F2 --> F3A
@@ -116,8 +116,8 @@ Los subagentes están definidos en [`agents/`](agents/) con su protocolo complet
 | **Fase 1** | [`product-architect`](agents/product-architect.md) | Modo Greenfield (entrevista `ask_question`) o Brownfield (ingeniería inversa de especificaciones desde código con `codebase-memory-mcp`). Inicialización dinámica de carpeta y MCP `obsidian`, requerimientos e invariantes. | **10 notas Diátaxis:** `00-PRD-Master.md`, `explicacion/` (3), `especificaciones/` (3), `criterios/` (2 con BDD Gherkin) y `referencia/01-glosario-ubicuo.md`. |
 | **Fase 2** | [`system-architect`](agents/system-architect.md) | Diseño DDD, grill-me de stack, esquema relacional en **DBML** (proyectado o extraído As-Is), scaffolding y plan atómico. Si es baseline documental concluye aquí; si es evolución genera plan con tareas `[PARALELO]`. | **8 notas arc42 en `arquitectura/`:** MOC, C4 contexto, estrategia, bloques, `04-modelo-de-datos-y-contratos.md` (con bloque ```` ```dbml ```` para `dbdiagram.io` y `DBML Visualizer`), secuencia, transversales y ADR Nygard. |
 | **Fase 3A** | [`core-builder`](agents/core-builder.md) | Construcción de backend y dominio mediante subagentes concurrentes en paralelo (`/teamwork`) bajo TDD Red-Green-Refactor, RFC 9457, committer diferido e indexación en `codebase-memory-mcp`. | **5 artefactos Docs-as-Code:** `05-vista-de-ejecucion.md` (secuencias reales), `02-catalogo-errores-rfc9457.md`, `03-contratos-api-publica.md`, `07-deuda-tecnica-y-riesgos.md` y `03-guia-de-testing-y-runner.md`. |
-| **Fase 3B** | [`ui-builder`](agents/ui-builder.md) | *(Condicional si `has_frontend == true`)* Construcción de UI bajo Feature-Sliced Design (FSD) en paralelo, 4 estados FSM, WCAG 2.1 AA, verificación con MCP `playwright`, committer e indexación total. | **4 artefactos Docs-as-Code UI:** actualización FSD en `03-vista-de-bloques.md`, `04-catalogo-componentes-ui.md`, `04-guia-testing-ui-y-accesibilidad.md` y anexo en `07-deuda-tecnica-y-riesgos.md`. |
-| **Fase 4** | [`qa-reviewer`](agents/qa-reviewer.md) | Auditoría independiente sin edición de código: validación BDD, cálculo de Blast Radius en `codebase-memory-mcp`, verificación E2E con `playwright`, RFC 9457 y seguridad OWASP. | Dictamen formal binario (`PASS` / `FAIL`) persistido en `docs/auditorias/AUDIT-Fase4.md`. |
+| **Fase 3B** | [`ui-builder`](agents/ui-builder.md) | *(Condicional si `has_frontend == true`)* Construcción de UI bajo Feature-Sliced Design (FSD) en paralelo, 4 estados FSM, WCAG 2.1 AA. Gatekeeper adversarial obligatorio con [`ux-auditor`](agents/ux-auditor.md) (evaluación con Playwright contra 10 antipatrones con veredicto APPROVE/REJECT) antes del committer e indexación. | **4 artefactos Docs-as-Code UI:** actualización FSD en `03-vista-de-bloques.md`, `04-catalogo-componentes-ui.md`, `04-guia-testing-ui-y-accesibilidad.md` y anexo en `07-deuda-tecnica-y-riesgos.md`. |
+| **Fase 4** | [`qa-reviewer`](agents/qa-reviewer.md) | Auditoría independiente sin edición de código: validación BDD, cálculo de Blast Radius en `codebase-memory-mcp`, auditoría UX/UI contra `audit-matrix.md` con Playwright, RFC 9457 y seguridad OWASP. | Dictamen formal binario (`PASS` / `FAIL`) persistido en `docs/auditorias/AUDIT-Fase4.md`. |
 | **Fase 5** | [`release-engineer`](agents/release-engineer.md) | Compuerta `verification-before-completion`, integración Trunk-Based (rebase/merge limpio), tags SemVer, limpieza de worktrees y reindexación final. | Actualización de `06-vista-de-despliegue.md`, transición de ADRs a `Aceptado` y reporte de cierre. |
 
 ---
