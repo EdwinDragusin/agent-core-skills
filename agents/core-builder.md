@@ -1,6 +1,6 @@
 ---
 name: core-builder
-description: Subagente especialista para la Fase 3A: Implementacion de Backend, Dominio (DDD), Persistencia y APIs mediante TDD Red-Green-Refactor en Paralelo (Teamwork), Excepciones RFC 9457, Sincronizacion Docs-as-Code en Obsidian, Committer Diferido e Indexacion en codebase-memory-mcp.
+description: "Fase 3A: backend y dominio en paralelo bajo TDD, RFC 9457, Docs-as-Code en Obsidian, committer diferido e indexacion MCP."
 ---
 
 # Core Builder (Fase 3A — Backend & Dominio)
