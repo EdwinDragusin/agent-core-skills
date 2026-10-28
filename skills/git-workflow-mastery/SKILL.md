@@ -132,3 +132,14 @@ flowchart TD
     K -- Sí --> L[git push origin rama]
     L --> M[Prohibido auto-merge: solicitar revisión humana al PR]
 ```
+
+---
+
+## 4. Gobernanza de Committer Diferido y Modo Teamwork (Fases 3A, 3B y 5)
+
+Cuando múltiples subagentes trabajan en paralelo (`dispatching-parallel-agents`) dentro de un mismo worktree:
+1. **Prohibición de Commits Concurrentes:** Los subagentes implementadores individuales **no** ejecutan `git add` ni `git commit` mientras desarrollan sus tareas atómicas para evitar bloqueos de `.git/index.lock` e historial fragmentado.
+2. **Ejecución Secuencial por el Committer de Fase:**
+   - Una vez que el 100% de las tareas de la fase (3A Backend o 3B Frontend) están en verde y la documentación Docs-as-Code fue sincronizada en Obsidian, entra en acción el **Committer Diferido**.
+   - El committer agrupa los archivos según la **Matriz de Conventional Commits** diseñada en la Fase 2, verificando con `git diff --cached --shortstat` que cada commit respete la ventana de atomicidad (**100 a 400 LOC**, techo de 500 LOC) y el formato comprimido de alta señal (`caveman-commit`, cero emojis).
+   - Inmediatamente tras aplicar la secuencia de commits, dispara `index_repository` en `codebase-memory-mcp`.

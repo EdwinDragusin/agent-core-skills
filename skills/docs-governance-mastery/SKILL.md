@@ -78,9 +78,20 @@ Para representar visualmente bloques de construcción, contextos, despliegues y
 flujos de ejecución:
 
 > [!IMPORTANT]
-> **Usar exclusivamente Mermaid.** No generar Structurizr DSL, PlantUML ni
-> imágenes directas. Obsidian renderiza Mermaid nativamente. Los diagramas se
-> incrustan directamente en los documentos Markdown del vault.
+> **Usar exclusivamente Mermaid para arquitectura y flujos, y DBML para esquemas relacionales de base de datos.**
+> - Diagramas C4, secuencias y máquinas de estado se incrustan en bloques `mermaid`.
+> - El modelo relacional de datos (tablas, PK/FK, índices, relaciones) dentro de `docs/arquitectura/04-modelo-de-datos-y-contratos.md` se redacta obligatoriamente en bloques ```` ```dbml ````, 100% compatibles para copiar/pegar en `dbdiagram.io` y visualizables nativamente en Obsidian mediante el plugin de la comunidad **`DBML Visualizer`**.
+
+### Inicialización Dinámica del Vault y Servidor MCP de Obsidian (Fase 1)
+
+El servidor MCP de Obsidian (`@bitbonsai/mcpvault@latest`) **no** se preconfigura con una ruta estática ciega. Se inicializa dinámicamente cuando comienza la Fase 1 (`product-architect`) y el agente necesita empezar a redactar los documentos:
+
+1. El agente pregunta al usuario el **nombre clave del proyecto** (`<nombre-proyecto>`), proponiendo como ubicación estándar la carpeta de documentos del usuario:
+   - Windows: `C:/Users/<usuario>/Documents/<nombre-proyecto>/docs` (`Mis documentos/<nombre-proyecto>/docs`)
+   - macOS / Linux: `$HOME/Documents/<nombre-proyecto>/docs`
+2. Una vez confirmada la ruta, el agente crea físicamente la carpeta maestra del proyecto, el subdirectorio `docs/` con sus carpetas base (`explicacion/`, `especificaciones/`, `criterios/`, `referencia/`) y registra el servidor MCP:
+   - En Antigravity: `agy.exe mcp add obsidian npx -y @bitbonsai/mcpvault@latest "<ruta-resuelta>/docs"`
+   - En Claude Code: `claude mcp add obsidian -- npx -y @bitbonsai/mcpvault@latest "<ruta-resuelta>/docs"`
 
 ### Gestión Documental vía Obsidian MCP
 
