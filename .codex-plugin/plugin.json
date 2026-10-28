@@ -1,0 +1,25 @@
+{
+  "name": "agent-core-skills",
+  "version": "2.0.0",
+  "description": "Framework integral de gobernanza Zero-Trust, 6 subagentes SDLC y 31 skills de ingenieria de software.",
+  "author": {
+    "name": "Edwin Dragusin",
+    "url": "https://github.com/EdwinDragusin"
+  },
+  "homepage": "https://github.com/EdwinDragusin/agent-core-skills",
+  "repository": "https://github.com/EdwinDragusin/agent-core-skills",
+  "license": "MIT",
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Agent Core Skills",
+    "shortDescription": "Gobernanza Zero-Trust, 6 subagentes SDLC y 31 skills de ingenieria.",
+    "longDescription": "Suite de gobernanza arquitectonica (arc42, Diataxis, DDD, FSD, RFC 9457), subagentes SDLC en 5 fases y 31 skills comprimidas en alta densidad.",
+    "developerName": "Edwin Dragusin",
+    "category": "Productivity",
+    "capabilities": [
+      "Interactive",
+      "Read",
+      "Write"
+    ]
+  }
+}
