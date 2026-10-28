@@ -16,22 +16,24 @@
 ## 3. Subagentes Especializados por Fase de Desarrollo
 
 ### Fase 1: Product Architect (`product-architect`)
-- **Mision:** Descubrimiento de producto, requerimientos, reglas de negocio e invariantes, historias de usuario y criterios BDD Gherkin.
-- **Skills:** `brainstorming`, `spec-driven-development`, `interview-me`, `docs-governance-mastery`.
-- **Gobernanza y MCP:** Pregunta nombre clave del proyecto, crea `"Mis documentos/<nombre-proyecto>/docs"`, inicializa MCP `obsidian` (`@bitbonsai/mcpvault@latest`) y redacta incrementalmente las 10 notas canonicas Diataxis (`00-PRD-Master.md`, `explicacion/`, `especificaciones/`, `criterios/`, `referencia/`).
-- **Limites:** Entrevista estructurada paso a paso via `ask_question`. Prohibido escribir codigo de produccion, dependencias o scaffolding.
+- **Mision:** Descubrimiento de producto (Modo Greenfield) o ingenieria inversa de requerimientos e invariantes desde codigo existente (Modo Brownfield / Reverse-Spec), inicializacion dinamica de Obsidian MCP y gobernanza Diataxis (10 notas canonicas + criterios BDD Gherkin).
+- **Skills:** `brainstorming`, `spec-driven-development`, `interview-me`, `docs-governance-mastery`, `codebase-memory-mastery`.
+- **Gobernanza y MCP:** Pregunta nombre clave del proyecto, crea `"Mis documentos/<nombre-proyecto>/docs"`, inicializa MCP `obsidian` (`@bitbonsai/mcpvault@latest`) e inspecciona codigo con `codebase-memory-mcp` en brownfield. Redacta incrementalmente las 10 notas canonicas Diataxis (`00-PRD-Master.md`, `explicacion/`, `especificaciones/`, `criterios/`, `referencia/`).
+- **Limites:** Entrevista estructurada (`interview-me` o Entrevista Delta) via `ask_question`. Prohibido escribir codigo de produccion, dependencias o scaffolding.
 - **Definition of Done (DoD):** 10 notas canonicas creadas en vault sin enlaces rotos y aprobadas por el usuario.
-- **Handoff a Fase 2 (Ultracave):** Rutas en vault, matriz in/out-of-scope, invariantes criticas y criterios BDD.
+- **Handoff a Fase 2 (Ultracave):** Rutas en vault, matriz in/out-of-scope, invariantes criticas, criterios BDD y flag `is_baseline_only`.
 
 ### Fase 2: System Architect (`system-architect`)
-- **Mision:** Arquitectura tecnica bajo DDD y Ponytail, seleccion minima de dependencias, contratos/interfaces (Bounded Contexts, Agregados, Value Objects), esquema relacional en DBML, suite de 8 documentos arc42, scaffolding y plan atomico con matriz de commits.
+- **Mision:** Arquitectura tecnica bajo DDD y Ponytail, seleccion minima de dependencias, contratos/interfaces (Bounded Contexts, Agregados, Value Objects), esquema relacional en DBML (proyectado o inferido As-Is), suite de 8 documentos arc42, scaffolding y plan atomico con matriz de commits.
 - **Skills:** `writing-plans`, `planning-and-task-breakdown`, `domain-driven-design`, `api-and-interface-design`, `docs-governance-mastery`, `codebase-memory-mastery`, `git-workflow-mastery`.
 - **Gobernanza y MCP:** Persiste suite de 8 notas arc42 en `"Mis documentos/<nombre-proyecto>/docs/arquitectura/"` via MCP `obsidian` e inspecciona codigo existente via `codebase-memory-mcp`.
-- **Esquema DBML:** Modelado relacional obligatorio en DBML dentro de `04-modelo-de-datos-y-contratos.md` (bloques ```` ```dbml ````), compatible con `dbdiagram.io` y el plugin de Obsidian `DBML Visualizer`.
+- **Esquema DBML:** Modelado relacional obligatorio en DBML dentro de `04-modelo-de-datos-y-contratos.md` (bloques ```` ```dbml ````), compatible con `dbdiagram.io` y el plugin de Obsidian `DBML Visualizer`. Extraido de modelos/migraciones reales en brownfield.
 - **Protocolo Grill-Me de Stack:** Si el stack no esta definido, interroga via `ask_question` con recomendacion Ponytail y registra ADR Nygard.
-- **Scaffolding Autonomo:** Clean Architecture en backend (`domain/`, `application/`, `infrastructure/`, `presentation/`) y Feature-Sliced Design en frontend (`app/`, `pages/`, `widgets/`, `features/`, `entities/`, `shared/`).
-- **Definition of Done (DoD):** 8 documentos arc42 validados con DBML integro, worktree/rama creada con tests base limpios, scaffolding inicial y plan atomico aprobado (tareas de 2-5 min etiquetadas con `[PARALELO]` cuando sean independientes y matriz de Conventional Commits).
-- **Handoff a Fase 3A (Ultracave):** Ruta de worktree, ruta de plan atomico, comandos de test, DBML, flag `has_frontend` y matriz de commits.
+- **Bifurcacion de Modo:**
+  - *Modo Baseline Documental (`is_baseline_only == true`):* Genera `07-deuda-tecnica-y-riesgos.md` (`ponytail-audit`) y concluye en Fase 2 sin crear ramas ni alterar codigo.
+  - *Modo Greenfield / Evolucion (`is_baseline_only == false`):* Crea rama/worktree, scaffolding y plan atomico con etiquetas `[PARALELO]`.
+- **Definition of Done (DoD):** 8 documentos arc42 validados con DBML integro y plan atomico aprobado (o cierre documental si es baseline).
+- **Handoff a Fase 3A (Ultracave, solo si `is_baseline_only == false`):** Ruta de worktree, ruta de plan atomico, comandos de test, DBML, flag `has_frontend` y matriz de commits.
 
 ### Fase 3A: Core Builder (`core-builder`)
 - **Mision:** Implementacion de backend, dominio (DDD), persistencia y APIs mediante subagentes concurrentes en paralelo (modo Teamwork) bajo ciclo TDD Red-Green-Refactor, sincronizacion Docs-as-Code en Obsidian, committer diferido e indexacion en `codebase-memory-mcp`.
