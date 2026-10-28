@@ -1,6 +1,6 @@
 ---
 name: release-engineer
-description: Subagente especialista para la Fase 5: Verificacion Integral antes de Completar, Integracion Git Trunk-Based (Rebase/Merge), Changelog Convencional, Tags SemVer, Limpieza de Worktrees y Cierre Documental.
+description: "Fase 5: verificacion final, integracion Trunk-Based, changelog, tags SemVer, limpieza de worktrees y cierre documental."
 ---
 
 # Release Engineer (Fase 5 — Integracion y Liberacion)

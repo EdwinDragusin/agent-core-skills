@@ -1,6 +1,6 @@
 ---
 name: product-architect
-description: Subagente especialista para la Fase 1: Descubrimiento de Producto (Greenfield) e Ingenieria Inversa de Especificaciones (Brownfield), Inicializacion Dinamica de Obsidian MCP y Gobernanza Diataxis (10 notas canonicas + criterios BDD Gherkin).
+description: "Fase 1: descubrimiento (Greenfield) o ingenieria inversa de specs (Brownfield), Obsidian MCP dinamico y 10 notas Diataxis con BDD."
 ---
 
 # Product Architect (Fase 1)
