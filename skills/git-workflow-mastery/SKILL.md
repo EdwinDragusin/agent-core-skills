@@ -3,44 +3,44 @@ name: git-workflow-mastery
 description: "Git avanzado: Trunk-Based, Conventional Commits, rebase, worktrees, ramas apiladas, hooks y Pull Requests."
 ---
 
-# Git Workflow Mastery — Operaciones Avanzadas y Arquitectura de Control de Versiones
+# Git Workflow Mastery - Operaciones Avanzadas y Arquitectura de Control de Versiones
 
-Esta skill dictamina los protocolos operativos de Git de bajo nivel que no están cubiertos directamente por las reglas globales del proyecto.
-> **IMPORTANTE:** Las convenciones estructurales (nomenclatura de ramas, Conventional Commits, pipeline CI, PRs) están definidas en las reglas de gobernanza o `AGENTS.md` del proyecto y **no se deben duplicar ni invalidar aquí**. Para teoría y fundamentos de las herramientas usadas, consultar la carpeta [references/](./references/).
+Esta skill dictamina los protocolos operativos de Git de bajo nivel que no estan cubiertos directamente por las reglas globales del proyecto.
+> **IMPORTANTE:** Las convenciones estructurales (nomenclatura de ramas, Conventional Commits, pipeline CI, PRs) estan definidas en las reglas de gobernanza o `AGENTS.md` del proyecto y **no se deben duplicar ni invalidar aqui**. Para teoria y fundamentos de las herramientas usadas, consultar la carpeta [references/](./references/).
 
 ---
 
 ## 1. Ramas Apiladas (Stacked Branches)
 
-Para evitar el bloqueo por code review, se crean ramas que dependen de otras ramas en vuelo. Esto emula la segmentación de instrucciones (pipelining):
+Para evitar el bloqueo por code review, se crean ramas que dependen de otras ramas en vuelo. Esto emula la segmentacion de instrucciones (pipelining):
 ```text
-main ──o──o
+main --o--o
            \
-            A1 ── A2 (Rama feat/caracteristica-a)
+            A1 -- A2 (Rama feat/caracteristica-a)
                    \
-                    B1 ── B2 (Rama feat/caracteristica-b, depende de A)
+                    B1 -- B2 (Rama feat/caracteristica-b, depende de A)
 ```
 
-### Receta Operativa: Injerción Topológica con `git rebase --onto`
+### Receta Operativa: Injercion Topologica con `git rebase --onto`
 Uso: Cuando la rama base (`feat/caracteristica-a`) fue modificada o integrada, y necesitas migrar la rama hija (`feat/caracteristica-b`) a la nueva base limpia.
 
-1. **Identificar ancestro de corte:** Localiza el hash del último commit de la rama A antigua del cual partió la rama B (`<ancestro_obsoleto_punta_a>`).
+1. **Identificar ancestro de corte:** Localiza el hash del ultimo commit de la rama A antigua del cual partio la rama B (`<ancestro_obsoleto_punta_a>`).
 2. **Ejecutar el rebase:**
    ```bash
    git checkout feat/caracteristica-b
    git rebase --onto main <ancestro_obsoleto_punta_a>
    ```
-3. **Verificación obligatoria:**
+3. **Verificacion obligatoria:**
    ```bash
    git log --oneline -n 5
    # Verificar que no haya commits duplicados y que la nueva base sea `main`.
    ```
-4. **Recuperación (Manejo de fallos):** Si hay conflictos irresolubles o te equivocaste de ancestro:
+4. **Recuperacion (Manejo de fallos):** Si hay conflictos irresolubles o te equivocaste de ancestro:
    ```bash
    git rebase --abort
    ```
 
-### Receta Operativa: Rebase Apilado Automático con `--update-refs`
+### Receta Operativa: Rebase Apilado Automatico con `--update-refs`
 Uso: Sincronizar un stack entero de ramas dependientes de un solo golpe.
 
 1. **Ejecutar rebase interactivo en la rama superior:**
@@ -48,13 +48,13 @@ Uso: Sincronizar un stack entero de ramas dependientes de un solo golpe.
    git checkout feat/caracteristica-b
    git rebase -i --update-refs origin/main
    ```
-2. **Resolver plan:** Git insertará instrucciones `update-ref` en el editor. Guarda y cierra.
-3. **Verificación obligatoria:**
+2. **Resolver plan:** Git insertara instrucciones `update-ref` en el editor. Guarda y cierra.
+3. **Verificacion obligatoria:**
    ```bash
    git log --oneline --graph --all
    # Confirmar que tanto A como B se movieron juntas de forma limpia.
    ```
-4. **Recuperación (Manejo de fallos):**
+4. **Recuperacion (Manejo de fallos):**
    ```bash
    git rebase --abort
    ```
@@ -63,10 +63,10 @@ Uso: Sincronizar un stack entero de ramas dependientes de un solo golpe.
 
 ## 2. Operaciones Avanzadas de Git
 
-Consulta [references/herramientas-avanzadas.md](./references/herramientas-avanzadas.md) para la base teórica de estos comandos.
+Consulta [references/herramientas-avanzadas.md](./references/herramientas-avanzadas.md) para la base teorica de estos comandos.
 
 ### Ambientes de Desarrollo Concurrentes (`git worktree`)
-Uso: Revisión de Pull Requests o tareas paralelas sin interrumpir el entorno local ni usar stashes.
+Uso: Revision de Pull Requests o tareas paralelas sin interrumpir el entorno local ni usar stashes.
 
 - **Crear un entorno aislado:**
   ```bash
@@ -82,59 +82,59 @@ Uso: Revisión de Pull Requests o tareas paralelas sin interrumpir el entorno lo
   git worktree remove ../review-feature
   ```
 
-### Memoria de Resolución de Conflictos (`git rerere`)
-Uso: Evitar resolver el mismo conflicto idéntico en múltiples rebases repetitivos.
+### Memoria de Resolucion de Conflictos (`git rerere`)
+Uso: Evitar resolver el mismo conflicto identico en multiples rebases repetitivos.
 
 - **Activar globalmente:**
   ```bash
   git config --global rerere.enabled true
   ```
-- **Flujo y Verificación:** Tras activarlo, en conflictos futuros Git mostrará `Recorded preimage`. Al resolver y confirmar, mostrará `Recorded resolution`. En rebases subsecuentes, dirá `Resolved 'ruta' using previous resolution`. Verifica el estado interno con:
+- **Flujo y Verificacion:** Tras activarlo, en conflictos futuros Git mostrara `Recorded preimage`. Al resolver y confirmar, mostrara `Recorded resolution`. En rebases subsecuentes, dira `Resolved 'ruta' using previous resolution`. Verifica el estado interno con:
   ```bash
   git rerere status
   ```
 
-### Auditoría de Reescritura (`git range-diff`)
-Uso: Analizar qué cambió entre un rebase o commit modificado con `--amend` y la versión previamente enviada al remoto.
+### Auditoria de Reescritura (`git range-diff`)
+Uso: Analizar que cambio entre un rebase o commit modificado con `--amend` y la version previamente enviada al remoto.
 
-- **Ejecución estándar:**
+- **Ejecucion estandar:**
   ```bash
   git range-diff origin/feat/mi-rama@{1} origin/feat/mi-rama @
   ```
-- **Verificación:** Revisar el output ("diff de diffs") para garantizar que no se inyectó código accidental o se perdieron cambios durante la resolución de merge del rebase.
+- **Verificacion:** Revisar el output ("diff de diffs") para garantizar que no se inyecto codigo accidental o se perdieron cambios durante la resolucion de merge del rebase.
 
 ---
 
-## 3. Checklist Visual de Ejecución
+## 3. Checklist Visual de Ejecucion
 
-> **NOTA:** Las reglas de nomenclatura, formato de commits y CI están definidas estrictamente en el `AGENTS.md`. Aplícalas en todo momento durante este flujo.
+> **NOTA:** Las reglas de nomenclatura, formato de commits y CI estan definidas estrictamente en el `AGENTS.md`. Aplicalas en todo momento durante este flujo.
 
 ```mermaid
 flowchart TD
-    A[Inicio de Tarea] --> B{¿Rama dedicada activa?}
+    A[Inicio de Tarea] --> B{Rama dedicada activa?}
     B -- No --> C[Crear rama]
-    B -- Sí --> D[Implementar cambios lógicos]
+    B -- Si --> D[Implementar cambios logicos]
     C --> D
     D --> E[Ejecutar Pipeline CI Local: ej. deno task ci / npm run ci / make ci]
-    E --> F{¿CI en verde código 0?}
+    E --> F{CI en verde codigo 0?}
     F -- No --> G[Corregir fallos de tests/lint/fmt]
     G --> E
-    F -- Sí --> H[Inspeccionar cambios empíricamente: git status / diff]
+    F -- Si --> H[Inspeccionar cambios empiricamente: git status / diff]
     H --> I[Componer Commit]
     I --> J[Confirmar cambios: git commit]
-    J --> K{¿Tarea completa de extremo a extremo?}
+    J --> K{Tarea completa de extremo a extremo?}
     K -- No --> D
-    K -- Sí --> L[git push origin rama]
-    L --> M[Prohibido auto-merge: solicitar revisión humana al PR]
+    K -- Si --> L[git push origin rama]
+    L --> M[Prohibido auto-merge: solicitar revision humana al PR]
 ```
 
 ---
 
 ## 4. Gobernanza de Committer Diferido y Modo Teamwork (Fases 3A, 3B y 5)
 
-Cuando múltiples subagentes trabajan en paralelo (`dispatching-parallel-agents`) dentro de un mismo worktree:
-1. **Prohibición de Commits Concurrentes:** Los subagentes implementadores individuales **no** ejecutan `git add` ni `git commit` mientras desarrollan sus tareas atómicas para evitar bloqueos de `.git/index.lock` e historial fragmentado.
-2. **Ejecución Secuencial por el Committer de Fase:**
-   - Una vez que el 100% de las tareas de la fase (3A Backend o 3B Frontend) están en verde y la documentación Docs-as-Code fue sincronizada en Obsidian, entra en acción el **Committer Diferido**.
-   - El committer agrupa los archivos según la **Matriz de Conventional Commits** diseñada en la Fase 2, verificando con `git diff --cached --shortstat` que cada commit respete la ventana de atomicidad (**100 a 400 LOC**, techo de 500 LOC) y el formato comprimido de alta señal (`caveman-commit`, cero emojis).
+Cuando multiples subagentes trabajan en paralelo (`dispatching-parallel-agents`) dentro de un mismo worktree:
+1. **Prohibicion de Commits Concurrentes:** Los subagentes implementadores individuales **no** ejecutan `git add` ni `git commit` mientras desarrollan sus tareas atomicas para evitar bloqueos de `.git/index.lock` e historial fragmentado.
+2. **Ejecucion Secuencial por el Committer de Fase:**
+   - Una vez que el 100% de las tareas de la fase (3A Backend o 3B Frontend) estan en verde y la documentacion Docs-as-Code fue sincronizada en Obsidian, entra en accion el **Committer Diferido**.
+   - El committer agrupa los archivos segun la **Matriz de Conventional Commits** disenada en la Fase 2, verificando con `git diff --cached --shortstat` que cada commit respete la ventana de atomicidad (**100 a 400 LOC**, techo de 500 LOC) y el formato comprimido de alta senal (`caveman-commit`, cero emojis).
    - Inmediatamente tras aplicar la secuencia de commits, dispara `index_repository` en `codebase-memory-mcp`.

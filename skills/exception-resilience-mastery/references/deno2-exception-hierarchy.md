@@ -1,23 +1,23 @@
-# Jerarquía de Excepciones, Tipado y Causalidad en Deno 2.x y Clean Architecture
+# Jerarquia de Excepciones, Tipado y Causalidad en Deno 2.x y Clean Architecture
 
-El entorno Deno 2.x proporciona constructores de errores nativos basados en clases que permiten bifurcación de tipos precisa y diagnósticos inmediatos.
+El entorno Deno 2.x proporciona constructores de errores nativos basados en clases que permiten bifurcacion de tipos precisa y diagnosticos inmediatos.
 
 ---
 
-## 1. Desambiguación de Permisos en Deno 2.0 (`NotCapable` vs `PermissionDenied`)
+## 1. Desambiguacion de Permisos en Deno 2.0 (`NotCapable` vs `PermissionDenied`)
 
-En Deno 1.x, tanto la falta de permisos de ejecución `--allow-*` como la falta de permisos en el sistema de archivos del sistema operativo emitían `Deno.errors.PermissionDenied`. 
+En Deno 1.x, tanto la falta de permisos de ejecucion `--allow-*` como la falta de permisos en el sistema de archivos del sistema operativo emitian `Deno.errors.PermissionDenied`. 
 
-Deno 2.0 introduce `Deno.errors.NotCapable` para separar explícitamente ambos escenarios:
+Deno 2.0 introduce `Deno.errors.NotCapable` para separar explicitamente ambos escenarios:
 
-| Excepción Deno | Origen del Error | Causa Raíz |
+| Excepcion Deno | Origen del Error | Causa Raiz |
 | :--- | :--- | :--- |
-| `Deno.errors.NotCapable` | Flags de ejecución de Deno | El proceso no fue iniciado con los permisos requeridos (ej. faltó `--allow-net` o `--allow-read`). |
+| `Deno.errors.NotCapable` | Flags de ejecucion de Deno | El proceso no fue iniciado con los permisos requeridos (ej. falto `--allow-net` o `--allow-read`). |
 | `Deno.errors.PermissionDenied` | Sistema Operativo Host | El proceso tiene el permiso de Deno, pero el usuario del sistema operativo carece de privilegios sobre el archivo/recurso. |
 
 ---
 
-## 2. Patrón de Excepciones Personalizadas con Causalidad y Limpieza de Stack
+## 2. Patron de Excepciones Personalizadas con Causalidad y Limpieza de Stack
 
 ```typescript
 /**
@@ -54,7 +54,7 @@ export class ExcepcionDominio extends Error {
 
 ## 3. Manejo de Recursos con Bloques Try/Finally y Protocolo `using` (Explicit Resource Management)
 
-Para prevenir bloqueos de recursos, conexiones huérfanas o fugas de descriptores de archivos, Deno soporta el estándar ECMAScript de gestión explícita de recursos:
+Para prevenir bloqueos de recursos, conexiones huerfanas o fugas de descriptores de archivos, Deno soporta el estandar ECMAScript de gestion explicita de recursos:
 
 ```typescript
 // Patron 1: Protocolo Disposable (Symbol.dispose / Symbol.asyncDispose)
@@ -87,9 +87,9 @@ export async function procesarTransaccion() {
 
 ---
 
-## 4. Anti-patrones de Manejo de Excepciones vs Patrones Canónicos
+## 4. Anti-patrones de Manejo de Excepciones vs Patrones Canonicos
 
-### Anti-patrón 1: Captura y Silenciamiento (Empty Catch / CWE-390)
+### Anti-patron 1: Captura y Silenciamiento (Empty Catch / CWE-390)
 ```typescript
 // INCORRECTO: Silencia el error y deja el sistema en estado inconsistente
 try {
@@ -110,7 +110,7 @@ try {
 }
 ```
 
-### Anti-patrón 2: Pérdida de la Causa Raíz
+### Anti-patron 2: Perdida de la Causa Raiz
 ```typescript
 // INCORRECTO: Se pierde el error original de la base de datos
 try {
@@ -127,7 +127,7 @@ try {
 }
 ```
 
-### Anti-patrón 3: Retorno de Mensajes de Base de Datos al Cliente
+### Anti-patron 3: Retorno de Mensajes de Base de Datos al Cliente
 ```typescript
 // INCORRECTO: Fuga de esquema y estructura de BD
 catch (err: any) {

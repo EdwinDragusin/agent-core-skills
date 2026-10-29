@@ -3,19 +3,19 @@ name: planning-and-task-breakdown
 description: "Descompone especificaciones en grafo de tareas verificables e identifica lotes ejecutables en paralelo."
 ---
 
-# Planning and Task Breakdown — Descomposicion y Grafo de Tareas
+# Planning and Task Breakdown - Descomposicion y Grafo de Tareas
 
 Transforma una especificacion arquitectonica (Fase 2) en una secuencia ordenada de tareas pequenas, aisladas y verificables que alimentan a los subagentes constructores (Fases 3A y 3B).
 
 ## 1. Reglas de Descomposicion Arquitectonica
 
 1. **Dependencias Primero (Bottom-Up Dentro de Cada Pista):**
-   - **Pista A (Backend — Fase 3A):**
+   - **Pista A (Backend - Fase 3A):**
      1. Modelos de Dominio, Value Objects e Invariantes (`domain/`).
      2. Esquemas de Persistencia, Migraciones y Repositorios (`infrastructure/`).
      3. Casos de Uso y Orquestacion (`application/`).
      4. Controladores, Rutas, Validacion de Entrada y Mapeo RFC 9457 (`presentation/`).
-   - **Pista B (Frontend — Fase 3B, inicia tras cierre de 3A):**
+   - **Pista B (Frontend - Fase 3B, inicia tras cierre de 3A):**
      1. Primitivos de UI y Clientes HTTP tipados (`shared/`).
      2. Modelos y Estados de Entidad (`entities/`).
      3. Acciones e Interacciones de Usuario (`features/`).

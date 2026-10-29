@@ -1,5 +1,5 @@
 #!/usr/bin/env sh
-# Git Hook: pre-push — Bloqueo de git push directo hacia main o master
+# Git Hook: pre-push - Bloqueo de git push directo hacia main o master
 
 while read local_ref local_sha remote_ref remote_sha; do
   if [ "$remote_ref" = "refs/heads/main" ] || [ "$remote_ref" = "refs/heads/master" ]; then

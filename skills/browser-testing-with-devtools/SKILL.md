@@ -3,7 +3,7 @@ name: browser-testing-with-devtools
 description: "Verifica UI en navegador real via MCP playwright: DOM, accesibilidad, 4 estados, consola y flujos E2E."
 ---
 
-# Browser Testing with Playwright & DevTools MCP — Verificacion Real en Navegador
+# Browser Testing with Playwright & DevTools MCP - Verificacion Real en Navegador
 
 El analisis estatico de codigo no detecta pantallas en blanco, errores de hidratacion, problemas de foco ni fallos de CORS. Usa el servidor MCP **`playwright`** (configurado en `mcp_config.json`) en las **Fases 3B (`ui-builder`)** y **4 (`qa-reviewer`)** para ver y probar la aplicacion en ejecucion real.
 

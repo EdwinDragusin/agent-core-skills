@@ -2,9 +2,9 @@
 
 Leer solo al redactar el reporte AUDIT-NNN (Fase 6).
 
-## 5. Plantilla de Reporte Estándar
+## 5. Plantilla de Reporte Estandar
 
-Todo reporte de auditoría debe persistirse con la siguiente estructura:
+Todo reporte de auditoria debe persistirse con la siguiente estructura:
 
 ```markdown
 ---
@@ -23,7 +23,7 @@ tags:
   - observabilidad
 ---
 
-# Auditoria de Manejo de Excepciones y Resiliencia — Reporte AUDIT-NNN
+# Auditoria de Manejo de Excepciones y Resiliencia - Reporte AUDIT-NNN
 
 ## 1. Resumen Ejecutivo
 - Total de Hallazgos: [N]

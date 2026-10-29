@@ -94,7 +94,7 @@ Guiar al usuario en la adquisicion de competencias iniciales mediante una experi
 - **Voz y Tono**: Contrato profesor-alumno. Utilizar de forma obligatoria la primera persona del plural inclusiva (*"Crearemos un proyecto"*, *"Configuraremos la base de datos"*, *"Veamos el resultado"*).
 - **Flujo**: Estrictamente lineal. Debe existir un unico camino desde el punto de inicio hasta el resultado final.
 - **Predecibilidad**: Cada accion debe garantizar un resultado determinista e inmediato.
-- **Restricciones de contenido**: PROHIBIDO introducir alternativas tecnicas (*"puede usar npm o yarn"*), bifurcaciones condicionales, digresiones teoricas o explicaciones profundas de diseño.
+- **Restricciones de contenido**: PROHIBIDO introducir alternativas tecnicas (*"puede usar npm o yarn"*), bifurcaciones condicionales, digresiones teoricas o explicaciones profundas de diseno.
 
 #### Directivas de Validacion para el Agente de IA
 1. **Verificacion de Linealidad**: Inspeccionar que no existan oraciones disyuntivas (*"o bien"*, *"si prefiere"*, *"alternativamente"*). Si se detectan, el agente debe seleccionar la opcion por defecto y eliminar la bifurcacion.
@@ -131,7 +131,7 @@ Asistir a un usuario con competencia tecnica previa en la resolucion de un probl
 #### Reglas de Estilo y Redaccion
 - **Voz y Tono**: Modo imperativo formal o condicional orientado a la tarea (*"Configure la variable X"*, *"Si requiere habilitar TLS, modifique el bloque Y"*).
 - **Enfoque de Negocio / Operacion**: Orientado a metas reales del proyecto (ej. *"Como configurar replicacion multiregion en PostgreSQL"* en lugar de *"Aprendiendo bases de datos"*).
-- **Economia Lingüistica**: Instrucciones concisas, directas y sin preambulos introductorios extensos.
+- **Economia Linguistica**: Instrucciones concisas, directas y sin preambulos introductorios extensos.
 - **Restricciones de contenido**: PROHIBIDO incluir ejercicios didacticos, explicaciones de conceptos elementales o evaluaciones formativas.
 
 #### Directivas de Validacion para el Agente de IA
@@ -144,7 +144,7 @@ Asistir a un usuario con competencia tecnica previa en la resolucion de un probl
 #### Anti-patrones Prohibidos
 - Explicar teoricamente el funcionamiento interno del componente antes de indicar la solucion operativa.
 - Tratar al lector como un aprendiz novato explicando conceptos como que es una API o un contenedor.
-- Diseñar guias abiertas sin un criterio claro de finalizacion de la tarea.
+- Disenar guias abiertas sin un criterio claro de finalizacion de la tarea.
 
 > [!WARNING]
 > Nunca convierta una Guia de Uso en un tutorial. Si el usuario ya sabe que desea hacer (ej. *"Rotar certificados SSL en Kubernetes"*), el agente debe omitir introducciones sobre la historia de la criptografia.
@@ -160,7 +160,7 @@ Proporcionar una descripcion factual, austera y exhaustiva de la maquinaria del 
 - **Voz y Tono**: Descriptivo, neutro, formal, incondicional y estrictamente tecnico.
 - **Estructura Espejo**: La jerarquia documental debe reflejar con precision matematica la estructura del codigo, la interfaz de linea de comandos (CLI), el esquema de base de datos o el contrato de la API.
 - **Completitud y Precision**: Cada parametro, tipo de dato, valor por defecto y excepcion debe estar documentado sin omitir campos por brevedad.
-- **Restricciones de contenido**: PROHIBIDO incluir opiniones, recomendaciones subjetivas, justificaciones de diseño o secuencias de pasos tutoriales.
+- **Restricciones de contenido**: PROHIBIDO incluir opiniones, recomendaciones subjetivas, justificaciones de diseno o secuencias de pasos tutoriales.
 
 #### Directivas de Validacion para el Agente de IA
 1. **Tolerancia Cero a la Alucinacion**: El agente de IA tiene ESTRICTAMENTE PROHIBIDO inferir parametros, firmas de funciones, codigos de error HTTP o atributos de configuracion a partir de memoria probabilistica o conocimiento parametrico no verificado.
@@ -172,7 +172,7 @@ Proporcionar una descripcion factual, austera y exhaustiva de la maquinaria del 
 4. **Ejemplos de Codigo Puros**: Los ejemplos deben limitarse a payloads validos, llamadas a metodos o invocaciones de comandos aisladas, sin narrativa procedimental circundante.
 
 #### Anti-patrones Prohibidos
-- Añadir juicios de valor (ej. *"Este parametro es muy util"* o *"Se recomienda no usar esto"* en lugar de *"Estado: Deprecated en version 2.1"*).
+- Anadir juicios de valor (ej. *"Este parametro es muy util"* o *"Se recomienda no usar esto"* en lugar de *"Estado: Deprecated en version 2.1"*).
 - Insertar flujos de trabajo completos de resolucion de problemas dentro de la documentacion de un endpoint.
 - Inventar propiedades o tipos de retorno no declarados en el codigo fuente.
 
@@ -184,7 +184,7 @@ Proporcionar una descripcion factual, austera y exhaustiva de la maquinaria del 
 ### 2.4. Explicacion (Explanation)
 
 #### Proposito Cognitivo
-Promover la comprension conceptual profunda, el juicio critico y la asimilacion de los principios de diseño, arquitectura y contexto historico del sistema. Permite al usuario comprender el *"por que"* de las decisiones de ingenieria.
+Promover la comprension conceptual profunda, el juicio critico y la asimilacion de los principios de diseno, arquitectura y contexto historico del sistema. Permite al usuario comprender el *"por que"* de las decisiones de ingenieria.
 
 #### Reglas de Estilo y Redaccion
 - **Voz y Tono**: Reflexivo, academico, analitico y discursivo. Se escribe en tercera persona o estilo expositivo formal.
@@ -195,8 +195,8 @@ Promover la comprension conceptual profunda, el juicio critico y la asimilacion 
 #### Directivas de Validacion para el Agente de IA
 1. **Sintesis de Decisiones Arquitectonicas**: Integrar de forma coherente los registros de decisiones arquitectonicas existentes en el vault mediante wikilinks (ej. `[[adr/ADR-001-seleccion-motor-mensajeria]]`).
 2. **Uso de Diagramas de Arquitectura**: Emplear diagramas Mermaid (C4, grafos de estado o secuencias logicas) para ilustrar flujos de informacion o topologias de software.
-3. **Respuesta Sistematica al 'Por Que'**: Cada seccion debe responder explicitamente a la justificacion de diseño detras de una eleccion tecnologica o patron estructural.
-4. **Perspectiva y Contexto**: Explicar restricciones tecnicas, dependencias externas, consideraciones de rendimiento y politicas de seguridad que influyeron en el diseño.
+3. **Respuesta Sistematica al 'Por Que'**: Cada seccion debe responder explicitamente a la justificacion de diseno detras de una eleccion tecnologica o patron estructural.
+4. **Perspectiva y Contexto**: Explicar restricciones tecnicas, dependencias externas, consideraciones de rendimiento y politicas de seguridad que influyeron en el diseno.
 
 #### Anti-patrones Prohibidos
 - Incluir un bloque de instalacion con `npm install` o comandos de despliegue.
@@ -211,10 +211,10 @@ El agente de IA debe aplicar el siguiente algoritmo determinista para clasificar
 
 ```mermaid
 flowchart TD
-    Inicio([Solicitud o Contenido a Clasificar]) --> DecisionEje1{¿El contenido esta orientado<br/>a la accion o al conocimiento?}
+    Inicio([Solicitud o Contenido a Clasificar]) --> DecisionEje1{El contenido esta orientado<br/>a la accion o al conocimiento?}
     
-    DecisionEje1 -->|Orientado a la Accion<br/>Practico| DecisionEje2Practico{¿Cual es el objetivo del usuario?}
-    DecisionEje1 -->|Orientado al Conocimiento<br/>Teorico| DecisionEje2Teorico{¿Cual es el objetivo del usuario?}
+    DecisionEje1 -->|Orientado a la Accion<br/>Practico| DecisionEje2Practico{Cual es el objetivo del usuario?}
+    DecisionEje1 -->|Orientado al Conocimiento<br/>Teorico| DecisionEje2Teorico{Cual es el objetivo del usuario?}
     
     DecisionEje2Practico -->|Aprender habilidades basicas<br/>Flujo guiado para principiante| CuadTutorial[Tutorial]
     DecisionEje2Practico -->|Resolver un problema de trabajo real<br/>Usuario con competencia previa| CuadGuia[Guia de Uso / How-to]
@@ -223,28 +223,28 @@ flowchart TD
     DecisionEje2Teorico -->|Comprender el por que / arquitectura<br/>Reflexion y analisis conceptual| CuadExp[Explicacion]
 ```
 
-### Tabla de Triggers Lingüisticos e Intenciones
+### Tabla de Triggers Linguisticos e Intenciones
 
 | Patron de Entrada / Pregunta del Usuario | Intencion Cognitiva | Cuadrante Destino | Estructura de Salida Obligatoria |
 | :--- | :--- | :--- | :--- |
 | *"Como empiezo con..."*<br/>*"Primeros pasos con..."*<br/>*"Crear mi primer componente"* | Aprendizaje guiado paso a paso desde cero. | **Tutorial** | Flujo lineal, primera persona plural, comandos con salida esperada. |
 | *"Como hago para rotar credenciales"*<br/>*"Pasos para exportar reportes a S3"*<br/>*"Como integrar X con Y"* | Resolucion de un problema de negocio u operacion. | **Guia de Uso** | Prerrequisitos factuales, pasos numerados en imperativo, notas de alerta. |
 | *"Que parametros acepta la funcion X"*<br/>*"Cual es el payload del endpoint /v1/checkout"*<br/>*"Listado de codigos de error del microservicio"* | Consulta de especificaciones y contratos tecnicos. | **Referencia** | Tablas de firmas, tipos de datos, codigos de respuesta, cero narrativa discursiva. |
-| *"Por que usamos WebSockets en lugar de SSE"*<br/>*"Cual es la arquitectura del pipeline de pagos"*<br/>*"Criterios de diseño para la particion de base de datos"* | Comprension de decisiones, trade-offs y fundamentos. | **Explicacion** | Ensayos tecnicos, diagramas C4/Mermaid, sintesis de trade-offs y enlaces a ADRs. |
+| *"Por que usamos WebSockets en lugar de SSE"*<br/>*"Cual es la arquitectura del pipeline de pagos"*<br/>*"Criterios de diseno para la particion de base de datos"* | Comprension de decisiones, trade-offs y fundamentos. | **Explicacion** | Ensayos tecnicos, diagramas C4/Mermaid, sintesis de trade-offs y enlaces a ADRs. |
 
 ### Reglas de Desambiguacion
 
 En situaciones en las que una solicitud del usuario contenga intenciones mezcladas, el agente debe proceder conforme a las siguientes directivas:
 
-1. **Ambigüedad entre Tutorial y Guia de Uso**:
+1. **Ambiguedad entre Tutorial y Guia de Uso**:
    - Si la tarea es simple pero el usuario explicita que no conoce la tecnologia (*"Nunca he usado Docker, como lo configuro"*), clasificar como **Tutorial**.
    - Si la tarea involucra un escenario especifico de produccion o configuracion avanzada (*"Como configurar Docker con red overlay en swarm"*), clasificar como **Guia de Uso**.
 
-2. **Ambigüedad entre Guia de Uso y Referencia**:
+2. **Ambiguedad entre Guia de Uso y Referencia**:
    - Si el usuario solicita un listado de opciones o variables, es **Referencia**.
    - Si el usuario solicita la secuencia de comandos para aplicar dichas opciones en una meta operativa, es **Guia de Uso**.
 
-3. **Ambigüedad entre Explicacion y Referencia**:
+3. **Ambiguedad entre Explicacion y Referencia**:
    - Si se requiere saber la firma, tipo o formato del contrato, es **Referencia**.
    - Si se requiere saber por que el contrato tiene dicha forma o como interactua con el resto del sistema distribuido, es **Explicacion**.
 
@@ -275,7 +275,7 @@ graph TD
 |                   | - Instrucciones bifurcadas ('Opcion A' vs 'Opcion B').      |
 +-------------------+-------------------------------------------------------------+
 | Guia de Uso       | - Introducciones pedagogicas para principiantes.            |
-|                   | - Explicacion del diseño interno del sistema.               |
+|                   | - Explicacion del diseno interno del sistema.               |
 |                   | - Catalogos exhaustivos de propiedades o atributos.         |
 +-------------------+-------------------------------------------------------------+
 | Referencia        | - Prosa narrativa o contextualizaciones historicas.         |
@@ -308,12 +308,12 @@ Cuando el contenido requiera apoyo de otro cuadrante, el agente debe utilizar en
 
 Antes de escribir o aprobar un artefacto documental, el agente de IA debe evaluar los siguientes puntos de control:
 
-- [ ] ¿El documento pertenece inequívocamente a un unico cuadrante?
-- [ ] ¿El tono del texto respeta la regla de voz de dicho cuadrante (plural inclusivo en tutorial, imperativo en guia, factual en referencia, expositivo en explicacion)?
-- [ ] ¿Se eliminaron todas las bifurcaciones y alternativas en los tutoriales?
-- [ ] ¿Se omitieron las introducciones historicas y teoricas en las guias de uso?
-- [ ] ¿Se extrajeron todos los datos de la referencia desde schemas o codigo real sin alucinaciones?
-- [ ] ¿Se canalizaron las justificaciones tecnicas hacia explicaciones o ADRs mediante wikilinks?
+- [ ] El documento pertenece inequivocamente a un unico cuadrante?
+- [ ] El tono del texto respeta la regla de voz de dicho cuadrante (plural inclusivo en tutorial, imperativo en guia, factual en referencia, expositivo en explicacion)?
+- [ ] Se eliminaron todas las bifurcaciones y alternativas en los tutoriales?
+- [ ] Se omitieron las introducciones historicas y teoricas en las guias de uso?
+- [ ] Se extrajeron todos los datos de la referencia desde schemas o codigo real sin alucinaciones?
+- [ ] Se canalizaron las justificaciones tecnicas hacia explicaciones o ADRs mediante wikilinks?
 
 ---
 
@@ -521,7 +521,7 @@ DIRECTIVA IA:
 - Sintetizar ADRs del vault mediante wikilinks.
 -->
 
-Este documento analiza los principios de diseño, el modelo teorico y los compromisos arquitectonicos que gobiernan [Nombre del Sistema].
+Este documento analiza los principios de diseno, el modelo teorico y los compromisos arquitectonicos que gobiernan [Nombre del Sistema].
 
 ## Contexto y Motivacion
 El sistema [Nombre del Sistema] fue concebido para resolver el problema de [describir problema de escala, concurrencia o consistencia]. En entornos con alta latencia de red, los modelos transaccionales sincronos tradicionales provocaban cuellos de botella severos.

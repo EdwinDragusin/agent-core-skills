@@ -3,7 +3,7 @@ name: finishing-a-development-branch
 description: "Cierre formal de rama o worktree en verde: verificacion final, integracion Trunk-Based y limpieza segura."
 ---
 
-# Finishing a Development Branch — Cierre e Integracion de Rama
+# Finishing a Development Branch - Cierre e Integracion de Rama
 
 Activa esta skill en la **Fase 5 (`release-engineer`)** una vez que `qa-reviewer` (Fase 4) emitio el dictamen `PASS`.
 

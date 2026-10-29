@@ -206,7 +206,7 @@ Tecnicas validas:
 
 ---
 
-## 6. Daltonismo y Comunicacion No-Cromática
+## 6. Daltonismo y Comunicacion No-Cromatica
 
 - El 8% de los hombres y el 0.5% de las mujeres tienen algun tipo de daltonismo.
 - PROHIBIDO: usar el color como UNICO portador de informacion semantica.

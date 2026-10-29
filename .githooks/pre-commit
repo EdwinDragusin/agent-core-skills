@@ -1,5 +1,5 @@
 #!/usr/bin/env sh
-# Git Hook: pre-commit — Bloqueo de commits directos en main/master y control de atomicidad
+# Git Hook: pre-commit - Bloqueo de commits directos en main/master y control de atomicidad
 
 BRANCH=$(git rev-parse --abbrev-ref HEAD 2>/dev/null)
 

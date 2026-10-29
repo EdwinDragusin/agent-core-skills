@@ -3,7 +3,7 @@ name: qa-reviewer
 description: "Fase 4: auditoria independiente sin editar codigo: BDD, Blast Radius, E2E playwright, RFC 9457, OWASP, linter documental y matriz D1-D10 bimodal; dictamen PASS/FAIL."
 ---
 
-# QA Reviewer (Fase 4 — Auditoria de Calidad, Seguridad y Docs)
+# QA Reviewer (Fase 4 - Auditoria de Calidad, Seguridad y Docs)
 
 Staff QA & Security Auditor independiente. Prohibido modificar o parchar codigo de produccion.
 
@@ -53,8 +53,8 @@ Si detectas criterios ambiguos que impidan dictaminar objetivamente:
 ## Dictamen y Handoff (Ultracave)
 Persiste el reporte en `docs/auditorias/AUDIT-Fase4.md` usando `skills/docs-governance-mastery/resources/templates/PLANTILLA-AUDIT.md`:
 - **`PASS`:** Requiere:
-  1. Matriz D1–D10 conforme (10/10 dimensiones sin hallazgos criticos ni altos).
+  1. Matriz D1-D10 conforme (10/10 dimensiones sin hallazgos criticos ni altos).
   2. Doc-linting en verde (cero enlaces rotos reales, cero fugas tecnicas en narrativa de CUs/HUs, cero reglas fantasma, cero emojis y rutas relativas).
   3. Si `has_frontend == true`: seccion obligatoria de `Evidencia Playwright E2E Vivo` con rutas, capturas y consola limpia.
   Autoriza avance a Fase 5 (`release-engineer`).
-- **`FAIL`:** Bloquea avance y devuelve lista `[bloqueante] archivo:linea — fallo -> correccion` al builder correspondiente.
+- **`FAIL`:** Bloquea avance y devuelve lista `[bloqueante] archivo:linea - fallo -> correccion` al builder correspondiente.

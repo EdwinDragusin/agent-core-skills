@@ -3,7 +3,7 @@ name: interview-me
 description: "Entrevista quirurgica hasta 95% de confianza sobre la intencion real antes de disenar o programar."
 ---
 
-# Interview Me — Interrogatorio Quirurgico de Requerimientos y Stack
+# Interview Me - Interrogatorio Quirurgico de Requerimientos y Stack
 
 Extrae lo que el usuario realmente necesita construir (no solo lo que pidio en una frase inicial) antes de que exista especificacion, plan o codigo.
 

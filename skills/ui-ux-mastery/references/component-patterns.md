@@ -1,4 +1,4 @@
-# Patrones de Refactorización por Componente
+# Patrones de Refactorizacion por Componente
 
 ## Descubrimiento de componentes
 
@@ -19,7 +19,7 @@ search_graph(name_pattern=".*Skeleton.*", kind="function|class")
 - [ ] Curva `--ease-decelerate` en hover/active
 - [ ] `motion-reduce:transition-none motion-reduce:transform-none`
 - [ ] Micro-audio opcional en click (via `playTick()`)
-- [ ] Estados loading: spinner inline sin deshabilitar botón completo, o `useOptimistic`
+- [ ] Estados loading: spinner inline sin deshabilitar boton completo, o `useOptimistic`
 
 ### Ejemplo de clases Tailwind v4
 
@@ -38,8 +38,8 @@ search_graph(name_pattern=".*Skeleton.*", kind="function|class")
 ## Input / CampoContrasena
 
 ### Checklist de craft
-- [ ] Focus ring con transición suave (`transition-shadow duration-200`)
-- [ ] Animación de ícono de visibilidad: `transition-transform duration-200` con `--ease-overshoot`
+- [ ] Focus ring con transicion suave (`transition-shadow duration-200`)
+- [ ] Animacion de icono de visibilidad: `transition-transform duration-200` con `--ease-overshoot`
 - [ ] Label flotante con `translate` (no `top`/`margin`)
 - [ ] `motion-reduce:transition-none`
 
@@ -48,8 +48,8 @@ search_graph(name_pattern=".*Skeleton.*", kind="function|class")
 ## Modal / Drawer / Popover (Radix UI)
 
 ### Checklist de craft
-- [ ] Transición asimétrica: entrada 300ms `--ease-decelerate`, salida 150ms `--ease-out-fast`
-- [ ] Overlay con `backdrop-blur-sm` (usar con moderación — costoso en mobile)
+- [ ] Transicion asimetrica: entrada 300ms `--ease-decelerate`, salida 150ms `--ease-out-fast`
+- [ ] Overlay con `backdrop-blur-sm` (usar con moderacion - costoso en mobile)
 - [ ] Data attributes correctos:
   ```html
   class="data-[state=open]:animate-slideUpFade data-[state=closed]:animate-fadeOut"
@@ -84,9 +84,9 @@ search_graph(name_pattern=".*Skeleton.*", kind="function|class")
 ## Skeleton
 
 ### Checklist de craft
-- [ ] Shimmer wave con gradiente dinámico (no parpadeo plano)
+- [ ] Shimmer wave con gradiente dinamico (no parpadeo plano)
 - [ ] Colores derivados de la paleta del tema (no grises hardcodeados)
-- [ ] `motion-reduce:animate-none` (mostrar bloque estático en reduced motion)
+- [ ] `motion-reduce:animate-none` (mostrar bloque estatico en reduced motion)
 - [ ] Dimensiones que matcheen el contenido real (evitar CLS)
 
 ---
@@ -94,10 +94,10 @@ search_graph(name_pattern=".*Skeleton.*", kind="function|class")
 ## Listas / Tablas de datos
 
 ### Checklist de craft
-- [ ] Staggering de 15–30ms por elemento via `animationDelay` con CSS custom property
-- [ ] Animación de entrada: `opacity 0→1` + `translate 0 4px → 0 0` en 200ms
-- [ ] Virtualización si >50 elementos (evitar stagger en listas infinitas)
-- [ ] `motion-reduce:` → renderizado inmediato sin delay
+- [ ] Staggering de 15-30ms por elemento via `animationDelay` con CSS custom property
+- [ ] Animacion de entrada: `opacity 0->1` + `translate 0 4px -> 0 0` en 200ms
+- [ ] Virtualizacion si >50 elementos (evitar stagger en listas infinitas)
+- [ ] `motion-reduce:` -> renderizado inmediato sin delay
 
 ---
 
@@ -111,5 +111,5 @@ search_graph(name_pattern=".*Skeleton.*", kind="function|class")
 ```
 
 - **Chromium 139+** (agosto 2025): renderizado nativo de squircles G2.
-- **Safari / Firefox**: fallback graceful a `border-radius` circular estándar.
+- **Safari / Firefox**: fallback graceful a `border-radius` circular estandar.
 - Para soporte cross-browser obligatorio: usar SVG `mask-image`.

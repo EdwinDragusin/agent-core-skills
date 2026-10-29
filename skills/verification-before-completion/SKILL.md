@@ -3,7 +3,7 @@ name: verification-before-completion
 description: "Antes de afirmar que algo esta completo: ejecuta test, build y linter reales y comprueba la salida actual."
 ---
 
-# Verification Before Completion — Evidencia Antes de Aserciones
+# Verification Before Completion - Evidencia Antes de Aserciones
 
 **Ley de Hierro:** Prohibido afirmar que algo "funciona", "pasa las pruebas", "esta corregido" o "esta listo para merge" sin haber ejecutado el comando de verificacion en el turno actual y leido su salida completa con codigo de retorno `0`.
 

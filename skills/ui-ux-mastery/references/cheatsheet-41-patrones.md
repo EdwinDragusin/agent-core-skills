@@ -16,7 +16,7 @@ Este archivo es la memoria procedimental del agente. Consultar antes de instanci
 - Al resolver la transaccion: repintar la UI con la verdad del servidor (ID real de orden), descartando estado optimista.
 
 ### 2. Bulk Actions
-- Checkboxes de seleccion masiva = estado ecosistémico global, no interruptores aislados.
+- Checkboxes de seleccion masiva = estado ecosistemico global, no interruptores aislados.
 - Control maestro "Seleccionar todos" debe ser consciente del estado de cada fila.
 - Tres estados del master checkbox: sin seleccion | seleccion parcial (indeterminate) | todo seleccionado.
 
@@ -47,7 +47,7 @@ Este archivo es la memoria procedimental del agente. Consultar antes de instanci
 - NUNCA usar modal de confirmacion generico para acciones reversibles.
 
 ### 8. Context Menu
-- Disenar como sistema jerarquico determinista, no lista flotante caótica.
+- Disenar como sistema jerarquico determinista, no lista flotante caotica.
 - Calcular anclaje dinamicamente para evitar desbordamiento del viewport.
 - Separadores semanticos (no decorativos): agrupan acciones del mismo dominio.
 - Accesibilidad: navegable con flechas, Enter para seleccionar, Escape para cerrar.
@@ -60,7 +60,7 @@ Este archivo es la memoria procedimental del agente. Consultar antes de instanci
 
 ### 10. Dropdown Design
 - Accesibilidad de teclado: Espacio/Enter para abrir, flechas para navegar, Escape para cerrar.
-- Elevacion nítida (shadow elevation coherente con el sistema de Z-axis).
+- Elevacion nitida (shadow elevation coherente con el sistema de Z-axis).
 - Padding tactico extenso (minimo 44px de altura por opcion en movil).
 - Icono direccional (chevron) coherente: apunta hacia abajo cerrado, hacia arriba abierto.
 - Posicionamiento dinamico: no puede desbordarse por los bordes del viewport.
@@ -109,7 +109,7 @@ Este archivo es la memoria procedimental del agente. Consultar antes de instanci
 
 ### 17. Date Pickers
 - Prohibido el modelo de N clics secuenciales para cambiar anio o mes en rangos amplios.
-- Permitir entrada manual por teclado junto al selector visual (ambos en sincronía).
+- Permitir entrada manual por teclado junto al selector visual (ambos en sincronia).
 - Atajos heuristicos: "Hoy", "Esta semana", "Este mes" como accesos rapidos.
 
 ### 18. Form Field States (Los Seis Estados Sagrados)
@@ -131,7 +131,7 @@ Omitir cualquiera de los 6 introduce un bug visual en el sistema de diseno.
 ### 20. Range Sliders
 - Restringir drasticamente en movil: los dedos no tienen precision de pixel.
 - Siempre emparejar con un campo numerico manual de texto para precision absoluta.
-- Ambos controles deben estar en sincronía bidireccional (cambiar uno actualiza el otro).
+- Ambos controles deben estar en sincronia bidireccional (cambiar uno actualiza el otro).
 
 ### 21. Stepper Wizard
 - Formularios de mas de 6 campos: obligatorio dividir en pasos logicos (3-5 pasos optimos).
@@ -232,7 +232,7 @@ Omitir cualquiera de los 6 introduce un bug visual en el sistema de diseno.
 - Proporcionar siempre los valores numericos junto a la visualizacion.
 
 ### 32. Design System Kit
-- Prohibido hardcodear valores hexadecimales o tamaños numericos en el codigo.
+- Prohibido hardcodear valores hexadecimales o tamanos numericos en el codigo.
 - Toda variable de color, tipografia, espaciado y sombra debe ser un Design Token semantico.
 - Formato estandar: W3C DTCG (Design Tokens Community Group Format Module) en JSON.
 - Ejemplo: color-brand-primary en lugar de #C62828. spacing-md en lugar de 16px.
@@ -317,7 +317,7 @@ Omitir cualquiera de los 6 introduce un bug visual en el sistema de diseno.
 ### 41. Empty States
 - El estado vacio es la primera impresion del sistema para cuentas nuevas.
 - Estructura obligatoria de un Empty State de calidad:
-  1. Ilustracion vectorial educacional y amable (no genérica).
+  1. Ilustracion vectorial educacional y amable (no generica).
   2. Titulo orientador: explica QUE esta vacio.
   3. Descripcion: explica POR QUE esta vacio (cuenta nueva, filtro sin resultados).
   4. CTA primario: boton que inicia la accion para poblar el espacio.
@@ -339,6 +339,6 @@ Omitir cualquiera de los 6 introduce un bug visual en el sistema de diseno.
 ### Patron Bonus -- Zeigarnik Effect
 - El cerebro se obsesiona con tareas inconclusas y purga las completadas.
 - Usar en onboarding: no completar todos los pasos al 100%. Dejar 1-2 abiertos intencionalmente.
-- Barra de progreso de perfil al 80%: tirón psicologico persistente y de baja friccion.
+- Barra de progreso de perfil al 80%: tiron psicologico persistente y de baja friccion.
 - Regla: el efecto solo funciona para metas que el usuario verdaderamente valora.
   No crear barras de progreso arbitrarias o falsas (produce rechazo).

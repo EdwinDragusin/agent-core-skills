@@ -29,7 +29,7 @@ Las herramientas de MCP dependen fuertemente de metadatos estructurados para el 
 ```yaml
 ---
 id: "ADR-015"
-titulo: "Uso de Redis para Caché"
+titulo: "Uso de Redis para Cache"
 estado: "aprobado"
 fecha: "2026-09-02"
 tags:
@@ -60,7 +60,7 @@ En este modelo, el vault ES la base de codigo y conocimiento; los agentes de IA 
 - **Regla:** El vault debe soportar la acumulacion de conocimiento incremental sin requerir reescrituras totales del contenido (evitar borrar contexto previo a menos que sea explicitamente caduco).
 
 > [!TIP]
-> A diferencia del modelo RAG convencional —donde el conocimiento se diluye en embeddings invisibles para la validacion humana—, el modelo LLM Wiki preserva el conocimiento estructurado y enlazado, lo que mantiene una interaccion simbiotica.
+> A diferencia del modelo RAG convencional -donde el conocimiento se diluye en embeddings invisibles para la validacion humana-, el modelo LLM Wiki preserva el conocimiento estructurado y enlazado, lo que mantiene una interaccion simbiotica.
 
 ## 5. Busqueda Semantica y Recuperacion de Contexto
 
@@ -73,7 +73,7 @@ La arquitectura y uniformidad del vault impactan en la destreza del agente para 
 
 **Herramientas MCP aplicables:** 
 - `search_notes`, `read_note`, `list_directory`, `get_notes_info` para documentos.
-- El servidor `codebase-memory-mcp` usando `search_code` sirve para analizar componentes y correlacionar implementacion vs diseño.
+- El servidor `codebase-memory-mcp` usando `search_code` sirve para analizar componentes y correlacionar implementacion vs diseno.
 
 ## 6. Checks de Auditoria
 

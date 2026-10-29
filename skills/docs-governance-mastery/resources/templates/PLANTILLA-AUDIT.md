@@ -15,7 +15,7 @@ tags:
   - sincronizacion/codigo-docs
 ---
 
-# AUDIT-001 — Sincronizacion Codigo <-> Documentacion
+# AUDIT-001 - Sincronizacion Codigo <-> Documentacion
 
 > [!info] Resumen Ejecutivo
 > - Modo: Completa
@@ -24,7 +24,7 @@ tags:
 
 ---
 
-## Detalle por Dimension (D1–D10)
+## Detalle por Dimension (D1-D10)
 
 ### D1: Catalogo de Use Cases <-> Codigo (catalogo-de-usecases.md vs *UseCase.ts)
 | # | Severidad | Elemento Doc | Elemento Codigo | Descripcion | Accion Sugerida |

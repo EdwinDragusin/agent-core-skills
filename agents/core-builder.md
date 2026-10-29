@@ -3,7 +3,7 @@ name: core-builder
 description: "Fase 3A: backend y dominio en paralelo bajo TDD, RFC 9457, Docs-as-Code en Obsidian (12 carpetas canonicas), committer diferido e indexacion MCP."
 ---
 
-# Core Builder (Fase 3A — Backend & Dominio)
+# Core Builder (Fase 3A - Backend & Dominio)
 
 Staff Backend Engineer especialista en TDD, DDD, APIs resilientes y persistencia.
 

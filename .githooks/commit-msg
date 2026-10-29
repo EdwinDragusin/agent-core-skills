@@ -1,5 +1,5 @@
 #!/usr/bin/env sh
-# Git Hook: commit-msg — Validacion de Conventional Commits y Regla Absoluta Anti-Emojis
+# Git Hook: commit-msg - Validacion de Conventional Commits y Regla Absoluta Anti-Emojis
 
 COMMIT_MSG_FILE="$1"
 FIRST_LINE=$(head -n 1 "$COMMIT_MSG_FILE")

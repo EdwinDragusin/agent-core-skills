@@ -1,18 +1,18 @@
 # Resiliencia de Red: Jitter, Circuit Breakers, Bulkheads e Idempotencia
 
-La mitigación de sobrecarga en sistemas distribuidos evita que fallos locales transitorios desencadenen tormentas de reintento (*Retry Storms*) y colapsos en cascada.
+La mitigacion de sobrecarga en sistemas distribuidos evita que fallos locales transitorios desencadenen tormentas de reintento (*Retry Storms*) y colapsos en cascada.
 
 ---
 
-## 1. Algoritmos de Retraso Exponencial con Fluctuación (Jitter)
+## 1. Algoritmos de Retraso Exponencial con Fluctuacion (Jitter)
 
-Sea $B$ el retraso base (ej. 100 ms), $M$ el retraso máximo (ej. 10000 ms), y $i$ el número secuencial de intento ($0, 1, 2, \dots$).
+Sea $B$ el retraso base (ej. 100 ms), $M$ el retraso maximo (ej. 10000 ms), y $i$ el numero secuencial de intento ($0, 1, 2, \dots$).
 
 ### A. Full Jitter (Recomendado por defecto)
-Distribuye uniformemente los reintentos entre cero y el límite exponencial superior, eliminando los picos de tráfico concurrente.
+Distribuye uniformemente los reintentos entre cero y el limite exponencial superior, eliminando los picos de trafico concurrente.
 
-$$\text{Límite} = \min(M, B \times 2^i)$$
-$$\text{Sleep} = \text{random}(0, \text{Límite})$$
+$$\text{Limite} = \min(M, B \times 2^i)$$
+$$\text{Sleep} = \text{random}(0, \text{Limite})$$
 
 ```typescript
 export function calcularFullJitter(intento: number, baseMs = 100, maxMs = 10000): number {
@@ -22,7 +22,7 @@ export function calcularFullJitter(intento: number, baseMs = 100, maxMs = 10000)
 ```
 
 ### B. Equal Jitter
-Garantiza una pausa mínima fija (la mitad del tiempo exponencial) y aleatoriza la otra mitad.
+Garantiza una pausa minima fija (la mitad del tiempo exponencial) y aleatoriza la otra mitad.
 
 $$\text{Temp} = \min(M, B \times 2^i)$$
 $$\text{Sleep} = \frac{\text{Temp}}{2} + \text{random}\left(0, \frac{\text{Temp}}{2}\right)$$
@@ -36,7 +36,7 @@ export function calcularEqualJitter(intento: number, baseMs = 100, maxMs = 10000
 ```
 
 ### C. Decorrelated Jitter
-Calcula el tiempo de retraso basándose en el retraso del intento previo, aumentando la dispersión temporal sin depender rígidamente del índice.
+Calcula el tiempo de retraso basandose en el retraso del intento previo, aumentando la dispersion temporal sin depender rigidamente del indice.
 
 $$\text{Sleep}_{i} = \min(M, \text{random}(B, \text{Sleep}_{i-1} \times 3))$$
 
@@ -49,9 +49,9 @@ export function calcularDecorrelatedJitter(sleepPrevio: number, baseMs = 100, ma
 
 ---
 
-## 2. Patrón Cortocircuito (Circuit Breaker)
+## 2. Patron Cortocircuito (Circuit Breaker)
 
-Protege al sistema evitando llamadas a dependencias caídas que agoten hilos asíncronos y conexiones.
+Protege al sistema evitando llamadas a dependencias caidas que agoten hilos asincronos y conexiones.
 
 ```mermaid
 stateDiagram-v2
@@ -121,4 +121,4 @@ export class CircuitBreaker {
 
 ## 3. Claves de Idempotencia (`Idempotency-Key`)
 
-Para mutaciones HTTP críticas reintentables (ej. pagos, registro de expedientes, envío de dictámenes), el cliente debe enviar un UUID v7 en el header `Idempotency-Key`. El servidor verifica en caché/BD si la llave ya fue procesada: si existe, retorna la respuesta previa almacenada sin re-ejecutar la lógica de negocio.
+Para mutaciones HTTP criticas reintentables (ej. pagos, registro de expedientes, envio de dictamenes), el cliente debe enviar un UUID v7 en el header `Idempotency-Key`. El servidor verifica en cache/BD si la llave ya fue procesada: si existe, retorna la respuesta previa almacenada sin re-ejecutar la logica de negocio.
