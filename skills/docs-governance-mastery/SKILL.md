@@ -49,4 +49,4 @@ Gestion y auditoria del vault de documentacion de proyectos de software: estruct
 | [mcp-agent-readiness.md](./references/mcp-agent-readiness.md) | Chunking, RAG, LLM Wiki |
 | [sdlc-mapping.md](./references/sdlc-mapping.md) | Artefactos por fase SDLC |
 | [audit-checklist.md](./references/audit-checklist.md) | Checklist y formato de reportes |
-| [templates/](./resources/templates/) | Plantillas maestras CU, DS-CU, RN, ADR, Actor, AUDIT |
+| [templates/](./resources/templates/) | Plantillas maestras bimodales (CU, DS-CU, RN, DIR, ADR, Actor, ONBOARDING, AUDIT) |

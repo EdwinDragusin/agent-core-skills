@@ -1,16 +1,18 @@
-# Estructura Canonica del Vault de Documentacion
+# Estructura Canonica del Vault de Documentacion (Bimodal y Accesible)
 
-Estructura obligatoria para `docs/` segun Guia Maestra de Arquitectura:
+Estructura obligatoria para `docs/` segun Guia Maestra y Directivas de Accesibilidad:
 
 ```text
 docs/
 ├── .obsidian/                     # Ajustes vault (Dataview, Templater, DBML ERD)
-├── _plantillas/                   # Plantillas maestras
-│   ├── PLANTILLA-ADR.md
-│   ├── PLANTILLA-Actor.md
-│   ├── PLANTILLA-CU.md
-│   ├── PLANTILLA-DS-CU.md
-│   └── PLANTILLA-RN.md
+├── _plantillas/                   # Plantillas maestras bimodales
+│   ├── PLANTILLA-ADR.md          # Formato Nygard con Resumen de Negocio
+│   ├── PLANTILLA-Actor.md        # Ficha de actor funcional y tecnica
+│   ├── PLANTILLA-CU.md           # Caso de Uso bimodal (Funcional + Contrato)
+│   ├── PLANTILLA-DIR.md          # Directriz tecnica de software (DIR-*)
+│   ├── PLANTILLA-DS-CU.md        # Diagrama de secuencia Clean Architecture
+│   ├── PLANTILLA-ONBOARDING.md   # Itinerarios de induccion por perfil
+│   └── PLANTILLA-RN.md           # Regla de negocio institucional pura
 ├── adr/                           # Registros Nygard (Backend)
 │   ├── ADR-000-historico-decisiones.md
 │   ├── ADR-001-stack-tecnologico.md
@@ -28,7 +30,6 @@ docs/
 │   │   │   └── vocabulario-de-errores.md
 │   │   ├── modelo-de-dominio.md   # Modelo tactico DDD
 │   │   ├── modelo-relacional.md   # Documentacion de persistencia
-│   │   ├── Modelo_Dominio.drawio  # Editable vectorial opcional
 │   │   ├── relacional.dbml        # Esquema DBML formal (version CAS)
 │   │   └── relacional.svg         # Esquema renderizado
 │   ├── capitulo-06-vista-de-ejecucion.md
@@ -40,20 +41,22 @@ docs/
 │   ├── capitulo-12-glosario.md
 │   ├── actores/                   # Fichas ACT-NNN.md
 │   ├── diagramas-secuencia/       # DS-CU-NNN.md (Mermaid Clean Architecture)
+│   ├── directrices/               # DIR-*.md (Directrices tecnicas de software)
 │   ├── dto/                       # CATALOGO-DTO.md (Reconciliado RFC 9457)
 │   ├── procesos/                  # Macroprocesos PB-NNN.md
-│   └── reglas/                    # Reglas de negocio RN-XNN.md con ^ancla
+│   └── reglas/                    # Reglas de negocio puras RN-XNN.md (^ancla)
 ├── auditorias/                    # Reportes AUDIT-NNN.md (Matriz D1-D10)
 ├── guia/                          # Marco Diataxis
 │   ├── explicacion/
 │   ├── how-to/
 │   ├── referencia/
-│   │   ├── casos-de-uso/          # CU-NNN.md
+│   │   ├── casos-de-uso/          # CU-NNN.md (Bimodales)
 │   │   └── inicio.md              # MOC de referencia
 │   └── tutoriales/
 ├── AGENTS.md                      # Manifiesto de gobernanza para LLMs
-├── glosario.md                    # Lenguaje ubicuo unificado
+├── glosario.md                    # Lenguaje ubicuo dual (1. Negocio, 2. Ingenieria)
+├── ONBOARDING.md                  # Guia de inicio rapido por roles
 ├── README.md                      # Entrada principal Git
 ├── ROADMAP-V1.md                  # Hitos de entrega y versiones
-└── TODO.md                        # Tablero dinamico Dataview
+└── TODO.md                        # Tablero dinamico Dataview con respaldo estatico
 ```
