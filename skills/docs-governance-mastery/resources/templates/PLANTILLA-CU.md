@@ -23,6 +23,7 @@ Resumen en lenguaje claro del objetivo del caso de uso, que necesidad humana o i
 > - **Actor Principal**: Administrador (Rol institucional)
 > - **Modulo**: Nombre del Modulo (`modulo/nombre-modulo`)
 > - **Reglas de Negocio Vinculadas**: [[RN-X01-nombre-regla|RN-X01]]
+> - **Historias de Usuario Vinculadas**: [[historias-de-usuario#^hu-001|HU-001]]
 > - **Casos de Uso Previos**: [[CU-000-caso-previo|CU-000]]
 > - **Casos de Uso Siguientes**: [[CU-002-caso-siguiente|CU-002]]
 
@@ -79,6 +80,15 @@ Resumen en lenguaje claro del objetivo del caso de uso, que necesidad humana o i
   - `400 Bad Request`: `ErrorValidacionDTO`
   - `404 Not Found`: `ErrorNoEncontradoDTO`
   - `409 Conflict`: `ErrorConflictoDTO`
+
+### Matriz Exhaustiva de Campos y Validaciones
+| Campo | Tipo Tecnico | Requerido | Validacion Zod / Restriccion | Origen DTO / Entidad |
+| :--- | :--- | :--- | :--- | :--- |
+| `id` | `uuid` | Si | Formato UUIDv7 valido | `GuardarRecursoDTO.id` |
+| `nombre` | `string` | Si | Minimo 3 caracteres, maximo 150 | `GuardarRecursoDTO.nombre` |
+| `codigo` | `string` | Si | Patron regex `^[A-Z0-9-]{3,20}$` | `GuardarRecursoDTO.codigo` |
+| `datosSensibles` | `jsonb` / `object` | No | Schema estructurado con cifrado | `GuardarRecursoDTO.datosSensibles` |
+| `version` | `integer` | Si | Control CAS: version leida >= 1 | `GuardarRecursoDTO.version` |
 
 ### Contrato de Persistencia
 - **Tabla principal**: `Nombre_Tabla` (Operacion: `INSERT` / `UPDATE` con CAS `version = version + 1`)
