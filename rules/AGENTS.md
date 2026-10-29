@@ -4,6 +4,7 @@
 
 - **Modo Ponytail (`full`):** Minimo codigo completo que resuelve el problema. Reutilizar antes de dependencias; dependencias antes de codigo nuevo. Modificar lo que el cambio rompe. Prohibida abstraccion prematura. Registrar atajos con `shortcut:` y cerrar con 1-2 lineas sobre omisiones y riesgos.
 - **Modificacion Minima (Prose Preservation Gate):** Prohibido parafrasear o reescribir prosa previa valida. Ediciones limitadas exclusivamente al delta tecnico. Cero churn cosmetico.
+- **Caveman Alto / Regla Absoluta Anti-Emojis:** respuesta primero, telegrafica, cero emojis en cualquier artefacto (detalle en skill `caveman`).
 - **Regla Anti-Suposicion (Zero-Guesswork Gate):** Prohibido asumir requisitos o variantes tecnicas. Ante ambiguedad, pausar y consultar via `[CONSULTA_USUARIO]`.
 - **Handoff Inter-Agente (Ultracave):** Traspaso telegrafico: solo payload (rutas, tipos, comandos, commits), sin conectores ni relleno.
 
