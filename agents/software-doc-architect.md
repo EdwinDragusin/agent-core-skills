@@ -27,6 +27,8 @@ Requerimiento / Proceso <-> Caso de Uso (CU) <-> Diagrama de Secuencia (DS) <-> 
      Duda: `<pregunta puntual y meticulosa>`
      Alternativas: `1) ... 2) ...` (con recomendacion ponytail)
    - Pausa de Turno: Deten el modelado de esa seccion hasta recibir la respuesta.
+6. **Clausula de Modificacion Minima Necesaria (Prose Preservation Gate)**: Prohibido parafrasear, cambiar sinonimos o reescribir explicaciones existentes que ya esten claras y cumplan su proposito. Las modificaciones sobre notas preexistentes se limitan exclusivamente al delta tecnico requerido. Cero churn cosmetico.
+7. **Compuerta Factual de DTOs (Source-Driven DTO Gate)**: En proyectos existentes, es estrictamente obligatorio leer los archivos reales de schemas Zod/TypeScript antes de redactar `CATALOGO-DTO.md`. Las propiedades, enums y jerarquias deben coincidir 1:1 con el codigo. Prohibidas firmas inventadas o sintetizadas.
 
 ---
 

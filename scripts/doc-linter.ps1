@@ -1,14 +1,15 @@
 <#
 .SYNOPSIS
-    Linter ligero de gobernanza documental, trazabilidad y accesibilidad cognitiva.
+    Linter riguroso de gobernanza documental, trazabilidad, factualidad y accesibilidad bimodal.
 .DESCRIPTION
-    Inspecciona el vault docs/ para detectar:
-    - Fugas de abstraccion en Casos de Uso e Historias de Usuario.
-    - Contaminacion taxonomica de reglas (directrices de software en reglas/ en vez de directrices/).
-    - Reglas fantasma (enlaces a RN-* sin archivo fisico).
-    - Presencia de rutas absolutas locales (C:\...).
-    - Violaciones de la politica Cero Emojis.
-    - Consultas Dataview crudas expuestas.
+    Inspecciona exhaustivamente el vault docs/ y el codigo fuente sin simulaciones:
+    - Verificacion real de resolucion de 100% de wikilinks (cero enlaces rotos).
+    - Fugas de abstraccion en Secciones 1-5 de Casos de Uso e Historias de Usuario.
+    - Contaminacion de directrices tecnicas en reglas/ (deben residir en directrices/DIR-*).
+    - Reglas de negocio fantasma (citas a RN-* inexistentes).
+    - Verificacion de matriz de campos y riqueza en Seccion 6 de CUs.
+    - Deteccion de rutas absolutas locales (C:\...) y politica Cero Emojis.
+    - Aislamiento de consultas Dataview crudas.
 .PARAMETER DocsPath
     Ruta a la carpeta docs/. Por defecto: "docs".
 #>
@@ -20,13 +21,14 @@ param(
 $ErrorActionPreference = "Stop"
 
 if (-not (Test-Path $DocsPath)) {
-    Write-Host "[ERROR] Ruta no encontrada: $DocsPath" -ForegroundColor Red
+    Write-Host "[ERROR] Directorio no encontrado: $DocsPath" -ForegroundColor Red
     exit 1
 }
 
 $hallazgos = @()
+$totalWikilinks = 0
 
-Write-Host "=== Iniciando Doc-Linter en: $DocsPath ===" -ForegroundColor Cyan
+Write-Host "=== Iniciando Doc-Linter Riguroso en: $DocsPath ===" -ForegroundColor Cyan
 
 # 1. Chequeo de Fugas de Abstraccion en Casos de Uso e Historias de Usuario
 $cuFiles = Get-ChildItem -Path "$DocsPath\guia\referencia\casos-de-uso" -Filter "*.md" -ErrorAction SilentlyContinue
@@ -52,7 +54,7 @@ foreach ($file in $archivosFuncionales) {
                         Tipo = "FugaAbstraccion"
                         Archivo = $file.FullName
                         Linea = ($i + 1)
-                        Mensaje = "Palabra clave tecnica '$kw' en seccion funcional de $($file.Name)"
+                        Mensaje = "Palabra tecnica '$kw' en seccion funcional de $($file.Name)"
                     }
                 }
             }
@@ -60,7 +62,22 @@ foreach ($file in $archivosFuncionales) {
     }
 }
 
-# 2. Chequeo de Contaminacion Taxonomica en docs/arquitectura/reglas/
+# 2. Control de Riqueza y Matriz de Campos en Casos de Uso
+foreach ($file in $cuFiles) {
+    if (-not $file) { continue }
+    $raw = Get-Content $file.FullName -Raw
+    if ($raw -notmatch "Matriz Exhaustiva de Campos|Campo\s*\|\s*Tipo") {
+        $hallazgos += [PSCustomObject]@{
+            Severidad = "Medio"
+            Tipo = "SintesisExcesiva"
+            Archivo = $file.FullName
+            Linea = 1
+            Mensaje = "El caso de uso $($file.Name) carece de la Matriz Exhaustiva de Campos y Validaciones en su Seccion 6"
+        }
+    }
+}
+
+# 3. Chequeo de Contaminacion Taxonomica en docs/arquitectura/reglas/
 $reglasFiles = Get-ChildItem -Path "$DocsPath\arquitectura\reglas" -Filter "*.md" -ErrorAction SilentlyContinue
 foreach ($file in $reglasFiles) {
     if ($file.Name -match "^RN-F") {
@@ -84,10 +101,44 @@ foreach ($file in $reglasFiles) {
     }
 }
 
-# 3. Deteccion de Reglas Fantasma
+# 4. Parser y Resolucion Real de Todos los Wikilinks en el Vault (Cero Simulaciones)
 $allMarkdown = Get-ChildItem -Path $DocsPath -Filter "*.md" -Recurse -ErrorAction SilentlyContinue
-$reglasExistentes = @($reglasFiles | ForEach-Object { $_.BaseName })
+$archivosPorNombre = @{}
+foreach ($f in $allMarkdown) {
+    $archivosPorNombre[$f.BaseName] = $f.FullName
+}
 
+foreach ($file in $allMarkdown) {
+    $lines = Get-Content $file.FullName
+    for ($idx = 0; $idx -lt $lines.Count; $idx++) {
+        $l = $lines[$idx]
+        $matches = [regex]::Matches($l, "\[\[([^\]|#]+)(?:#[^\]|]+)?(?:\|[^\]]+)?\]\]")
+        foreach ($m in $matches) {
+            $totalWikilinks++
+            $target = $m.Groups[1].Value.Trim()
+            if ($target -eq "" -or $target.StartsWith("#")) { continue }
+            
+            # Normalizar nombre base
+            $targetBase = [System.IO.Path]::GetFileNameWithoutExtension($target)
+            if (-not $archivosPorNombre.ContainsKey($targetBase)) {
+                # Verificar si es ruta relativa
+                $targetRel = Join-Path $file.DirectoryName "$target.md"
+                if (-not (Test-Path $targetRel)) {
+                    $hallazgos += [PSCustomObject]@{
+                        Severidad = "Alto"
+                        Tipo = "EnlaceRoto"
+                        Archivo = $file.FullName
+                        Linea = ($idx + 1)
+                        Mensaje = "Wikilink roto a '$target' en $($file.Name)"
+                    }
+                }
+            }
+        }
+    }
+}
+
+# 5. Deteccion de Reglas Fantasma
+$reglasExistentes = @($reglasFiles | ForEach-Object { $_.BaseName })
 foreach ($file in $allMarkdown) {
     $content = Get-Content $file.FullName -Raw
     $matches = [regex]::Matches($content, "\[\[(RN-[A-Z0-9]+)")
@@ -99,7 +150,7 @@ foreach ($file in $allMarkdown) {
         }
         if (-not $encontrado) {
             $hallazgos += [PSCustomObject]@{
-                Severidad = "Alto"
+                Severidad = "Critico"
                 Tipo = "ReglaFantasma"
                 Archivo = $file.FullName
                 Linea = 0
@@ -109,7 +160,7 @@ foreach ($file in $allMarkdown) {
     }
 }
 
-# 4. Chequeo de Rutas Absolutas Locales y Emojis
+# 6. Chequeo de Rutas Absolutas Locales, Emojis y Dataview Crudo
 foreach ($file in $allMarkdown) {
     $lines = Get-Content $file.FullName
     for ($i = 0; $i -lt $lines.Count; $i++) {
@@ -144,13 +195,16 @@ foreach ($file in $allMarkdown) {
     }
 }
 
-# Reporte Final
+# Reporte y Resumen Metrico
+Write-Host "Total de archivos analizados: $($allMarkdown.Count)" -ForegroundColor Gray
+Write-Host "Total de wikilinks verificados: $totalWikilinks" -ForegroundColor Gray
 Write-Host ""
+
 if ($hallazgos.Count -eq 0) {
-    Write-Host "[EXITO] Cero hallazgos. Documentacion conforme con estandares de gobernanza y accesibilidad bimodal." -ForegroundColor Green
+    Write-Host "[EXITO] Cero hallazgos. Documentacion 100% conforme con gobernanza bimodal, factualidad y accesibilidad." -ForegroundColor Green
     exit 0
 } else {
-    Write-Host "[ALERTA] Se encontraron $($hallazgos.Count) hallazgos:" -ForegroundColor Yellow
+    Write-Host "[ALERTA] Se encontraron $($hallazgos.Count) hallazgos de gobernanza:" -ForegroundColor Yellow
     $hallazgos | Format-Table -Property Severidad, Tipo, Mensaje -AutoSize
     exit 1
 }

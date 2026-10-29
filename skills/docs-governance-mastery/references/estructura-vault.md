@@ -8,9 +8,10 @@ docs/
 ├── _plantillas/                   # Plantillas maestras bimodales
 │   ├── PLANTILLA-ADR.md          # Formato Nygard con Resumen de Negocio
 │   ├── PLANTILLA-Actor.md        # Ficha de actor funcional y tecnica
-│   ├── PLANTILLA-CU.md           # Caso de Uso bimodal (Funcional + Contrato)
+│   ├── PLANTILLA-CU.md           # Caso de Uso bimodal (Funcional + Matriz Campos)
 │   ├── PLANTILLA-DIR.md          # Directriz tecnica de software (DIR-*)
 │   ├── PLANTILLA-DS-CU.md        # Diagrama de secuencia Clean Architecture
+│   ├── PLANTILLA-HU.md           # Catalogo consolidado de Historias de Usuario
 │   ├── PLANTILLA-ONBOARDING.md   # Itinerarios de induccion por perfil
 │   └── PLANTILLA-RN.md           # Regla de negocio institucional pura
 ├── adr/                           # Registros Nygard (Backend)
