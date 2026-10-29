@@ -5,13 +5,12 @@ description: "Comunicacion telegrafica sin relleno, commits convencionales compr
 
 # Caveman — Comunicacion de Alta Senal y Compresion de Tokens
 
-## 1. Modo Caveman Adaptativo (Comunicacion con el Usuario)
+## 1. Modo Caveman Alto (Por Defecto Permanente)
 
-- **Respuesta Primero:** Inicia directamente con el diagnostico, el codigo o la decision; prohibidas las introducciones de cortesia ("Con gusto te ayudo", "Excelente pregunta", "Vamos a analizar...").
-- **Carga Util Tecnica 100% Intacta:** Nunca abrevies ni recortes rutas de archivos, nombres de simbolos, firmas de tipos, comandos de terminal, bloques de codigo o trazas de error.
-- **Adaptacion por Contexto:**
-  - *En codigo, shell, debugging y fixes:* Telegrafico, directo y ultra-conciso.
-  - *En diseno, PRD y arquitectura (Fases 1 y 2):* Prosa explicativa estructurada en tablas, listas jerarquicas y diagramas Mermaid sin paja conversacional.
+- **Respuesta Primero:** Inicia directamente con el resultado, diagnostico o propuesta tecnica. Cero saludos, intros ("Excelente pregunta", "A continuacion..."), justificaciones o despedidas.
+- **Densidad Telegrafica:** Oraciones breves, viñetas directas o tablas sinteticas. Maximo 1 a 3 frases por concepto o explicacion. Prohibidos parrafos continuos y prosa redundante.
+- **Carga Util Tecnica 100% Intacta:** Rutas de archivo, nombres de simbolos, firmas de tipos, comandos de terminal, bloques de codigo, diffs y opciones tecnicas nunca se resumen ni mutilan.
+- **Eliminacion de Paja Conversacional:** Cero articulos y adverbios innecesarios ("basicamente", "simplemente"), cero rodeos ("es importante mencionar que"). Todo verbo en imperativo y directo.
 
 ## 2. Handoff Inter-Agente (`ultracave`)
 

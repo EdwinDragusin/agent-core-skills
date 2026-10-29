@@ -30,17 +30,18 @@ Gestion y auditoria del vault de documentacion de proyectos de software: estruct
 4. Fase 3 Redaccion (arc42/Diataxis/Obsidian): [workflow-6-fases](./references/workflow-6-fases.md)
 5. Fase 4 Auditoria y verificacion cruzada: [workflow-6-fases](./references/workflow-6-fases.md)
 6. Fase 5 Presentacion y validacion humana: [workflow-6-fases](./references/workflow-6-fases.md)
-7. Auditoria integral del vault (8 dimensiones), solo si se solicita: [protocolo](./references/protocolo-auditoria-8-dimensiones.md)
+7. Auditoria continua Codigo <-> Documentacion (10 dimensiones D1-D10): [protocolo](./references/protocolo-auditoria-10-dimensiones.md)
 
-## Indice de references/
+## Indice de references/ y resources/
 
 | Archivo | Cuando leerlo |
 |:--|:--|
+| [guia-maestra-estandar.md](./references/guia-maestra-estandar.md) | Estandar canonico completo arc42, Diataxis, ADR, DDD, D1-D10 |
 | [principios-fundamentales.md](./references/principios-fundamentales.md) | Detalle de modelo dual, vault MCP, comandos de registro, ADRs |
 | [workflow-6-fases.md](./references/workflow-6-fases.md) | Ejecutar cualquier fase 0-5 |
-| [estructura-vault.md](./references/estructura-vault.md) | Inicializar vault nuevo |
+| [estructura-vault.md](./references/estructura-vault.md) | Inicializar vault nuevo con 12 carpetas canonicas |
 | [anti-alucinacion-e-integracion.md](./references/anti-alucinacion-e-integracion.md) | Redactar contenido factual; elegir herramientas MCP |
-| [protocolo-auditoria-8-dimensiones.md](./references/protocolo-auditoria-8-dimensiones.md) | Auditar vault |
+| [protocolo-auditoria-10-dimensiones.md](./references/protocolo-auditoria-10-dimensiones.md) | Auditar sincronizacion Codigo <-> Documentacion (D1–D10) |
 | [arc42-chapters-guide.md](./references/arc42-chapters-guide.md) | Redactar capitulos arc42, ADR Nygard |
 | [diataxis-quadrants-guide.md](./references/diataxis-quadrants-guide.md) | Redactar/clasificar cuadrantes |
 | [frontmatter-schemas.md](./references/frontmatter-schemas.md) | Validar frontmatter YAML |
@@ -48,3 +49,4 @@ Gestion y auditoria del vault de documentacion de proyectos de software: estruct
 | [mcp-agent-readiness.md](./references/mcp-agent-readiness.md) | Chunking, RAG, LLM Wiki |
 | [sdlc-mapping.md](./references/sdlc-mapping.md) | Artefactos por fase SDLC |
 | [audit-checklist.md](./references/audit-checklist.md) | Checklist y formato de reportes |
+| [templates/](./resources/templates/) | Plantillas maestras CU, DS-CU, RN, ADR, Actor, AUDIT |

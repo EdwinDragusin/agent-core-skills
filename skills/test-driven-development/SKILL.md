@@ -16,6 +16,10 @@ Una prueba que falla antes del codigo es la unica evidencia valida. "Parece corr
 1. **RED:** escribe el test; ejecutalo; confirma que falla por la razon esperada. Un test que pasa de inmediato no prueba nada. Prohibido escribir codigo de produccion antes de ver rojo.
 2. **GREEN:** codigo minimo que lo pasa (filosofia `ponytail`); sin generalizar.
 3. **REFACTOR:** limpia duplicacion y nombres con el verde intacto; ejecuta tests tras cada paso.
+   - **Compuerta UI/UX (`ui-ux-mastery`):** Si el refactor afecta componentes visuales o interactivos de interfaz:
+     - Evalua la intencion de la interfaz: diagnostico de modelo mental del usuario, puntos de friccion y ansiedad cognitiva (Etapa 1 de `ui-ux-mastery`).
+     - Detecta y erradica antipatrones: "Database-Shaped UI", sopa de booleanos concurrentes (`isLoading && isError`), CLS por skeletons dispares, validacion prematura en `onChange` y estados vacios desiertos.
+     - **Verificacion Visual con Playwright:** En componentes interactivos, levanta vista y captura evidencia con `browser_take_screenshot` en los 4 estados FSM (empty, loading, error, success) para corroborar la ausencia de antipatrones visuales antes de cerrar el refactor.
 
 ## 2. Patron Prove-It (bugs)
 Bug reportado: NO arregles primero. (1) Escribe test que reproduce el bug; (2) confirma que falla; (3) aplica el fix; (4) el test pasa; (5) suite completa sin regresiones.
