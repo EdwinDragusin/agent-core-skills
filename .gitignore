@@ -13,3 +13,4 @@ desktop.ini
 # Temp / logs
 *.log
 .tmp/
+.playwright-mcp/
