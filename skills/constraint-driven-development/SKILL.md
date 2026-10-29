@@ -3,7 +3,7 @@ name: constraint-driven-development
 description: "Fija la barra de calidad como contrato: prohibe supresiones de linter/tipos, tests saltados y stubs vacios."
 ---
 
-# Constraint-Driven Development — Contrato de Barra de Calidad Innegociable
+# Constraint-Driven Development - Contrato de Barra de Calidad Innegociable
 
 Spec-Driven define que construir; TDD demuestra que funciona; **Constraint-Driven** impide que un agente "haga trampa" debilitando las pruebas o silenciando el compilador para forzar el verde.
 
@@ -21,7 +21,7 @@ Ningun subagente implementador (Fase 3A/3B) puede introducir ninguno de estos pa
 
 ## 2. Umbrales por Defecto del Proyecto
 
-Si el proyecto no define aun sus umbrales en el Árbol de Calidad (`docs/criterios/02-arbol-de-calidad.md`), aplica estos valores base:
+Si el proyecto no define aun sus umbrales en el Arbol de Calidad (`docs/criterios/02-arbol-de-calidad.md`), aplica estos valores base:
 - **Cobertura en Dominio y Casos de Uso (`domain/`, `application/`):** >= 90% de lineas y ramas.
 - **Accesibilidad en UI (`Fase 3B`):** WCAG 2.1 AA (0 violaciones criticas/serias en arbol ARIA y contraste >= 4.5:1).
 - **Errores en Consola del Navegador (`playwright`):** 0 errores, 0 rechazos de promesas no manejados.

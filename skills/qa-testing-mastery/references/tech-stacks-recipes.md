@@ -1,12 +1,12 @@
-# Recetarios de Tecnologías y Código para Pruebas de Alta Fidelidad
+# Recetarios de Tecnologias y Codigo para Pruebas de Alta Fidelidad
 
-Patrones y recetas listas para producción para Express, Sequelize (v6 y v7), Vitest/Jest, Supertest, Pact.js v3, Faker, Autocannon y k6.
+Patrones y recetas listas para produccion para Express, Sequelize (v6 y v7), Vitest/Jest, Supertest, Pact.js v3, Faker, Autocannon y k6.
 
 ---
 
-## 1. Suite de Integración con Supertest, Vitest/Jest y CLS Rollbacks
+## 1. Suite de Integracion con Supertest, Vitest/Jest y CLS Rollbacks
 
-### A. Configuración de CLS para Sequelize (`test/setup-cls.ts`)
+### A. Configuracion de CLS para Sequelize (`test/setup-cls.ts`)
 
 ```typescript
 import { createNamespace } from 'cls-hooked';
@@ -17,7 +17,7 @@ export const testNamespace = createNamespace('sequelize-test-namespace');
 Sequelize.useCLS(testNamespace);
 ```
 
-### B. Plantilla de Prueba de Integración (`test/integration/orders.spec.ts`)
+### B. Plantilla de Prueba de Integracion (`test/integration/orders.spec.ts`)
 
 ```typescript
 import { describe, it, expect, beforeAll, afterAll, beforeEach, afterEach } from 'vitest';
@@ -27,21 +27,21 @@ import { sequelize, User, Product, Order } from '../../src/models';
 import { userFactory, productFactory } from '../factories';
 import type { Transaction } from 'sequelize';
 
-describe('POST /api/orders (Integración con BD Real y CLS Rollback)', () => {
+describe('POST /api/orders (Integracion con BD Real y CLS Rollback)', () => {
   let transaction: Transaction;
 
   beforeAll(async () => {
-    // Asegurar conexión a PostgreSQL real (ej. vía Testcontainers o Docker)
+    // Asegurar conexion a PostgreSQL real (ej. via Testcontainers o Docker)
     await sequelize.authenticate();
   });
 
   beforeEach(async () => {
-    // Iniciar transacción autogestionada por prueba
+    // Iniciar transaccion autogestionada por prueba
     transaction = await sequelize.transaction();
   });
 
   afterEach(async () => {
-    // Reversión incondicional: la BD queda exactamente igual que antes del test en <5ms
+    // Reversion incondicional: la BD queda exactamente igual que antes del test en <5ms
     if (transaction) {
       await transaction.rollback();
     }
@@ -51,7 +51,7 @@ describe('POST /api/orders (Integración con BD Real y CLS Rollback)', () => {
     await sequelize.close();
   });
 
-  it('debe crear una orden con stock disponible y persistirla en la transacción', async () => {
+  it('debe crear una orden con stock disponible y persistirla en la transaccion', async () => {
     const user = await userFactory();
     const product = await productFactory({ stock: 5, price: 100 });
 
@@ -69,7 +69,7 @@ describe('POST /api/orders (Integración con BD Real y CLS Rollback)', () => {
       status: 'CONFIRMED'
     });
 
-    // Validar mutación real en BD
+    // Validar mutacion real en BD
     const updatedProduct = await Product.findByPk(product.id);
     expect(updatedProduct?.stock).toBe(3);
   });
@@ -79,21 +79,21 @@ describe('POST /api/orders (Integración con BD Real y CLS Rollback)', () => {
     const user2 = await userFactory();
     const product = await productFactory({ stock: 1, price: 50 });
 
-    // Simular concurrencia real enviando dos peticiones simultáneas
+    // Simular concurrencia real enviando dos peticiones simultaneas
     const [res1, res2] = await Promise.all([
       request(app).post('/api/orders').send({ userId: user1.id, items: [{ productId: product.id, quantity: 1 }] }),
       request(app).post('/api/orders').send({ userId: user2.id, items: [{ productId: product.id, quantity: 1 }] })
     ]);
 
     const statuses = [res1.status, res2.status].sort();
-    expect(statuses).toEqual([201, 409]); // Una tiene éxito, la otra es rechazada por bloqueo
+    expect(statuses).toEqual([201, 409]); // Una tiene exito, la otra es rechazada por bloqueo
   });
 });
 ```
 
 ---
 
-## 2. Fábricas Dinámicas de Datos con Faker (`test/factories/index.ts`)
+## 2. Fabricas Dinamicas de Datos con Faker (`test/factories/index.ts`)
 
 ```typescript
 import { faker } from '@faker-js/faker';
@@ -225,8 +225,8 @@ import autocannon from 'autocannon';
 async function runBenchmark() {
   const result = await autocannon({
     url: 'http://localhost:3000/api/dashboard',
-    connections: 50,       // Conexiones simultáneas
-    duration: 15,          // Segundos de duración
+    connections: 50,       // Conexiones simultaneas
+    duration: 15,          // Segundos de duracion
     pipelining: 1,
     headers: {
       'Authorization': 'Bearer test-token'
@@ -246,7 +246,7 @@ runBenchmark();
 
 ---
 
-## 5. Pruebas de Carga y Estrés con k6 (`test/performance/load-test.js`)
+## 5. Pruebas de Carga y Estres con k6 (`test/performance/load-test.js`)
 
 ```javascript
 import http from 'k6/http';
@@ -255,7 +255,7 @@ import { check, sleep } from 'k6';
 export const options = {
   stages: [
     { duration: '30s', target: 50 },   // Ramp-up a 50 Virtual Users
-    { duration: '1m', target: 200 },    // Estrés sostenido a 200 VUs
+    { duration: '1m', target: 200 },    // Estres sostenido a 200 VUs
     { duration: '30s', target: 0 }      // Ramp-down
   ],
   thresholds: {
@@ -293,7 +293,7 @@ export default function () {
 
 ---
 
-## 6. Modernización y Sequelize v7 (Decorators y Tipado Estricto)
+## 6. Modernizacion y Sequelize v7 (Decorators y Tipado Estricto)
 
 ```typescript
 import { Table, Attribute } from '@sequelize/core/decorators-legacy';

@@ -1,6 +1,6 @@
-# Presentación de Errores y Experiencia de Usuario (UI/UX) en Frontend
+# Presentacion de Errores y Experiencia de Usuario (UI/UX) en Frontend
 
-La presentación de errores en la interfaz de usuario debe balancear la claridad cognitiva, la accesibilidad (a11y) y la orientación hacia la auto-recuperación del usuario.
+La presentacion de errores en la interfaz de usuario debe balancear la claridad cognitiva, la accesibilidad (a11y) y la orientacion hacia la auto-recuperacion del usuario.
 
 ---
 
@@ -56,7 +56,7 @@ export const CampoTextoAccesible: React.FC<CampoFormularioProps> = ({
 
 ---
 
-## 2. Componente de Fallo con Trace ID Copiable para Soporte Técnico
+## 2. Componente de Fallo con Trace ID Copiable para Soporte Tecnico
 
 ```tsx
 import React, { useState } from "react";
@@ -119,7 +119,7 @@ export const BannerErrorProblemDetails: React.FC<BannerErrorProps> = ({
 
 ## 3. Error Boundary Granular en React
 
-Evita que una falla no capturada en un componente hijo colapse toda la aplicación (pantalla blanca):
+Evita que una falla no capturada en un componente hijo colapse toda la aplicacion (pantalla blanca):
 
 ```tsx
 import React, { Component, ErrorInfo, ReactNode } from "react";

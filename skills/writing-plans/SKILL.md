@@ -3,7 +3,7 @@ name: writing-plans
 description: "Planes atomicos antes de tocar codigo: fronteras de archivos, firmas, tests y pasos de 2-5 min con tareas [PARALELO]."
 ---
 
-# Writing Plans — Planes de Implementacion Atomicos
+# Writing Plans - Planes de Implementacion Atomicos
 
 Escribe planes de implementacion tan explicitos que un subagente sin contexto previo pueda ejecutar cualquier tarea sin adivinar decisiones de diseno.
 
@@ -19,13 +19,13 @@ Antes de listar tareas, define el mapa exacto de archivos a crear o modificar:
 ## 2. Dimensionamiento de Tareas (Granularidad de 2 a 5 Minutos)
 
 - Una tarea es la unidad minima que posee su propio ciclo verificable de prueba (`Red -> Green -> Refactor`).
-- Separa en **Pista A (Backend — Fase 3A)** y **Pista B (Frontend — Fase 3B)**.
+- Separa en **Pista A (Backend - Fase 3A)** y **Pista B (Frontend - Fase 3B)**.
 - Etiqueta con **`[PARALELO]`** toda tarea que no comparta archivos ni dependa secuencialmente de otra tarea en vuelo, habilitando su despacho simultaneo con `dispatching-parallel-agents`.
 
 ## 3. Estructura Canonica de Cada Tarea en el Plan
 
 Cada tarea del plan DEBE contener:
-1. **Nombre, Pista y Etiqueta:** `### Tarea N: [Nombre] — [SECUENCIAL | PARALELO]`
+1. **Nombre, Pista y Etiqueta:** `### Tarea N: [Nombre] - [SECUENCIAL | PARALELO]`
 2. **Archivos Objetivo:**
    - `Crear: ruta/exacta/archivo.ts`
    - `Modificar: ruta/exacta/existente.ts:L10-L40`

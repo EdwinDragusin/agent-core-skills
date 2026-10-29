@@ -3,7 +3,7 @@ name: ponytail
 description: "Modo anti-sobreingenieria: minimo cambio completo, YAGNI, review anti-bloat, auditoria de repo (audit) y deuda con shortcut:."
 ---
 
-# Ponytail — Simplicidad Radical, Auditoria Anti-Bloat y Deuda Tecnica
+# Ponytail - Simplicidad Radical, Auditoria Anti-Bloat y Deuda Tecnica
 
 ## 1. Reglas Nucleares de Implementacion (Modo `full`)
 
@@ -24,7 +24,7 @@ description: "Modo anti-sobreingenieria: minimo cambio completo, YAGNI, review a
 Cuando tomes un atajo deliberado para evitar sobreingenieria (ej. cache en memoria en lugar de Redis, validacion sincrona simple en lugar de cola distribuida):
 - Deja un comentario rastreable en el codigo con el formato exacto:
   ```ts
-  // shortcut: <que se simplifico> — limite: <cuando fallara> — mejora: <cuando migrar>
+  // shortcut: <que se simplifico> - limite: <cuando fallara> - mejora: <cuando migrar>
   ```
 - Al cierre de las Fases 3A y 3B, extrae todos los comentarios `shortcut:` y `TODO:` hacia `docs/arquitectura/07-deuda-tecnica-y-riesgos.md`.
 

@@ -207,10 +207,10 @@ export function auditarContenidoReadme(contenido: string, rutaArchivo: string): 
   const tieneBadges = /\[!\[.*?\]\(.*?\)\]\(.*?\)|!\[.*?\]\(https:\/\/img\.shields\.io\/.*?\)/.test(contenido);
   const tieneTOC = anclasEnlaceTOC.length > 0 || /tabla de contenidos|table of contents/i.test(contenido);
   const tieneInstalacion = encabezadosOriginales.some((h) =>
-    /instalaci[oó]n|install|setup|puesta en marcha|requisitos/i.test(h.texto)
+    /instalaci[oo]n|install|setup|puesta en marcha|requisitos/i.test(h.texto)
   );
   const tieneUso = encabezadosOriginales.some((h) =>
-    /uso|usage|ejecuci[oó]n|gu[ií]a de uso|comenzando/i.test(h.texto)
+    /uso|usage|ejecuci[oo]n|gu[ii]a de uso|comenzando/i.test(h.texto)
   );
   const tieneContribucion = encabezadosOriginales.some((h) =>
     /contribu/i.test(h.texto) || /flujo de trabajo git|convenciones git/i.test(h.texto)

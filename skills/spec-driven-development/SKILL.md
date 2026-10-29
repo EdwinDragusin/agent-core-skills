@@ -3,7 +3,7 @@ name: spec-driven-development
 description: "Especifica antes de codificar: mapa de capacidades y flujo bloqueante SPECIFY, PLAN, TASKS, IMPLEMENT (Greenfield y Reverse-Spec)."
 ---
 
-# Spec-Driven Development — Desarrollo Guiado por Especificacion
+# Spec-Driven Development - Desarrollo Guiado por Especificacion
 
 El codigo sin especificacion es adivinanza. Antes de implementar cualquier funcionalidad no trivial, formaliza la especificacion como fuente unica de verdad entre el ingeniero humano y los subagentes.
 
@@ -18,7 +18,7 @@ Activa esta fase cuando una solicitud agrupa multiples capacidades que podrian p
 1. Descompon la iniciativa en una tabla de modulos independientes:
    | ID de Modulo (kebab-case) | Responsabilidad Unica | Depende de |
    | :--- | :--- | :--- |
-   | `identidad` | Cuentas, sesiones, tokens | — |
+   | `identidad` | Cuentas, sesiones, tokens | - |
    | `facturacion` | Planes, cobros, recibos | `identidad` |
    | `notificaciones` | Envio de correos y webhooks | `identidad` |
 2. **Direccion Aciclica:** Las flechas de dependencia apuntan en un solo sentido. Si dos modulos dependen mutuamente entre si, o son el mismo modulo o falta extraer un primitivo compartido.

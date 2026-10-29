@@ -1,44 +1,44 @@
-# Motion Tokens — Referencia Técnica
+# Motion Tokens - Referencia Tecnica
 
 ## Curvas de easing (cubic-bezier)
 
-Estas curvas **no** son resortes físicos. Son aproximaciones polinómicas cúbicas útiles para
-transiciones rápidas. Un `cubic-bezier()` no puede producir oscilación periódica (su derivada
-es cuadrática → máximo 2 puntos críticos).
+Estas curvas **no** son resortes fisicos. Son aproximaciones polinomicas cubicas utiles para
+transiciones rapidas. Un `cubic-bezier()` no puede producir oscilacion periodica (su derivada
+es cuadratica -> maximo 2 puntos criticos).
 
 ```css
 @theme {
-  /* Desaceleración agresiva (easeOutQuint) — para entradas y apariciones */
+  /* Desaceleracion agresiva (easeOutQuint) - para entradas y apariciones */
   --ease-decelerate: cubic-bezier(0.23, 1, 0.32, 1);
 
-  /* Overshoot simple (easeOutBack) — para elementos que "rebotan" una vez */
+  /* Overshoot simple (easeOutBack) - para elementos que "rebotan" una vez */
   --ease-overshoot: cubic-bezier(0.34, 1.56, 0.64, 1);
 
-  /* Salida rápida (easeOut) — para desapariciones y salidas */
+  /* Salida rapida (easeOut) - para desapariciones y salidas */
   --ease-out-fast: cubic-bezier(0.4, 0, 1, 1);
 }
 ```
 
-### Cuándo usar cada una
+### Cuando usar cada una
 
-| Token | Caso de uso | Duración sugerida |
+| Token | Caso de uso | Duracion sugerida |
 |:---|:---|:---|
-| `--ease-decelerate` | Entradas de modales, aparición de elementos, slide-in | 200–350ms |
-| `--ease-overshoot` | Elementos que necesitan "pop" sutil (badges, toasts, popovers) | 300–500ms |
-| `--ease-out-fast` | Salidas, cierre de modales, elementos que desaparecen | 150–200ms |
+| `--ease-decelerate` | Entradas de modales, aparicion de elementos, slide-in | 200-350ms |
+| `--ease-overshoot` | Elementos que necesitan "pop" sutil (badges, toasts, popovers) | 300-500ms |
+| `--ease-out-fast` | Salidas, cierre de modales, elementos que desaparecen | 150-200ms |
 
 ---
 
 ## Resortes reales con CSS `linear()` (Recomendado)
 
-La función `linear()` (CSS Easing Level 2) interpola linealmente entre puntos arbitrarios,
-permitiendo samplear la solución exacta de un oscilador armónico amortiguado.
+La funcion `linear()` (CSS Easing Level 2) interpola linealmente entre puntos arbitrarios,
+permitiendo samplear la solucion exacta de un oscilador armonico amortiguado.
 
-**Soporte**: Baseline — Chrome 113+, Firefox 112+, Safari 17.2+ (>96% global).
+**Soporte**: Baseline - Chrome 113+, Firefox 112+, Safari 17.2+ (>96% global).
 
-### Resorte suave (bajo rebote) — para entradas de UI
+### Resorte suave (bajo rebote) - para entradas de UI
 
-Parámetros físicos: stiffness=120, damping=14, mass=1
+Parametros fisicos: stiffness=120, damping=14, mass=1
 
 ```css
 @theme {
@@ -54,9 +54,9 @@ Parámetros físicos: stiffness=120, damping=14, mass=1
 }
 ```
 
-### Resorte con rebote — para feedback táctil y popovers
+### Resorte con rebote - para feedback tactil y popovers
 
-Parámetros físicos: stiffness=180, damping=12, mass=1
+Parametros fisicos: stiffness=180, damping=12, mass=1
 
 ```css
 @theme {
@@ -74,20 +74,20 @@ Parámetros físicos: stiffness=180, damping=12, mass=1
 
 ### Herramientas para generar springs personalizados
 
-- [CSS Spring Animation Generator — Josh W. Comeau](https://www.joshwcomeau.com/animation/css-spring-animation/)
+- [CSS Spring Animation Generator - Josh W. Comeau](https://www.joshwcomeau.com/animation/css-spring-animation/)
 - [Open Props Spring Easings](https://open-props.style/#easing)
 
 ---
 
 ## Propiedades seguras para animar (GPU Compositor)
 
-### Tier 1 — Composited puros (costo ~0)
+### Tier 1 - Composited puros (costo ~0)
 - `translate`, `rotate`, `scale` (propiedades individuales, preferidas sobre `transform` compuesto)
 - `opacity`
 
-### Tier 2 — Composited con costo GPU
-- `filter` (blur, brightness) — puede causar re-rasterización de texturas en mobile
-- `backdrop-filter` — **costoso**; usar con moderación en listas largas
+### Tier 2 - Composited con costo GPU
+- `filter` (blur, brightness) - puede causar re-rasterizacion de texturas en mobile
+- `backdrop-filter` - **costoso**; usar con moderacion en listas largas
 - `clip-path` (interpolaciones simples, solo Chromium)
 
 ### Prohibido animar
@@ -97,7 +97,7 @@ Parámetros físicos: stiffness=180, damping=12, mass=1
 
 ### Nota sobre `will-change`
 
-- **No usar globalmente**. Provoca "layer explosion" (desperdicio de VRAM, borrón de texto).
-- Aplicar transientemente: añadir `will-change-transform` en `pointerenter`/hover y remover al terminar.
-- En la mayoría de casos, los browsers modernos promueven automáticamente durante animaciones activas.
-- **`transform-gpu` de Tailwind** (`translateZ(0)`) es un hack legacy; preferir `will-change-transform` si se necesita pre-promoción explícita.
+- **No usar globalmente**. Provoca "layer explosion" (desperdicio de VRAM, borron de texto).
+- Aplicar transientemente: anadir `will-change-transform` en `pointerenter`/hover y remover al terminar.
+- En la mayoria de casos, los browsers modernos promueven automaticamente durante animaciones activas.
+- **`transform-gpu` de Tailwind** (`translateZ(0)`) es un hack legacy; preferir `will-change-transform` si se necesita pre-promocion explicita.

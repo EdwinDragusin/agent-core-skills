@@ -1,19 +1,19 @@
 # Esquemas de Frontmatter (Schemas)
 
 > [!NOTE]
-> Este documento define los esquemas canónicos de YAML frontmatter para la gestión estandarizada de documentos arquitectónicos en el vault de Obsidian. Sirve como referencia estricta para validaciones automáticas.
+> Este documento define los esquemas canonicos de YAML frontmatter para la gestion estandarizada de documentos arquitectonicos en el vault de Obsidian. Sirve como referencia estricta para validaciones automaticas.
 
 ## Consideraciones Generales
 
 > [!IMPORTANT]
-> - Se prefiere una estructura plana (flat) sobre estructuras anidadas para máxima compatibilidad con Dataview y las mejores practicas de Obsidian.
+> - Se prefiere una estructura plana (flat) sobre estructuras anidadas para maxima compatibilidad con Dataview y las mejores practicas de Obsidian.
 > - Las comillas dobles deben usarse para los valores de cadena (strings) en los ejemplos y plantillas YAML.
 > - Todos los archivos deben incluir una propiedad `tags` estructurada como un arreglo plano.
 
 ## Nueva Propiedad: `diataxis-quadrant`
 
 > [!TIP]
-> Para alinear la documentación con el estándar Diataxis, se introduce la propiedad `diataxis-quadrant`. Esta propiedad es obligatoria para las Guias y opcional (pero recomendada si aplica) para otros tipos.
+> Para alinear la documentacion con el estandar Diataxis, se introduce la propiedad `diataxis-quadrant`. Esta propiedad es obligatoria para las Guias y opcional (pero recomendada si aplica) para otros tipos.
 
 - **Valores Permitidos:** `tutorial`, `how-to`, `referencia`, `explicacion`
 
@@ -37,19 +37,19 @@ diataxis-quadrant: "referencia"
 - `id` (String): Identificador unico. Ejemplo: `"ADR-001"` o `"ADR-F001"`.
 - `titulo` (String): Titulo descriptivo de la decision. Ejemplo: `"Patron Upsert"`.
 - `estado` (String): Estado actual de la decision.
-- `fecha` (String): Fecha de creación o aprobación en formato ISO 8601 (YYYY-MM-DD).
+- `fecha` (String): Fecha de creacion o aprobacion en formato ISO 8601 (YYYY-MM-DD).
 - `tags` (Array): Lista de etiquetas. Debe incluir `adr`.
 
 ### Campos Opcionales
 - `aliases` (Array): Nombres alternativos para busqueda.
-- `diataxis-quadrant` (String): Clasificación en el framework Diataxis (generalmente `"referencia"`).
+- `diataxis-quadrant` (String): Clasificacion en el framework Diataxis (generalmente `"referencia"`).
 
 ### Valores Permitidos
 - `estado`: `Propuesto`, `Aprobado`, `Rechazado`, `Obsoleto`
 
 ### Reglas de Validacion
 - `id` debe cumplir la expresion regular `^ADR-F?\d{3}$`.
-- `fecha` debe ser un string válido en formato `YYYY-MM-DD`.
+- `fecha` debe ser un string valido en formato `YYYY-MM-DD`.
 
 ### Enlaces Internos
 - No aplica estrictamente en el frontmatter, las relaciones se gestionan en el cuerpo del documento mediante wikilinks.
@@ -265,10 +265,10 @@ tags: [guia, arquitectura, jobs, workers, procesos-programados]
 
 ---
 
-## Errores Comunes de Validación y Detección
+## Errores Comunes de Validacion y Deteccion
 
 > [!WARNING]
-> Prestar atención a estos antipatrones comunes durante las auditorias del vault.
+> Prestar atencion a estos antipatrones comunes durante las auditorias del vault.
 
 1. **Falta de Comillas en Enlaces Internos:**
    - **Error:** `caso_de_uso: [[CU-001]]` (El analizador YAML puede fallar por los corchetes).
@@ -284,4 +284,4 @@ tags: [guia, arquitectura, jobs, workers, procesos-programados]
 
 4. **Etiquetas (Tags) Mal Formateadas:**
    - **Error:** Usar `#tag` dentro de la lista de arreglos YAML (`tags: [#adr]`).
-   - **Solucion:** Omitir el símbolo de almohadilla (`tags: [adr]`).
+   - **Solucion:** Omitir el simbolo de almohadilla (`tags: [adr]`).

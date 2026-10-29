@@ -1,4 +1,4 @@
-# JSDoc vs TypeScript vs TSDoc — Decision Arquitectonica
+# JSDoc vs TypeScript vs TSDoc - Decision Arquitectonica
 
 | Escenario | Estrategia Recomendada | Justificacion |
 |:---|:---|:---|

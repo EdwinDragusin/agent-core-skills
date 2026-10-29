@@ -3,7 +3,7 @@ name: dispatching-parallel-agents
 description: "Despacha subagentes en paralelo (Teamwork) cuando hay 2+ tareas independientes sin estado compartido."
 ---
 
-# Dispatching Parallel Agents — Ejecucion Concurrente en Equipo (Teamwork)
+# Dispatching Parallel Agents - Ejecucion Concurrente en Equipo (Teamwork)
 
 Cuando tienes multiples tareas etiquetadas como **`[PARALELO]`** en el plan atomico (o multiples fallos en subsistemas desacoplados), ejecutarlas en serie desperdicia tiempo y contamina el contexto. Despachalas simultaneamente en paralelo.
 

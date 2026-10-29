@@ -3,7 +3,7 @@ name: doubt-driven-development
 description: "Revision adversarial con contexto fresco de toda decision no trivial para refutar supuestos antes de aceptarla."
 ---
 
-# Doubt-Driven Development — Revision Adversarial de Supuestos
+# Doubt-Driven Development - Revision Adversarial de Supuestos
 
 Una respuesta segura no equivale a una respuesta correcta. En sesiones largas, los agentes acumulan contexto y convierten suposiciones fragiles en "hechos". Esta skill fuerza una revision adversarial orientada a **refutar y encontrar como falla** una decision antes de aprobarla.
 

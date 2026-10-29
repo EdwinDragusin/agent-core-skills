@@ -8,9 +8,7 @@
       "command": "npx",
       "args": [
         "-y",
-        "@playwright/mcp@latest",
-        "--executable-path",
-        "C:\\Program Files\\BraveSoftware\\Brave-Browser\\Application\\brave.exe"
+        "@playwright/mcp@0.0.83"
       ]
     }
   }

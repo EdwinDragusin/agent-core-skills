@@ -3,7 +3,7 @@ name: systematic-debugging
 description: "Causa raiz en 4 fases antes de editar: evidencia, hipotesis, reproduccion minima y parche quirurgico. Ante cualquier bug o test fallido."
 ---
 
-# Systematic Debugging — Diagnostico de Causa Raiz en 4 Fases
+# Systematic Debugging - Diagnostico de Causa Raiz en 4 Fases
 
 **Ley de Hierro:** Prohibido proponer o aplicar un parche sin haber identificado y demostrado empiricamente la causa raiz. Parchear por ensayo y error ("shotgun debugging") oculta defectos y crea regresiones.
 
@@ -20,7 +20,7 @@ Antes de formar cualquier teoria:
 1. Compara el codigo que falla contra un caso similar que **si** funciona en el repositorio.
 2. Formula de **1 a 3 hipotesis especificas** ordenadas por probabilidad y respaldadas por evidencia (`archivo:linea`):
    - *Hipotesis 1:* "El middleware de auth devuelve 401 porque el header se lee en mayusculas y el cliente lo envia normalizado en minusculas".
-3. Diseña el experimento minimo (un log puntual o lectura de estado) que confirme o refute la Hipotesis 1.
+3. Disena el experimento minimo (un log puntual o lectura de estado) que confirme o refute la Hipotesis 1.
 
 ## Fase 3: Verificacion de Hipotesis (Una Variable a la Vez)
 

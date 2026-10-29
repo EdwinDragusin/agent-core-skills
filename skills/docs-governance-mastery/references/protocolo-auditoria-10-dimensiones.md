@@ -1,4 +1,4 @@
-# Protocolo de Auditoria Continua (10 Dimensiones D1–D10) con Filtro de Accesibilidad Bimodal
+# Protocolo de Auditoria Continua (10 Dimensiones D1-D10) con Filtro de Accesibilidad Bimodal
 
 Auditoria de Sincronizacion Codigo <-> Documentacion (Living Knowledge Graph) y Erradicacion de Barreras Cognitivas.
 
@@ -8,7 +8,7 @@ Auditoria de Sincronizacion Codigo <-> Documentacion (Living Knowledge Graph) y 
 - **Incremental**: Buscar ultimo `AUDIT-NNN.md` en `docs/auditorias/`. Filtrar con `git log --since="<FECHA>"` solo archivos modificados.
 - **Completa**: Evaluacion integral de todo el codigo y documentacion.
 
-### 1. Las 10 Dimensiones de Sincronizacion y Calidad Cognitiva (D1–D10)
+### 1. Las 10 Dimensiones de Sincronizacion y Calidad Cognitiva (D1-D10)
 
 1. **D1: Catalogo de Use Cases <-> UseCases en Codigo**:
    - `docs/arquitectura/capitulo-05-vista-de-bloques/capa-de-aplicacion/catalogo-de-usecases.md` vs archivos `*UseCase.ts`. Coincidencia 100%.

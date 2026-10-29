@@ -3,7 +3,7 @@ name: subagent-driven-development
 description: "Ejecuta planes con un subagente fresco por tarea atomica, seguido de revision de conformidad y calidad."
 ---
 
-# Subagent-Driven Development — Ejecucion Aislada por Tarea
+# Subagent-Driven Development - Ejecucion Aislada por Tarea
 
 Ejecuta un plan de implementacion despachando un subagente nuevo por cada tarea atomica. Evita la contaminacion de contexto acumulado y garantiza que cada unidad de trabajo se construya y verifique de forma limpia.
 
@@ -24,8 +24,8 @@ Cada subagente recibe unicamente el payload de su tarea en formato `ultracave` y
 ## 3. Revision en Dos Etapas por el Orquestador
 
 Al terminar cada lote de subagentes:
-1. **Etapa 1 — Conformidad con Especificacion:** Comprueba que el codigo entregado implementa exactamente las firmas, contratos e invariantes de la tarea sin omitir requisitos ni agregar funciones no solicitadas.
-2. **Etapa 2 — Calidad y Limites:** Verifica que la suite integrada siga en verde, sin supresiones de linter ni violaciones de capas.
+1. **Etapa 1 - Conformidad con Especificacion:** Comprueba que el codigo entregado implementa exactamente las firmas, contratos e invariantes de la tarea sin omitir requisitos ni agregar funciones no solicitadas.
+2. **Etapa 2 - Calidad y Limites:** Verifica que la suite integrada siga en verde, sin supresiones de linter ni violaciones de capas.
 
 ## 4. Cierre de Fase
 

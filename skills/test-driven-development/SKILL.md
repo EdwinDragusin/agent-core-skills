@@ -3,7 +3,7 @@ name: test-driven-development
 description: Ciclo Red-Green-Refactor y patron Prove-It para toda logica nueva, bug o cambio de comportamiento. Test primero, siempre.
 ---
 
-# TDD — Red, Green, Refactor
+# TDD - Red, Green, Refactor
 
 Una prueba que falla antes del codigo es la unica evidencia valida. "Parece correcto" no es terminado.
 

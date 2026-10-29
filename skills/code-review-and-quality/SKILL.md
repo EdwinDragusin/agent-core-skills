@@ -3,7 +3,7 @@ name: code-review-and-quality
 description: Revision de codigo en 5 ejes (correccion, legibilidad, arquitectura, seguridad, rendimiento) antes de integrar cualquier cambio.
 ---
 
-# Code Review — Revision en 5 Ejes
+# Code Review - Revision en 5 Ejes
 
 Todo cambio se revisa antes de integrar. **Estandar de aprobacion:** aprueba si el cambio mejora definitivamente la salud del codigo y respeta las convenciones, aunque no sea perfecto; no bloquees por preferencias de estilo.
 

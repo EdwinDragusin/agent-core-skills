@@ -3,7 +3,7 @@ name: frontend-ui-engineering
 description: "UI de produccion bajo Feature-Sliced Design: componentes, estado, HTML semantico, WCAG 2.1 AA y rendimiento."
 ---
 
-# Frontend UI Engineering — Ingenieria de Componentes y Arquitectura FSD
+# Frontend UI Engineering - Ingenieria de Componentes y Arquitectura FSD
 
 Complementa `ui-ux-mastery` con las reglas de ingenieria de codigo para construir el frontend en la **Fase 3B (`ui-builder`)**.
 
@@ -19,7 +19,7 @@ Respeta estrictamente la jerarquia de capas (cada capa solo importa de capas inf
 
 No mezcles todos los datos en un solo store global. Clasifica cada dato en su categoria exacta:
 1. **Estado de Servidor (Cache Asincrono):** Datos que vienen de los endpoints de Fase 3A (`03-contratos-api-publica.md`). Gestiona su ciclo con invalidacion automatica, deduplicacion y reintentos.
-2. **Estado de URL (Router):** Filtros, busqueda, paginacion y pestaña activa viven en los query params de la URL para que la vista sea compartible y recargable.
+2. **Estado de URL (Router):** Filtros, busqueda, paginacion y pestana activa viven en los query params de la URL para que la vista sea compartible y recargable.
 3. **Estado de UI Local / FSM:** Apertura de modales, paso actual de un wizard o foco activo viven colocados junto al componente como una Maquina de Estado Finito explicita (`idle` | `loading` | `success` | `error`).
 
 ## 3. Semantica HTML y Accesibilidad Nativa (WCAG 2.1 AA)

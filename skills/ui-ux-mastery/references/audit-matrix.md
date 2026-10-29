@@ -1,14 +1,14 @@
-# Matriz de Auditoría — 7 Dimensiones de UI Craft
+# Matriz de Auditoria - 7 Dimensiones de UI Craft
 
 Al auditar cualquier componente o vista, evaluar y aplicar estas dimensiones:
 
 ---
 
-## 1. Micro-interacción en Clic/Tap
+## 1. Micro-interaccion en Clic/Tap
 
-| Estándar (A Corregir) | Premium (A Implementar) |
+| Estandar (A Corregir) | Premium (A Implementar) |
 |:---|:---|
-| Cambio plano de color de fondo | Micro-hundimiento elástico `active:scale-[0.97]` con `transition-transform duration-150` y curva `--ease-decelerate` |
+| Cambio plano de color de fondo | Micro-hundimiento elastico `active:scale-[0.97]` con `transition-transform duration-150` y curva `--ease-decelerate` |
 
 ```html
 <button class="transition-transform duration-150 active:scale-[0.97]"
@@ -18,32 +18,32 @@ Al auditar cualquier componente o vista, evaluar y aplicar estas dimensiones:
 ```
 
 > **Nota**: No es necesario agregar `transform-gpu`. Los browsers modernos promueven
-> automáticamente elementos con `transform` activo a capas GPU.
+> automaticamente elementos con `transform` activo a capas GPU.
 
 ---
 
 ## 2. Modales, Drawers y Popovers
 
-| Estándar | Premium |
+| Estandar | Premium |
 |:---|:---|
-| Aparecen de golpe o con fundido simple | Desaceleración suave al entrar (`slideUpFade` + `backdrop-blur`), salida acelerada rápida (`scaleDownFadeOut`) |
+| Aparecen de golpe o con fundido simple | Desaceleracion suave al entrar (`slideUpFade` + `backdrop-blur`), salida acelerada rapida (`scaleDownFadeOut`) |
 
-**Integración con Radix UI** — usar variantes individuales por estado:
+**Integracion con Radix UI** - usar variantes individuales por estado:
 
 ```html
-<!-- ✅ Correcto: variantes individuales -->
+<!-- OK: Correcto: variantes individuales -->
 <div class="data-[state=open]:animate-slideUpFade
             data-[state=closed]:animate-scaleDownFadeOut">
 ```
 
 ```html
-<!-- ❌ Incorrecto: pipe OR no existe en CSS selectors -->
+<!-- ERROR: Incorrecto: pipe OR no existe en CSS selectors -->
 <div class="data-[state=open|closed]:...">
 ```
 
-**Transiciones asimétricas** (principio clave):
-- **Entrada**: más lenta, desacelerada → `300ms` con `--ease-decelerate` o `--spring-gentle`
-- **Salida**: más rápida, acelerada → `150ms` con `--ease-out-fast`
+**Transiciones asimetricas** (principio clave):
+- **Entrada**: mas lenta, desacelerada -> `300ms` con `--ease-decelerate` o `--spring-gentle`
+- **Salida**: mas rapida, acelerada -> `150ms` con `--ease-out-fast`
 
 ### Custom variants para Radix (en CSS global)
 
@@ -58,9 +58,9 @@ Uso: `data-open:opacity-100 data-closed:opacity-0`
 
 ## 3. Carga de Listas y Tablas
 
-| Estándar | Premium |
+| Estandar | Premium |
 |:---|:---|
-| Renderizado en bloque rígido o spinner full-screen | Staggering: decalaje en cascada de 15–30ms por elemento |
+| Renderizado en bloque rigido o spinner full-screen | Staggering: decalaje en cascada de 15-30ms por elemento |
 
 ```tsx
 // Stagger via CSS custom property inyectada por React
@@ -77,9 +77,9 @@ Uso: `data-open:opacity-100 data-closed:opacity-0`
 
 ## 4. Estados de Carga (Skeletons)
 
-| Estándar | Premium |
+| Estandar | Premium |
 |:---|:---|
-| Bloques grises parpadeantes monótonos | Shimmer wave continuo con gradiente de luz dinámico |
+| Bloques grises parpadeantes monotonos | Shimmer wave continuo con gradiente de luz dinamico |
 
 ```css
 .shimmer {
@@ -103,9 +103,9 @@ Uso: `data-open:opacity-100 data-closed:opacity-0`
 
 ## 5. Formularios y Cambios de Estado
 
-| Estándar | Premium |
+| Estandar | Premium |
 |:---|:---|
-| Botón deshabilitado con spinner esperando red | Actualización visual instantánea con `useOptimistic` |
+| Boton deshabilitado con spinner esperando red | Actualizacion visual instantanea con `useOptimistic` |
 
 ```tsx
 const [optimisticItems, setOptimistic] = useOptimistic(
@@ -116,7 +116,7 @@ const [optimisticItems, setOptimistic] = useOptimistic(
 function handleSubmit(formData: FormData) {
   startTransition(async () => {
     setOptimistic(nuevoItem);       // frame 0: UI ya refleja el cambio
-    await guardarEnServidor(nuevoItem);  // background: mutación real
+    await guardarEnServidor(nuevoItem);  // background: mutacion real
   });
 }
 ```
@@ -124,20 +124,20 @@ function handleSubmit(formData: FormData) {
 > **Nota sobre TanStack Query**: Si el proyecto usa TanStack Query, evaluar si conviene
 > usar su sistema nativo de optimistic updates (`onMutate` + cache directo) en lugar de
 > combinar ambos paradigmas. Mezclarlos puede causar race conditions entre el ciclo de
-> transición de React y la invalidación de cache de TanStack Query.
+> transicion de React y la invalidacion de cache de TanStack Query.
 
 ---
 
 ## 6. Feedback Sensorial Web
 
-| Estándar | Premium |
+| Estandar | Premium |
 |:---|:---|
-| Silencio total | Micro-audio sintético vía Web Audio API en acciones clave |
+| Silencio total | Micro-audio sintetico via Web Audio API en acciones clave |
 
-### Micro-audio (recomendado — cross-browser)
+### Micro-audio (recomendado - cross-browser)
 
 ```ts
-// Singleton AudioContext — inicializar lazily en primer user gesture
+// Singleton AudioContext - inicializar lazily en primer user gesture
 let audioCtx: AudioContext | null = null;
 
 function playTick(frequency = 800, durationMs = 15) {
@@ -158,11 +158,11 @@ function playTick(frequency = 800, durationMs = 15) {
 }
 ```
 
-### Vibración háptica (progressive enhancement — solo Android Chrome)
+### Vibracion haptica (progressive enhancement - solo Android Chrome)
 
-> **⚠️ Limitaciones severas**: `navigator.vibrate()` **no funciona en iOS** (Apple se opone
+> **ADVERTENCIA: Limitaciones severas**: `navigator.vibrate()` **no funciona en iOS** (Apple se opone
 > oficialmente), no funciona en desktop, no funciona en Firefox Android, y solo produce
-> pulsos crudos on/off. No usar como pilar de UX — tratar como bonus en Android únicamente.
+> pulsos crudos on/off. No usar como pilar de UX - tratar como bonus en Android unicamente.
 
 ```ts
 function triggerHaptic(pattern: number | number[] = 10) {
@@ -174,24 +174,24 @@ function triggerHaptic(pattern: number | number[] = 10) {
 
 ### Accesibilidad del audio
 - Siempre ofrecer toggle global de mute.
-- No usar audio como único canal de feedback (siempre acompañar con visual).
+- No usar audio como unico canal de feedback (siempre acompanar con visual).
 - Respetar `prefers-reduced-motion` si el audio sincroniza con movimiento.
 
 ---
 
 ## 7. Accesibilidad de Movimiento
 
-| Estándar | Premium |
+| Estandar | Premium |
 |:---|:---|
 | Ignorar preferencias del SO | `motion-reduce:*` en todas las animaciones |
 
 ```html
 <button class="transition-transform duration-150 active:scale-[0.97]
                motion-reduce:transition-none motion-reduce:transform-none">
-  Acción
+  Accion
 </button>
 ```
 
-- `motion-reduce:` → `@media (prefers-reduced-motion: reduce)`
-- `motion-safe:` → `@media (prefers-reduced-motion: no-preference)`
-- Probar siempre bajo emulación de `prefers-reduced-motion: reduce` en DevTools.
+- `motion-reduce:` -> `@media (prefers-reduced-motion: reduce)`
+- `motion-safe:` -> `@media (prefers-reduced-motion: no-preference)`
+- Probar siempre bajo emulacion de `prefers-reduced-motion: reduce` en DevTools.

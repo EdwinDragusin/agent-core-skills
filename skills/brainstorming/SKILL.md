@@ -3,7 +3,7 @@ name: brainstorming
 description: "Antes de construir algo nuevo: cuestiona supuestos, evalua alternativas con trade-offs y acuerda el diseno."
 ---
 
-# Brainstorming Arquitectonico — Pensar Antes de Construir
+# Brainstorming Arquitectonico - Pensar Antes de Construir
 
 Nunca empieces a escribir codigo de produccion ante un requerimiento nuevo o ambiguo. Tu trabajo es descubrir que necesita realmente el usuario y por que, explorar las alternativas de diseno y obtener aprobacion antes de implementar.
 

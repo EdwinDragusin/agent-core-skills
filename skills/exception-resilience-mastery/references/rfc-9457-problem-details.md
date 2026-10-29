@@ -1,6 +1,6 @@
-# Estandarización RFC 9457: Problem Details for HTTP APIs
+# Estandarizacion RFC 9457: Problem Details for HTTP APIs
 
-El RFC 9457 (que reemplaza al RFC 7807) define el formato canónico para transportar detalles de errores legibles por humanos y máquinas en respuestas HTTP mediante el tipo de medio `application/problem+json`.
+El RFC 9457 (que reemplaza al RFC 7807) define el formato canonico para transportar detalles de errores legibles por humanos y maquinas en respuestas HTTP mediante el tipo de medio `application/problem+json`.
 
 ---
 
@@ -8,40 +8,40 @@ El RFC 9457 (que reemplaza al RFC 7807) define el formato canónico para transpo
 
 ```typescript
 /**
- * Objeto canónico Problem Details según RFC 9457
+ * Objeto canonico Problem Details segun RFC 9457
  */
 export interface ProblemDetails {
   /**
    * URI de referencia que identifica el tipo de problema.
-   * Si es un error genérico dependiente solo del código HTTP, se utiliza 'about:blank'.
+   * Si es un error generico dependiente solo del codigo HTTP, se utiliza 'about:blank'.
    */
   type: string;
 
   /**
-   * Resumen corto y legible que describe la categoría general del problema.
-   * No debe variar entre ocurrencias del mismo error ni incluir parámetros dinámicos sensibles.
+   * Resumen corto y legible que describe la categoria general del problema.
+   * No debe variar entre ocurrencias del mismo error ni incluir parametros dinamicos sensibles.
    */
   title: string;
 
   /**
-   * Código de estado HTTP generado por el servidor de origen (redundancia con el header HTTP).
+   * Codigo de estado HTTP generado por el servidor de origen (redundancia con el header HTTP).
    */
   status: number;
 
   /**
-   * Explicación legible por humanos específica de esta ocurrencia.
-   * Debe orientar al consumidor sobre cómo corregir la solicitud sin revelar datos de infraestructura.
+   * Explicacion legible por humanos especifica de esta ocurrencia.
+   * Debe orientar al consumidor sobre como corregir la solicitud sin revelar datos de infraestructura.
    */
   detail: string;
 
   /**
-   * URI o URN que identifica la ocurrencia específica del problema.
-   * Contiene el Trace ID o identificador único de correlación para auditoría forense.
+   * URI o URN que identifica la ocurrencia especifica del problema.
+   * Contiene el Trace ID o identificador unico de correlacion para auditoria forense.
    */
   instance: string;
 
   /**
-   * Extensión estructurada para validación de parámetros.
+   * Extension estructurada para validacion de parametros.
    */
   invalid_params?: Array<{
     name: string;
@@ -49,7 +49,7 @@ export interface ProblemDetails {
   }>;
 
   /**
-   * Extensiones adicionales permitidas por el estándar.
+   * Extensiones adicionales permitidas por el estandar.
    */
   [key: string]: unknown;
 }
@@ -57,7 +57,7 @@ export interface ProblemDetails {
 
 ---
 
-## 2. Implementación Canónica de Middleware en Hono / Deno
+## 2. Implementacion Canonica de Middleware en Hono / Deno
 
 ```typescript
 import { Context, Hono } from "hono";
@@ -70,12 +70,12 @@ export function registrarManejadorErroresRfc9457(app: Hono) {
     const traceId = c.get("traceId") ?? crypto.randomUUID();
     const instanceUri = `urn:trace:${traceId}`;
     
-    // 2. Obtener función de traducción según el locale negociado
+    // 2. Obtener funcion de traduccion segun el locale negociado
     const t = c.get("t") ?? ((key: string) => key);
     const acceptLang = c.req.header("accept-language") ?? "es";
     const idiomaResuelto = acceptLang.startsWith("en") ? "en" : "es";
 
-    // 3. Manejo de Excepciones de Dominio / Aplicación
+    // 3. Manejo de Excepciones de Dominio / Aplicacion
     if (err instanceof ExcepcionDominio) {
       const statusHttp = mapearCodigoDominioAHttpStatus(err.codigo);
       const titleLocalizado = t(`errores.${err.codigo}.titulo`);
@@ -114,7 +114,7 @@ export function registrarManejadorErroresRfc9457(app: Hono) {
       );
     }
 
-    // 5. Error No Controlado (500 Fail-Safe) - Cero fugas de información
+    // 5. Error No Controlado (500 Fail-Safe) - Cero fugas de informacion
     // Registro interno completo en el servidor
     console.error(JSON.stringify({
       nivel: "ERROR",
@@ -125,7 +125,7 @@ export function registrarManejadorErroresRfc9457(app: Hono) {
       causa: (err as any).cause,
     }));
 
-    // Respuesta invariablemente limpia y genérica para el cliente
+    // Respuesta invariablemente limpia y generica para el cliente
     c.header("Content-Type", "application/problem+json");
     c.header("Content-Language", idiomaResuelto);
 
@@ -145,12 +145,12 @@ export function registrarManejadorErroresRfc9457(app: Hono) {
 
 ---
 
-## 3. Lista de Verificación de Auditoría para RFC 9457
+## 3. Lista de Verificacion de Auditoria para RFC 9457
 
 - [ ] Encabezado `Content-Type` establecido en `application/problem+json`.
 - [ ] Atributo `type` presente con URI absoluta documentada o `about:blank`.
-- [ ] Atributo `title` presente y consistente con la categoría del error.
-- [ ] Atributo `status` numérico idéntico al código de respuesta HTTP.
+- [ ] Atributo `title` presente y consistente con la categoria del error.
+- [ ] Atributo `status` numerico identico al codigo de respuesta HTTP.
 - [ ] Atributo `detail` libre de trazas de pila, consultas SQL, nombres de tablas o rutas internas.
-- [ ] Atributo `instance` poblado con el Trace ID para soporte técnico.
-- [ ] Validación de formularios serializada bajo la extensión estructurada `invalid_params`.
+- [ ] Atributo `instance` poblado con el Trace ID para soporte tecnico.
+- [ ] Validacion de formularios serializada bajo la extension estructurada `invalid_params`.

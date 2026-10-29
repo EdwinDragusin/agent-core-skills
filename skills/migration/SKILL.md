@@ -3,7 +3,7 @@ name: migration
 description: "Migraciones reversibles sin downtime (Expand-Migrate-Contract) para esquemas DBML/SQL, APIs, configuracion y dependencias."
 ---
 
-# Migration — Transiciones Compatibles y Patron Expand/Contract
+# Migration - Transiciones Compatibles y Patron Expand/Contract
 
 Toda modificacion de esquema de base de datos en produccion, contrato de API publica o dependencia central debe ser **compatible hacia atras durante la transicion** y poseer una ruta de rollback probada antes de ejecutarse.
 
@@ -11,14 +11,14 @@ Toda modificacion de esquema de base de datos en produccion, contrato de API pub
 
 Prohibido renombrar o eliminar directamente una columna, tabla o campo de API en un solo paso si existen consumidores o instancias en ejecucion:
 
-1. **Fase 1 — EXPAND (Aditiva y Segura):**
+1. **Fase 1 - EXPAND (Aditiva y Segura):**
    - Agrega la nueva columna (nullable o con `DEFAULT` no bloqueante) o el nuevo campo en el DTO sin eliminar el anterior.
    - Configura **Dual-Write** en el codigo: escribe simultaneamente en el campo viejo y en el nuevo; sigue leyendo del viejo (o del nuevo con fallback al viejo).
-2. **Fase 2 — MIGRATE (Backfill en Lotes):**
-   - Rellena los registros historicos en lotes pequeños controlados (`LIMIT 1000`) con pausas o transaccion por lote para no bloquear tablas con locks exclusivos largos.
+2. **Fase 2 - MIGRATE (Backfill en Lotes):**
+   - Rellena los registros historicos en lotes pequenos controlados (`LIMIT 1000`) con pausas o transaccion por lote para no bloquear tablas con locks exclusivos largos.
    - Verifica paridad de datos (conteo de nulos = 0 y checksums iguales entre columna vieja y nueva).
    - Cambia las lecturas para consumir exclusivamente el campo nuevo.
-3. **Fase 3 — CONTRACT (Limpieza Diferida):**
+3. **Fase 3 - CONTRACT (Limpieza Diferida):**
    - Una vez confirmado en produccion que ningun consumidor lee ni escribe el campo antiguo, elimina la escritura dual en codigo y posteriormente ejecuta el `DROP COLUMN` o retiro del endpoint deprecado.
 
 ## 2. Checklist de Seguridad antes de Ejecutar Migracion

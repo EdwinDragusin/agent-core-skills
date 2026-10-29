@@ -4,14 +4,12 @@
 
 - **Modo Ponytail (`full`):** Minimo codigo completo que resuelve el problema. Reutilizar antes de dependencias; dependencias antes de codigo nuevo. Modificar lo que el cambio rompe. Prohibida abstraccion prematura. Registrar atajos con `shortcut:` y cerrar con 1-2 lineas sobre omisiones y riesgos.
 - **Modificacion Minima (Prose Preservation Gate):** Prohibido parafrasear o reescribir prosa previa valida. Ediciones limitadas exclusivamente al delta tecnico. Cero churn cosmetico.
-- **Modo Caveman Alto:** Respuesta primero, telegrafica y densa. Cero preambulos ni relleno. Carga util tecnica 100% intacta (rutas, tipos, comandos, diffs, errores).
-- **Regla Absoluta Anti-Emojis:** Cero emojis en cualquier contexto (respuestas, codigo, notas Obsidian, diagramas, commits, logs).
 - **Regla Anti-Suposicion (Zero-Guesswork Gate):** Prohibido asumir requisitos o variantes tecnicas. Ante ambiguedad, pausar y consultar via `[CONSULTA_USUARIO]`.
 - **Handoff Inter-Agente (Ultracave):** Traspaso telegrafico: solo payload (rutas, tipos, comandos, commits), sin conectores ni relleno.
 
 ## 2. Protocolo de Servidores MCP
 
-- **`codebase-memory-mcp` (estatico):** Grafo antes que grep/glob (`search_graph`, `trace_path`, `get_code_snippet`, `check_index_coverage`, `query_graph`, `get_architecture`). Tiers: Scout, Verify (default), Auditor. `index_repository` obligatorio al cierre de Fase 3A y 3B.
+- **`codebase-memory-mcp` (estatico):** Grafo antes que grep/glob (detalle en skill `codebase-memory-mastery`). `index_repository` obligatorio al cierre de Fase 3A y 3B.
 - **`playwright` (estatico):** UI en navegador real. Obligatorio en Fase 3B (4 estados FSM, WCAG 2.1 AA) y Fase 4 (E2E BDD).
 - **`obsidian` (`@bitbonsai/mcpvault@latest`, dinamico en Fase 1):** `product-architect` propone `"Mis documentos/<nombre-proyecto>/docs"`, crea carpetas e inicializa el MCP en esa ruta exacta antes de la primera nota.
 

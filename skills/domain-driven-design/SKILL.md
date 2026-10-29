@@ -3,7 +3,7 @@ name: domain-driven-design
 description: "Modela por dominio: Bounded Contexts, Agregados, Value Objects, Eventos, Lenguaje Ubicuo y persistencia en DBML."
 ---
 
-# Domain-Driven Design (DDD) — Diseno Estrategico y Tactico
+# Domain-Driven Design (DDD) - Diseno Estrategico y Tactico
 
 Modela el codigo reflejando las reglas e invariantes reales del negocio. Opera en dos niveles: **Estrategico** (fronteras entre contextos) y **Tactico** (bloques internos del modelo).
 

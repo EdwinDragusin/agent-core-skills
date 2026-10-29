@@ -1,16 +1,16 @@
-# Observabilidad Forense, W3C Trace Context y Redacción de PII (GDPR / Privacidad Global)
+# Observabilidad Forense, W3C Trace Context y Redaccion de PII (GDPR / Privacidad Global)
 
-El registro de incidencias debe ofrecer máxima visibilidad a los operadores sin exponer datos personales de identificación (PII) que infrinjan regulaciones de privacidad como el GDPR (Europa), CCPA (EE.UU.) o normativas locales (INAI, LGPD, etc.).
+El registro de incidencias debe ofrecer maxima visibilidad a los operadores sin exponer datos personales de identificacion (PII) que infrinjan regulaciones de privacidad como el GDPR (Europa), CCPA (EE.UU.) o normativas locales (INAI, LGPD, etc.).
 
 ---
 
-## 1. Estándar W3C Trace Context (`traceparent`)
+## 1. Estandar W3C Trace Context (`traceparent`)
 
 El encabezado `traceparent` unifica el rastreo distribuido de extremo a extremo:
 
-$$\text{Formato: } \underbrace{\text{00}}_{\text{Versión}}-\underbrace{\text{4bf92f3577b34da6a3ce929d0e0e4736}}_{\text{Trace ID (16 bytes / 32 hex)}}-\underbrace{\text{00f067aa0ba902b7}}_{\text{Parent/Span ID (8 bytes / 16 hex)}}-\underbrace{\text{01}}_{\text{Trace Flags (Sampled)}}$$
+$$\text{Formato: } \underbrace{\text{00}}_{\text{Version}}-\underbrace{\text{4bf92f3577b34da6a3ce929d0e0e4736}}_{\text{Trace ID (16 bytes / 32 hex)}}-\underbrace{\text{00f067aa0ba902b7}}_{\text{Parent/Span ID (8 bytes / 16 hex)}}-\underbrace{\text{01}}_{\text{Trace Flags (Sampled)}}$$
 
-### Propagación de Contexto Asíncrono en TypeScript / JavaScript (Node, Deno, Bun)
+### Propagacion de Contexto Asincrono en TypeScript / JavaScript (Node, Deno, Bun)
 
 ```typescript
 import { AsyncLocalStorage } from "node:async_hooks";
@@ -32,15 +32,15 @@ export function obtenerTraceIdActual(): string {
 
 ---
 
-## 2. Redacción Automática de PII en Registros JSON
+## 2. Redaccion Automatica de PII en Registros JSON
 
-### Claves Críticas Sujetas a Enmascaramiento Obligatorio:
+### Claves Criticas Sujetas a Enmascaramiento Obligatorio:
 - `password`, `contrasena`, `token`, `authorization`, `apiKey`, `secret`
 - `tarjeta`, `credit_card`, `cvv`, `pan`
-- Identificadores fiscales/personales por región: `curp`, `rfc`, `nss` (MX), `dni`, `nie` (ES), `ssn` (US), `cpf` (BR)
+- Identificadores fiscales/personales por region: `curp`, `rfc`, `nss` (MX), `dni`, `nie` (ES), `ssn` (US), `cpf` (BR)
 - `correo`, `email`, `telefono`
 
-### Función de Sanitización Canónica
+### Funcion de Sanitizacion Canonica
 
 ```typescript
 const CLAVES_SENSIBLES = new Set([

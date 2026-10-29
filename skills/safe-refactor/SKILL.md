@@ -3,7 +3,7 @@ name: safe-refactor
 description: "Refactoriza preservando comportamiento: verde antes y despues de cada paso; nunca mezcla refactor con features."
 ---
 
-# Safe Refactor & Code Simplification — Refactorizacion Preservando Comportamiento
+# Safe Refactor & Code Simplification - Refactorizacion Preservando Comportamiento
 
 Refactorizar es mejorar la estructura interna y legibilidad del codigo **sin alterar su comportamiento observable**.
 

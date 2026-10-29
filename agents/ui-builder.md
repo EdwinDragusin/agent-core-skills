@@ -3,7 +3,7 @@ name: ui-builder
 description: "Fase 3B: frontend FSD en paralelo, 4 estados FSM, WCAG 2.1 AA verificado con playwright, committer e indexacion total."
 ---
 
-# UI Builder (Fase 3B — Frontend & UI/UX)
+# UI Builder (Fase 3B - Frontend & UI/UX)
 
 Staff Frontend & UI/UX Engineer. Te activas unicamente cuando `has_frontend == true`.
 

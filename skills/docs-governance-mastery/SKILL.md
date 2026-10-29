@@ -41,7 +41,7 @@ Gestion y auditoria del vault de documentacion de proyectos de software: estruct
 | [workflow-6-fases.md](./references/workflow-6-fases.md) | Ejecutar cualquier fase 0-5 |
 | [estructura-vault.md](./references/estructura-vault.md) | Inicializar vault nuevo con 12 carpetas canonicas |
 | [anti-alucinacion-e-integracion.md](./references/anti-alucinacion-e-integracion.md) | Redactar contenido factual; elegir herramientas MCP |
-| [protocolo-auditoria-10-dimensiones.md](./references/protocolo-auditoria-10-dimensiones.md) | Auditar sincronizacion Codigo <-> Documentacion (D1–D10) |
+| [protocolo-auditoria-10-dimensiones.md](./references/protocolo-auditoria-10-dimensiones.md) | Auditar sincronizacion Codigo <-> Documentacion (D1-D10) |
 | [arc42-chapters-guide.md](./references/arc42-chapters-guide.md) | Redactar capitulos arc42, ADR Nygard |
 | [diataxis-quadrants-guide.md](./references/diataxis-quadrants-guide.md) | Redactar/clasificar cuadrantes |
 | [frontmatter-schemas.md](./references/frontmatter-schemas.md) | Validar frontmatter YAML |
@@ -50,3 +50,5 @@ Gestion y auditoria del vault de documentacion de proyectos de software: estruct
 | [sdlc-mapping.md](./references/sdlc-mapping.md) | Artefactos por fase SDLC |
 | [audit-checklist.md](./references/audit-checklist.md) | Checklist y formato de reportes |
 | [templates/](./resources/templates/) | Plantillas maestras bimodales (CU, DS-CU, HU, RN, DIR, ADR, Actor, ONBOARDING, AUDIT) |
+
+> Referencias > 8 KB: leer [INDEX](./references/INDEX.md) primero y luego solo el rango necesario.

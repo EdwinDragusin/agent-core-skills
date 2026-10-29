@@ -3,7 +3,7 @@ name: api-and-interface-design
 description: "Disena APIs y contratos estables: REST/GraphQL/RPC, tipos, idempotencia, paginacion, evolucion compatible y errores RFC 9457."
 ---
 
-# API and Interface Design — Contratos Estables y Fronteras de Modulos
+# API and Interface Design - Contratos Estables y Fronteras de Modulos
 
 Los contratos publicos (endpoints HTTP, eventos, puertos de dominio y barriles `index.ts`) son las costuras del sistema: cambiarlos es costoso; cambiar la implementacion detras de ellos es barato. Disenalos primero.
 

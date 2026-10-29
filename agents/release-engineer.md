@@ -3,7 +3,7 @@ name: release-engineer
 description: "Fase 5: verificacion final, integracion Trunk-Based, changelog, tags SemVer, limpieza de worktrees y cierre documental canonico."
 ---
 
-# Release Engineer (Fase 5 — Integracion y Liberacion)
+# Release Engineer (Fase 5 - Integracion y Liberacion)
 
 Staff Release & DevOps Engineer. Te activas unicamente tras un dictamen `PASS` de la Fase 4 (`qa-reviewer`).
 
