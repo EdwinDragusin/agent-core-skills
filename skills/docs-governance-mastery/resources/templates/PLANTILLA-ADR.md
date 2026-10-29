@@ -7,29 +7,44 @@ id: ADR-001
 tags:
   - adr
   - arquitectura/persistencia
-titulo: "Patron de Persistencia y Concurrencia Optimista"
+titulo: "Titulo Descriptivo de la Decision"
 ---
 
-# ADR-001: Patron de Persistencia y Concurrencia Optimista
+# ADR-001: Titulo Descriptivo de la Decision
 
-## Estado
-Aprobado
+## Resumen Ejecutivo para Perfiles de Negocio y Direccion
+*(Seccion en lenguaje claro comprensible por cualquier perfil sin conocimientos de programacion).*
+- **Que problema de la vida real resuelve**: Explicacion breve en 2 lineas sobre la necesidad operativa, funcional o de servicio que motiva esta decision.
+- **Que riesgo o impacto operativo existiria sin esta decision**: Explicacion clara de las fallas, perdida de datos o problemas para usuarios o la institucion en caso de no aplicarla.
+- **Que cambia en la operacion diaria**: Descripcion de los efectos visibles para postulantes, evaluadores o administradores del sistema.
 
-## Contexto
-Operaciones concurrentes requieren prevencion de lost updates sin bloqueos pesimistas.
+---
 
-## Decision
-Adopcion de Concurrencia Optimista CAS (Compare-And-Swap) en agregados mutables:
-1. Columna `version integer not null default 1` en tablas transaccionales.
-2. Escritura valida version BD vs version leida.
-3. Si difiere, aborta y lanza `ConflictoDeConcurrenciaException` (HTTP 409 Problem Details).
+## Especificacion Tecnica de Ingenieria (Para Desarrolladores y Agentes)
 
-## Consecuencias
+### 1. Estado y Metadatos
+- **Estado**: Aprobado
+- **Decisiones previas vinculadas**: [[ADR-000-historico-decisiones|ADR-000]]
+- **Capitulos arc42 impactados**: [[capitulo-04-estrategia-solucion]], [[capitulo-05-vista-de-bloques]]
 
-### Positivas
-- Ausencia de bloqueos en base de datos.
-- Consistencia garantizada en sistemas distribuidos.
+### 2. Contexto Tecnico y Fuerzas en Tension
+Exposicion detallada del problema computacional, restricciones de concurrencia, volumen de datos o dependencias tecnicas.
 
-### Negativas / Compromisos
-- Clientes deben manejar HTTP 409 con logica de reintento.
-- DTOs de mutacion exigen parametro `version`.
+### 3. Decision Arquitectonica y Patrones
+Especificacion exacta de la solucion adoptada:
+1. Patron implementado (ej. Concurrencia Optimista CAS, Transactional Outbox, Inmutabilidad JSONB).
+2. Algoritmos, librerias o estructuras de datos seleccionadas.
+3. Fronteras arquitectonicas y contratos entre capas.
+
+### 4. Consecuencias
+
+#### Positivas (Beneficios)
+- Consistencia estricta y aislamiento de responsabilidades.
+- Alto rendimiento y ausencia de bloqueos.
+
+#### Negativas / Compromisos (Trade-offs)
+- Complejidad adicional en clientes o consumidores.
+- Requisitos de versionado o migracion de esquemas.
+
+#### Estrategia de Mitigacion
+Mecanismos implementados para contener los compromisos asumidos.

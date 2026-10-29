@@ -98,16 +98,15 @@ Si la operacion abarca multiples casos de uso o interacciones de negocio.
 - Ficha tecnica con actor principal, disparador (trigger), inputs, outputs y reglas de negocio vinculadas `[[RN-...]]`.
 - Secuencia narrativa y lista de casos de uso involucrados `[[CU-...]]`.
 
-### 4.3. Casos de Uso (`docs/guia/referencia/casos-de-uso/CU-NNN.md`)
-Especificacion funcional completa:
+### 4.3. Casos de Uso Bimodales (`docs/guia/referencia/casos-de-uso/CU-NNN.md`)
+Especificacion bimodal desacoplada:
 - Frontmatter YAML: `actor_principal`, `aliases`, `complejidad`, `estado`, `id`, `modulo`, `tablas_afectadas`, `tags`, `titulo`.
-- Descripcion e Informacion General (callout con actor, modulo, reglas relacionadas, CUs previos y siguientes).
-- Precondiciones garantizadas.
-- Flujo Principal (Happy Path) paso a paso con endpoints y operaciones.
-- Flujos Alternativos y Excepciones: minimo dos bifurcaciones documentadas con codigo HTTP esperado (ej. 400 Bad Request, 404 Not Found, 409 Conflict).
-- Postcondiciones garantizadas.
-- Contrato de Persistencia: tablas exactas afectadas y tipo de operacion DML (`INSERT`, `UPDATE`, `DELETE logico`).
-- Enlace al Diagrama de Secuencia `[[DS-CU-NNN-...]]`.
+- **Seccion 1**: Proposito y valor de negocio en lenguaje comprensible por perfiles no tecnicos.
+- **Seccion 2**: Precondiciones funcionales observables.
+- **Seccion 3**: Flujo Principal (Happy Path) narrativo puro: prohibido citar DTOs, JSONB, SQL, HTTP o hashing en los pasos de interaccion de usuario.
+- **Seccion 4**: Flujos Alternativos y Excepciones funcionales en terminos de servicio.
+- **Seccion 5**: Postcondiciones y reglas vinculadas.
+- **Seccion 6**: Contrato Tecnico de Implementacion (exclusivo ingenieria/IA): Endpoints REST, Controller, UseCase, DTOs in/out, errores RFC 9457 y enlace a `[[DS-CU-NNN]]`.
 
 ### 4.4. Diagramas de Secuencia Tecnicos (`docs/arquitectura/diagramas-secuencia/DS-CU-NNN.md`)
 Diseno tecnico exacto en Clean Architecture:
@@ -117,15 +116,13 @@ Diseno tecnico exacto en Clean Architecture:
   `Actor` -> `Controller` -> `UseCase` -> `Repository/Port` -> `PostgreSQL DB` -> `BitacoraService`.
 - Bloques `alt / else` documentando el camino feliz y las excepciones controladas con DTOs de error.
 
-### 4.5. Reglas de Negocio (`docs/arquitectura/reglas/RN-XNN.md`)
-Invariantes y restricciones formales con prefijos taxonomicos:
-- `RN-A*`: Agenda, cupos y capacidad.
-- `RN-E*`: Evaluacion, reactivos y temporizadores.
-- `RN-I*`: Identidad, instituciones e historiales.
-- `RN-S*`: Seguridad, autenticacion y rate limiting.
-- `RN-C*`: Convenios y requisitos.
-- `RN-F*`: Frontend, validacion Zod y accesibilidad.
-- **Obligatorio**: Cada criterio de aceptacion debe terminar con un ancla de bloque Obsidian (`^identificador`) para trazabilidad granular.
+### 4.5. Reglas de Negocio vs Directrices de Software
+- **Reglas de Negocio Institucionales (`docs/arquitectura/reglas/RN-XNN.md`)**:
+  - Invariantes y politicas de servicio con prefijos: `RN-A*` (Agenda), `RN-E*` (Evaluacion), `RN-I*` (Identidad), `RN-S*` (Seguridad), `RN-C*` (Convenios).
+  - Prohibido incluir tipos de base de datos SQL (`varchar nullable`), sentencias DDL/DML o frameworks web.
+  - Cada criterio de aceptacion debe terminar con un ancla de bloque Obsidian (`^identificador`).
+- **Directrices Tecnicas de Software (`docs/arquitectura/directrices/DIR-*.md`)**:
+  - Convenciones de ingenieria, empaquetado y linters: `DIR-FRONT-*` (FSD, barriles `index.ts`, resolvers Zod), `DIR-BACK-*` (UnitOfWork, Outbox), `DIR-SEC-*` (Sanitizacion).
 
 ### 4.6. Catalogo Canonico de DTOs (`docs/arquitectura/dto/CATALOGO-DTO.md`)
 - Matriz de reconciliacion nombre a nombre entre CU, DS y Codigo.
@@ -137,8 +134,9 @@ Invariantes y restricciones formales con prefijos taxonomicos:
 - **Concurrencia Optimista (CAS)**: Toda tabla mutable debe incluir `version integer not null default 1`.
 - **Tablas Inmutables (Append-Only)**: Tablas de auditoria y transiciones con permisos restringidos de solo insercion.
 
-### 4.8. Glosario de Lenguaje Ubicuo (`docs/glosario.md`)
-- Definicion precisa de terminos en el contexto del Bounded Context, clasificados por Agregado Raiz, Entidad, Value Object o Servicio de Dominio.
+### 4.8. Glosario Dual y Guia de Onboarding
+- `docs/ONBOARDING.md`: Guia de incorporacion por roles (Ruta 1: Negocio/Lego, Ruta 2: Frontend, Ruta 3: Backend).
+- `docs/glosario.md`: Glosario dual estructurado en 1) Negocio y Dominio (analogias cotidianas, prohibido clasificar personas como "Agregado Raiz") y 2) Ingenieria DDD.
 
 ---
 
