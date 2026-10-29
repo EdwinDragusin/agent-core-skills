@@ -7,7 +7,7 @@
 [![Filosofia](https://img.shields.io/badge/arquitectura-Zero--Trust%20%7C%20Ponytail%20%7C%20Caveman-red.svg)](#visión-general-y-motivación)
 [![Estandar](https://img.shields.io/badge/standard--readme-conforme-success.svg)](https://github.com/RichardLitt/standard-readme)
 
-Plugin nativo y framework integral de gobernanza arquitectónica, orquestación de **6 subagentes especializados en 5 fases del SDLC**, integración con **3 servidores MCP** (`obsidian`, `codebase-memory-mcp`, `playwright`) y catálogo de **32 skills de ingeniería de software en español** comprimidas en alta densidad de tokens (`caveman-compress`). Compatible de forma nativa con **Google Antigravity** y universalmente instalable en **Claude Code, Cursor, OpenAI Codex, Gemini CLI y OpenCode**.
+Plugin nativo y framework integral de gobernanza arquitectónica, orquestación de **8 subagentes especializados** (pipeline SDLC en 5 fases + gatekeepers adversariales y transversal pre-código), integración con **3 servidores MCP** (`obsidian`, `codebase-memory-mcp`, `playwright`), linter documental automatizado (`scripts/doc-linter.ps1`) y catálogo de **32 skills de ingeniería de software en español** comprimidas en alta densidad de tokens (`caveman-compress`). Compatible de forma nativa con **Google Antigravity** (instalable via `agy plugin install`) y universalmente integrable en **Claude Code, Cursor, OpenAI Codex, Gemini CLI y OpenCode**.
 
 ---
 
@@ -16,7 +16,7 @@ Plugin nativo y framework integral de gobernanza arquitectónica, orquestación 
 - [Visión General y Motivación](#visión-general-y-motivación)
 - [Arquitectura del Plugin y Ecosistema](#arquitectura-del-plugin-y-ecosistema)
 - [Guía de Uso y Modos Operativos (AGENTS.md)](#guía-de-uso-y-modos-operativos-agentsmd)
-- [Pipeline de 6 Subagentes por Fase del SDLC](#pipeline-de-6-subagentes-por-fase-del-sdlc)
+- [Pipeline de 8 Subagentes por Fase del SDLC](#pipeline-de-8-subagentes-por-fase-del-sdlc)
 - [Orquestación de Servidores MCP por Fase](#orquestación-de-servidores-mcp-por-fase)
 - [Catálogo de 32 Skills Versionadas](#catálogo-de-32-skills-versionadas)
   - [1. Gobernanza Arquitectónica y Documentación](#1-gobernanza-arquitectónica-y-documentación)
@@ -39,12 +39,13 @@ Plugin nativo y framework integral de gobernanza arquitectónica, orquestación 
 
 ## Visión General y Motivación
 
-El desarrollo de software asistido por agentes requiere contratos explícitos, aislamiento de contexto y verificación empírica. Este plugin soluciona los fallos sistémicos de los modelos de lenguaje mediante cuatro pilares:
+El desarrollo de software asistido por agentes requiere contratos explícitos, aislamiento de contexto y verificación empírica. Este plugin soluciona los fallos sistémicos de los modelos de lenguaje mediante cinco pilares:
 
-1. **Modelo Zero-Trust y Source-Driven:** Obligación de inspeccionar el grafo de código (`codebase-memory-mcp`), tipos instalados y documentación oficial antes de afirmar o codificar.
-2. **Filosofía Ponytail y Economía Caveman:** Mínimo código completo sin abstracción prematura (`ponytail`), respuestas directas con carga técnica intacta (`caveman`) y skills redactadas en español de alta densidad que ahorran entre 50% y 65% de tokens de contexto.
-3. **Documentación Viva Sincronizada (Diátaxis + arc42 + DBML):** Bóveda en Obsidian inicializada dinámicamente en `Mis documentos/<nombre-proyecto>/docs` desde la Fase 1 y alimentada automáticamente desde el código en las Fases 2, 3A y 3B.
+1. **Modelo Zero-Trust y Source-Driven:** Obligación de inspeccionar el grafo de código (`codebase-memory-mcp`), tipos instalados y esquemas reales antes de afirmar o codificar (`Source-Driven DTO Gate`).
+2. **Filosofía Ponytail y Economía Caveman:** Mínimo código completo sin abstracción prematura (`ponytail`), respuestas directas con carga técnica intacta (`caveman`) y presupuesto estricto de tokens de contexto.
+3. **Gobernanza Bimodal (arc42 + Diátaxis + DBML CAS):** Separación estricta entre experiencia funcional pura (perfiles Lego/negocio) y contratos técnicos tipados con matriz exhaustiva de validaciones Zod, Historias de Usuario consolidadas (`historias-de-usuario.md`), directrices técnicas (`directrices/DIR-*`), glosario dual y rutas guiadas en `docs/ONBOARDING.md`.
 4. **Construcción TDD en Equipo Paralelo (`/teamwork`) y Barra Inquebrantable:** Subagentes concurrentes por tarea atómica (`dispatching-parallel-agents`) bajo ciclo Red-Green-Refactor y prohibición de rebajar umbrales o silenciar linters (`constraint-driven-development`).
+5. **Compuertas Bloqueantes de Handoff:** `Pre-Change Interview Gate` obligatoria previa a cualquier modificación, compuerta adversarial `ux-auditor` con Playwright vivo y `Prose Preservation Gate` (cero parafraseo cosmético en notas preexistentes).
 
 > [!IMPORTANT]
 > **Principio Cardinal de Evidencia Empírica:** Prohibido declarar una tarea, prueba o rama como completada sin haber ejecutado el runner, compilador o verificación en navegador (`playwright`) en el turno actual con salida limpia verificada.
@@ -107,7 +108,7 @@ Al activar el plugin, [`rules/AGENTS.md`](rules/AGENTS.md) (y [`CLAUDE.md`](CLAU
 
 ---
 
-## Pipeline de 6 Subagentes por Fase del SDLC
+## Pipeline de 8 Subagentes por Fase del SDLC
 
 Los subagentes estan definidos en [`agents/`](agents/) con su protocolo completo; [`rules/AGENTS.md`](rules/AGENTS.md) conserva el resumen permanente:
 
@@ -116,9 +117,11 @@ Los subagentes estan definidos en [`agents/`](agents/) con su protocolo completo
 | **Fase 1** | [`product-architect`](agents/product-architect.md) | Descubrimiento funcional (Greenfield) o ingenieria inversa desde codigo (Brownfield). Inicializacion de jerarquia canonica y MCP `obsidian`. Cero codigo. | `ONBOARDING.md`, arc42 (Caps 1, 2, 3, 10), `historias-de-usuario.md` consolidado, CUs bimodales (Secciones 1-5 puras), Actores `ACT-NNN`, Procesos `PB-NNN` y Glosario (Negocio). |
 | **Fase 2** | [`system-architect`](agents/system-architect.md) | Diseno DDD, modelo relacional DBML con CAS (`version`), capa de aplicacion, directrices `DIR-*`, catalogo DTO Source-Driven factual (RFC 9457) y ADRs bimodales Nygard. | arc42 (Caps 4, 5, 6, 7, 8, 9, 11), `relacional.dbml`, `DS-CU-NNN.md` Mermaid, `RN-XNN.md` (^ancla), directrices `DIR-*`, `CATALOGO-DTO.md` y plan atomico con `[PARALELO]`. |
 | **Fase 3A** | [`core-builder`](agents/core-builder.md) | Backend paralelo (`/teamwork`) bajo TDD Red-Green-Refactor, RFC 9457, committer diferido e indexacion en `codebase-memory-mcp`. | Sincronizacion Docs-as-Code en 12 carpetas canonicas (`capitulo-05-vista-de-bloques/`, `vocabulario-de-errores.md`, `CATALOGO-DTO.md`, `capitulo-11-...`). |
-| **Fase 3B** | [`ui-builder`](agents/ui-builder.md) | UI FSD paralelo, 4 estados FSM, WCAG 2.1 AA. Gatekeeper obligatorio: [`ux-auditor`](agents/ux-auditor.md) con Playwright vivo (veredicto APPROVE/REJECT). | Sincronizacion Docs-as-Code UI (`capitulo-05-vista-de-bloques/`, `how-to/ejecutar-pruebas-ui.md`, `capitulo-11-...`). |
+| **Fase 3B** | [`ui-builder`](agents/ui-builder.md) | UI FSD paralelo, 4 estados FSM, WCAG 2.1 AA. Docs-as-Code en componentes UI y pruebas. | Sincronizacion Docs-as-Code UI (`capitulo-05-vista-de-bloques/`, `how-to/ejecutar-pruebas-ui.md`, `capitulo-11-...`). |
+| **Gate 3B** | [`ux-auditor`](agents/ux-auditor.md) | Gatekeeper adversarial de UI: navegacion real con Playwright vivo contra 11 antipatrones UX y WCAG. | Evaluacion obligatoria con veredicto formal `APPROVE` / `REJECT` previo a committer e indexacion. |
 | **Fase 4** | [`qa-reviewer`](agents/qa-reviewer.md) | Auditoria independiente sin editar codigo: CUs bimodales con matriz de campos, Blast Radius, E2E con Playwright vivo, OWASP y Matriz D1-D10. | Dictamen formal binario (`PASS` / `FAIL`) en `docs/auditorias/AUDIT-Fase4.md` y reporte `doc-linter.ps1`. |
 | **Fase 5** | [`release-engineer`](agents/release-engineer.md) | Suite verde, integracion Trunk-Based, tags SemVer, worktrees limpios, reindexacion final. | Actualizacion de `capitulo-07-vista-de-despliegue.md`, `ROADMAP-V1.md` y transicion de ADRs a `Aceptado`. |
+| **Pre-Doc** | [`software-doc-architect`](agents/software-doc-architect.md) | Especialista transversal pre-codigo: modelado DDD, arquitectura limpia, contratos RFC 9457, DBML CAS, directrices bimodales y Living Knowledge Graph. | Especificacion completa pre-codigo y cirugia documental precisa sobre el grafo de Obsidian. |
 
 ---
 
@@ -212,14 +215,21 @@ Proporciona el siguiente prompt a tu agente de IA para que instale y configure a
 
 ### Opción A: Instalación Nativa en Google Antigravity
 
-Clona el repositorio directamente en el directorio de plugins de Antigravity para activar en un solo paso las reglas permanentes (`rules/AGENTS.md`), los 6 subagentes (`agents/`), las 32 skills (`skills/`) y los servidores MCP (`mcp_config.json`):
+El plugin se puede instalar directamente mediante el CLI oficial de Antigravity (`agy`) o clonando el repositorio en el directorio de plugins:
 
 ```bash
+# 1. Instalacion directa con Antigravity CLI (Recomendado)
+agy plugin install https://github.com/EdwinDragusin/agent-core-skills.git
+
+# 2. Alternativa manual via Git Clone
 # Windows (PowerShell)
 git clone https://github.com/EdwinDragusin/agent-core-skills.git "$HOME\.gemini\config\plugins\agent-core-skills"
 
 # macOS / Linux
 git clone https://github.com/EdwinDragusin/agent-core-skills.git "$HOME/.gemini/config/plugins/agent-core-skills"
+
+# 3. Validacion de manifiesto, subagentes y skills
+agy plugin validate .
 ```
 
 ### Opción B: Instalación Multi-Agente (Claude Code, Cursor, Codex, OpenCode)
@@ -229,12 +239,12 @@ El repositorio incluye manifiestos nativos en [`.claude-plugin/`](.claude-plugin
 ```bash
 # 1. Claude Code (via sistema de plugins o instalacion global)
 git clone https://github.com/EdwinDragusin/agent-core-skills.git "$HOME/.claude/plugins/agent-core-skills"
-cp "$HOME/.claude/plugins/agent-core-skills/ rules/AGENTS.md" "$HOME/.claude/CLAUDE.md"
+cp "$HOME/.claude/plugins/agent-core-skills/rules/AGENTS.md" "$HOME/.claude/CLAUDE.md"
 
 # 2. Cursor IDE / OpenAI Codex / Proyecto Local (Workspace)
 mkdir -p .agents
 git clone https://github.com/EdwinDragusin/agent-core-skills.git .agents/agent-core-skills
-cp .agents/agent-core-skills/AGENTS.md ./AGENTS.md
+cp .agents/agent-core-skills/rules/AGENTS.md ./AGENTS.md
 ```
 
 ---
@@ -255,14 +265,21 @@ Todo cambio en este repositorio se rige por las siguientes normas:
 
 ## Auditoría Automatizada
 
-Ejecuta el validador determinista [`scripts/validate_readme.ts`](scripts/validate_readme.ts) (mismo motor que la skill `readme-architecture-mastery` del plugin `agent-core-extras`) para certificar la integridad estructural y de seguridad del repositorio:
+El repositorio incluye herramientas deterministas de verificacion para documentacion y estructura:
 
 ```bash
-# Escaneo estatico de cumplimiento de las 7 dimensiones
+# 1. Escaneo estatico de estructura de README (7 dimensiones)
 deno run --allow-read ./scripts/validate_readme.ts ./README.md
 
-# Modo de auto-remediacion segura
+# 2. Modo de auto-remediacion segura de README
 deno run --allow-read --allow-write ./scripts/validate_readme.ts --fix ./README.md
+```
+
+Para auditar vaults documentales generados bajo el estandar maestro:
+
+```powershell
+# Auditoria de trazabilidad wikilinks, bimodalidad, matrices Zod y cero emojis
+powershell -ExecutionPolicy Bypass -File ./scripts/doc-linter.ps1 -DocsPath docs
 ```
 
 ---
