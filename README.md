@@ -237,9 +237,11 @@ agy plugin validate .
 El repositorio incluye manifiestos nativos en [`.claude-plugin/`](.claude-plugin/plugin.json), [`.cursor-plugin/`](.cursor-plugin/plugin.json), [`.codex-plugin/`](.codex-plugin/plugin.json) y [`gemini-extension.json`](gemini-extension.json):
 
 ```bash
-# 1. Claude Code (via sistema de plugins o instalacion global)
-git clone https://github.com/EdwinDragusin/agent-core-skills.git "$HOME/.claude/plugins/agent-core-skills"
-cp "$HOME/.claude/plugins/agent-core-skills/rules/AGENTS.md" "$HOME/.claude/CLAUDE.md"
+# 1. Claude Code (via Marketplace nativo o instalacion global)
+/plugin marketplace add EdwinDragusin/agent-core-skills
+/plugin install agent-core-skills@agent-core-skills-marketplace
+/reload-plugins
+cp "$HOME/.claude/plugins/marketplaces/agent-core-skills-marketplace/rules/AGENTS.md" "$HOME/.claude/CLAUDE.md"
 
 # 2. Cursor IDE / OpenAI Codex / Proyecto Local (Workspace)
 mkdir -p .agents

@@ -8,5 +8,6 @@
   "homepage": "https://github.com/EdwinDragusin/agent-core-skills",
   "repository": "https://github.com/EdwinDragusin/agent-core-skills",
   "license": "MIT",
-  "skills": "./skills"
+  "skills": "./skills",
+  "mcpServers": "./mcp_config.json"
 }
