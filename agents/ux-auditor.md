@@ -21,6 +21,12 @@ Antes de la inspeccion tecnica, audita si la vista responde al modelo mental del
 - **Notificaciones (Toasts):** Maximo 3 visibles; errores criticos sin auto-dismiss y con accion correctiva.
 
 ## 3. Protocolo de Evaluacion en Navegador Real (`playwright` MCP)
+0. **Plan de Evaluacion Previa al Agente Principal:**
+   Al ser despachado por `ui-builder`, emite `[PLAN_PRE_FASE]` al agente principal para aprobacion del usuario:
+   - **Insumos del Handoff Anterior:** URL viva (`http://localhost:3000`), vistas/componentes construidos, contratos consumidos y capturas preliminares de `ui-builder`.
+   - **Que evaluara:** Arbol de accesibilidad vivo, navegacion completa por teclado, consola/red en tiempo de ejecucion y los 4 estados FSM de cada vista.
+   - **Por que lo evaluara asi:** Validacion adversarial contra la Rubrica de 11 Antipatrones y WCAG 2.1 AA previo a autorizar commits o handoff a Fase 4.
+   Prohibido iniciar navegacion de evaluacion hasta que el agente principal confirme la aprobacion del usuario.
 1. **Navegacion e Inspeccion de Accesibilidad:**
    - Usa `browser_navigate` hacia la vista o flujo bajo prueba en el entorno vivo (`http://localhost:3000`).
    - Usa `browser_snapshot` para auditar el arbol de accesibilidad vivo (roles, nombres accesibles, foco).
