@@ -45,7 +45,7 @@ El desarrollo de software asistido por agentes requiere contratos explicitos, ai
 2. **Filosofia Ponytail y Economia Caveman:** Minimo codigo completo sin abstraccion prematura (`ponytail`), respuestas directas con carga tecnica intacta (`caveman`) y presupuesto estricto de tokens de contexto.
 3. **Gobernanza Bimodal (arc42 + Diataxis + DBML CAS):** Separacion estricta entre experiencia funcional pura (perfiles Lego/negocio) y contratos tecnicos tipados con matriz exhaustiva de validaciones Zod, Historias de Usuario consolidadas (`historias-de-usuario.md`), directrices tecnicas (`directrices/DIR-*`), glosario dual y rutas guiadas en `docs/ONBOARDING.md`.
 4. **Construccion TDD en Equipo Paralelo (`/teamwork`) y Barra Inquebrantable:** Subagentes concurrentes por tarea atomica (`dispatching-parallel-agents`) bajo ciclo Red-Green-Refactor y prohibicion de rebajar umbrales o silenciar linters (`constraint-driven-development`).
-5. **Compuertas Bloqueantes de Handoff:** `Pre-Change Interview Gate` obligatoria previa a cualquier modificacion, compuerta adversarial `ux-auditor` con Playwright vivo y `Prose Preservation Gate` (cero parafraseo cosmetico en notas preexistentes).
+5. **Compuertas Bloqueantes y Planes Pre-Fase:** Plan de Ejecucion Pre-Fase (`[PLAN_PRE_FASE]`) emitido por cada subagente al agente principal para presentacion y aprobacion obligatoria del usuario antes de ejecutar cambios (declarando que modificara, por que asi y que toma del handoff previo), `Pre-Change Interview Gate`, compuerta adversarial `ux-auditor` con Playwright vivo y `Prose Preservation Gate` (cero parafraseo cosmetico).
 
 > [!IMPORTANT]
 > **Principio Cardinal de Evidencia Empirica:** Prohibido declarar una tarea, prueba o rama como completada sin haber ejecutado el runner, compilador o verificacion en navegador (`playwright`) en el turno actual con salida limpia verificada.
@@ -104,7 +104,8 @@ Al activar el plugin, [`rules/AGENTS.md`](rules/AGENTS.md) (y [`CLAUDE.md`](CLAU
 - **Modo Ponytail (`full`):** Escribir el minimo codigo completo que resuelve el problema. Reutilizar codigo existente antes de dependencias; dependencias antes de codigo nuevo. Prohibida la abstraccion prematura. Todo atajo deliberado se marca con `// shortcut:` y cada respuesta tecnica cierra con 1-2 lineas declarando que se omitio y riesgos latentes.
 - **Modo Caveman Adaptativo:** Respuesta tecnica en la primera linea sin preambulos conversacionales. En codigo y terminal: telegrafico; en diseno y arquitectura: prosa estructurada.
 - **Regla Absoluta Anti-Emojis:** Cero emojis en respuestas, codigo fuente, notas de Obsidian, diagramas Mermaid, commits o logs.
-- **Handoff Inter-Agente (`ultracave`):** Traspaso entre subagentes compuesto exclusivamente por payload tecnico (rutas, tipos, comandos, hashes de commit).
+- **Handoff Inter-Agente (`ultracave`):** Traspaso entre subagentes compuesto exclusivamente por payload tecnico (rutas, tipos, comandos, hashes de commit). Prohibido pasar planes en el handoff.
+- **Plan de Ejecucion Pre-Fase y Aprobacion de Usuario:** Cada subagente emite `[PLAN_PRE_FASE]` al agente principal, quien lo presenta directamente al usuario para su aprobacion: 1) Insumos del handoff previo tomados, 2) Que anadira o modificara con rutas concretas, y 3) Por que lo modificara asi (diseno, reglas RN-*, directrices DIR-* y ponytail). Ningun subagente toca codigo o notas sin la aprobacion explicita del usuario.
 
 ---
 
