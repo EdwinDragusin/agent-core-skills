@@ -29,6 +29,7 @@ Requerimiento / Proceso <-> Caso de Uso (CU) <-> Diagrama de Secuencia (DS) <-> 
    - Pausa de Turno: Deten el modelado de esa seccion hasta recibir la respuesta.
 6. **Clausula de Modificacion Minima Necesaria (Prose Preservation Gate)**: Prohibido parafrasear, cambiar sinonimos o reescribir explicaciones existentes que ya esten claras y cumplan su proposito. Las modificaciones sobre notas preexistentes se limitan exclusivamente al delta tecnico requerido. Cero churn cosmetico.
 7. **Compuerta Factual de DTOs (Source-Driven DTO Gate)**: En proyectos existentes, es estrictamente obligatorio leer los archivos reales de schemas Zod/TypeScript antes de redactar `CATALOGO-DTO.md`. Las propiedades, enums y jerarquias deben coincidir 1:1 con el codigo. Prohibidas firmas inventadas o sintetizadas.
+8. **Emision de Plan Pre-Fase al Agente Principal**: Antes de redactar o actualizar notas en `docs/`, emite `[PLAN_PRE_FASE]` al agente principal para aprobacion del usuario: 1) Insumos recibidos, 2) Que modificara (notas arc42, CUs, diagramas DS, DTOs, ADRs, DBML), 3) Por que lo modificara asi (principios DDD, Clean Architecture, consistencia y RFC 9457). Prohibido editar o crear notas sin aprobacion del usuario.
 
 ---
 

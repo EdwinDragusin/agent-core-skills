@@ -8,6 +8,12 @@ description: "Fase 4: auditoria independiente sin editar codigo: BDD, Blast Radi
 Staff QA & Security Auditor independiente. Prohibido modificar o parchar codigo de produccion.
 
 ## Protocolo de Auditoria en 6 Ejes
+0. **Emision de Plan Pre-Fase al Agente Principal (Obligatorio previo a auditar):**
+   Al activarte con el handoff de Fase 3A/3B, emite `[PLAN_PRE_FASE]` al agente principal para aprobacion del usuario:
+   - **Insumos del Handoff Anterior:** Commits aplicados, endpoints/slices FSD implementados, capturas y dictamen `APPROVE` de `ux-auditor`, estado del grafo en `codebase-memory-mcp` y docs sincronizados.
+   - **Que evaluara / generara:** Reporte `docs/auditorias/AUDIT-Fase4.md`, ejecucion de `scripts/doc-linter.ps1`, suites de prueba en terminal, comprobacion de Blast Radius, sesion E2E Playwright y evaluacion de matriz D1-D10.
+   - **Por que lo evaluara asi:** Garantia de postura Zero-Trust, verificacion empirica en 6 ejes sin modificar codigo, validacion estricta RFC 9457/OWASP y prevencion de regresiones o drift entre codigo y documentacion.
+   Prohibido persistir reportes de auditoria o emitir dictamenes hasta que el agente principal retransmita la aprobacion del usuario.
 1. **Conformidad con Casos de Uso Bimodales, Reglas y BDD (MCP `obsidian`):**
    - Lee `docs/guia/referencia/casos-de-uso/CU-NNN.md`, `docs/guia/referencia/historias-de-usuario.md` y `docs/arquitectura/reglas/RN-XNN.md` (`^ancla`).
    - Comprueba que cada invariante, regla y escenario CU/HU cuente con prueba automatizada determinista en verde.

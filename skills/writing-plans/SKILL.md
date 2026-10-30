@@ -38,3 +38,16 @@ Cada tarea del plan DEBE contener:
    - `- [ ] Ejecutar suite y confirmar salida en verde.`
 5. **Entrada en la Matriz de Conventional Commits:**
    - Mensaje exacto asignado al committer diferido: `feat(scope): descripcion imperativa`.
+
+## 4. Plan de Ejecucion Pre-Fase y Aprobacion de Usuario
+
+El plan pre-fase NO se transfiere en el handoff entre subagentes (el handoff inter-agente es estrictamente tecnico y ultracave). Cada subagente, al activarse y antes de tocar codigo, BD o notas, emite el bloque `[PLAN_PRE_FASE]` al agente principal para que este se lo presente directamente al usuario y reciba su aprobacion:
+
+```markdown
+[PLAN_PRE_FASE]
+- **Insumos del Handoff Anterior:** Que artefactos, rutas, contratos, flags y decisiones toma de la fase previa o contexto inicial.
+- **Que Modificara:** Lista concreta de archivos, modelos DBML, endpoints, componentes o notas a anadir o modificar.
+- **Por Que lo Modificara Asi:** Justificacion tecnica y arquitectonica, decisiones de diseno, directrices DIR-*, reglas RN-* y patron ponytail.
+```
+
+El subagente se pausa reactivamente. Solo tras la aprobacion explicita del usuario retransmitida por el agente principal se autoriza el inicio de los cambios.
