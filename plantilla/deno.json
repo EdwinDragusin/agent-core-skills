@@ -1,0 +1,22 @@
+{
+  "workspace": [
+    "./back"
+  ],
+  "tasks": {
+    "dev": "deno task dev:back & deno task dev:front",
+    "dev:back": "deno task --cwd back dev",
+    "dev:front": "deno task --cwd front dev",
+    "check": "deno task --cwd back check && deno task --cwd front check",
+    "lint": "deno task --cwd back lint && deno task --cwd front lint",
+    "fmt": "deno task --cwd back fmt && deno task --cwd front fmt",
+    "fmt:check": "deno task --cwd back fmt:check && deno task --cwd front fmt:check",
+    "test": "deno task --cwd back test && deno task --cwd front test",
+    "test:integracion": "deno task --cwd back test:integracion",
+    "coverage": "deno task --cwd back coverage && deno task --cwd front coverage",
+    "ci": "deno task test:scripts && deno task --cwd back ci && deno task --cwd front ci && deno task lint:docs",
+    "lint:docs": "deno run --allow-run --allow-read scripts/lint-docs.ts",
+    "hooks:install": "git config core.hooksPath .githooks",
+    "ci:rapido": "deno task --cwd back fmt:check && deno task --cwd back lint && deno task --cwd front fmt:check && deno task --cwd front lint",
+    "test:scripts": "deno test --allow-read scripts/"
+  }
+}

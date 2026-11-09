@@ -1,0 +1,73 @@
+{
+  "compilerOptions": {
+    "strict": true,
+    "noImplicitAny": true,
+    "strictNullChecks": true
+  },
+  "tasks": {
+    "dev": "deno run --watch --allow-net --allow-env --allow-read --allow-write src/interfaz/http/main.ts",
+    "migrate": "deno run --allow-net --allow-env --allow-sys --allow-read --env-file npm:drizzle-kit migrate --config drizzle.config.ts",
+    "check": "deno check src/**/*.ts tests/**/*.ts",
+    "check:migraciones": "deno run --allow-net --allow-env --allow-sys --allow-read npm:drizzle-kit check --config drizzle.config.ts",
+    "fmt": "deno fmt src/ tests/",
+    "fmt:check": "deno fmt --check src/ tests/",
+    "lint": "deno lint src/ tests/",
+    "test:arquitectura": "deno test --allow-read=src/,tests/ tests/arquitectura/",
+    "test:dominio": "deno test --allow-read=src/,tests/ tests/dominio/",
+    "test:aplicacion": "deno test --allow-read=src/,tests/ --allow-write=tests/ tests/aplicacion/",
+    "test:infraestructura": "deno test --allow-net --allow-env --allow-read=src/,tests/ --allow-write=tests/ tests/infraestructura/",
+    "test:interfaz": "deno test --allow-net --allow-env --allow-read=src/,tests/ --allow-write=tests/ tests/interfaz/",
+    "test:unit": "deno test --allow-net --allow-env --allow-read=src/,tests/ --allow-write=tests/ tests/dominio/ tests/aplicacion/ tests/arquitectura/ tests/infraestructura/ tests/interfaz/",
+    "test": "deno task test:unit",
+    "test:integracion": "deno test -A tests/integracion/",
+    "coverage": "deno coverage coverage --exclude=tests/",
+    "ci:static": "deno task fmt:check && deno task lint && deno task check && deno task check:migraciones",
+    "ci:unit": "deno task test:unit --coverage=coverage --coverage-raw-data-only",
+    "ci:integration": "deno task test:integracion --coverage=coverage --coverage-raw-data-only",
+    "ci": "deno task ci:static && rm -rf coverage && deno task ci:unit && deno task ci:integration && deno task coverage"
+  },
+  "coverage": {
+    "thresholds": {
+      "lines": 93,
+      "branches": 86,
+      "functions": 94
+    }
+  },
+  "imports": {
+    "@dominio/": "./src/dominio/",
+    "@aplicacion/": "./src/aplicacion/",
+    "@infraestructura/": "./src/infraestructura/",
+    "@interfaz/": "./src/interfaz/",
+    "@tests/": "./tests/",
+    "drizzle-kit": "npm:drizzle-kit@^0.31.11",
+    "hono": "jsr:@hono/hono@^4.6.0",
+    "drizzle-orm": "npm:drizzle-orm@^0.38.0",
+    "drizzle-orm/": "npm:/drizzle-orm@^0.38.0/",
+    "postgres": "npm:postgres@^3.4.0",
+    "hash-wasm": "npm:hash-wasm@^4.12.0",
+    "jose": "npm:jose@^5.9.6",
+    "eta": "npm:eta@^3.5.0",
+    "@std/assert": "jsr:@std/assert@^1.0.0",
+    "@std/dotenv": "jsr:@std/dotenv@^0.225.0",
+    "@std/testing": "jsr:@std/testing@^1.0.0",
+    "@std/path": "jsr:@std/path@^1.0.0",
+    "uuid": "npm:uuid@14.0.1",
+    "nodemailer": "npm:nodemailer@^6.9.16",
+    "@types/nodemailer": "npm:@types/nodemailer@^6.4.17",
+    "testcontainers": "npm:testcontainers@^10.0.0",
+    "@testcontainers/postgresql": "npm:@testcontainers/postgresql@^10.0.0"
+  },
+  "fmt": {
+    "useTabs": false,
+    "lineWidth": 100,
+    "indentWidth": 2,
+    "singleQuote": false
+  },
+  "lint": {
+    "rules": {
+      "tags": [
+        "recommended"
+      ]
+    }
+  }
+}
