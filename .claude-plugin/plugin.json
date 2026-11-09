@@ -1,7 +1,7 @@
 {
   "name": "agent-core-skills",
-  "version": "2.0.0",
-  "description": "Framework integral de gobernanza Zero-Trust, orquestacion SDLC en 5 fases con subagentes en paralelo, integracion MCP y 32 skills de ingenieria.",
+  "version": "3.0.0",
+  "description": "Nucleo de gobernanza arquitectonica, adopcion de estandar y 17 skills de ingenieria complementarias a Superpowers.",
   "author": {
     "name": "Edwin Dragusin"
   },
@@ -9,5 +9,7 @@
   "repository": "https://github.com/EdwinDragusin/agent-core-skills",
   "license": "MIT",
   "skills": "./skills",
-  "mcpServers": "./mcp_config.json"
+  "dependencies": [
+    "superpowers@superpowers-marketplace"
+  ]
 }
