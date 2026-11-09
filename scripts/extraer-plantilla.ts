@@ -32,7 +32,7 @@ export interface ArchivoEstandar {
     | "docs"
     | "config";
   regla: string;
-  requiereAdaptacion: boolean;
+  requiereAdaptacion: boolean | "Solo via estandar.config.ts";
   guiaAdaptacion: string;
   marcadores?: string[];
   tipoTransformacion:
@@ -247,33 +247,27 @@ export function filtrarBloquesPs1Proyecto(contenido: string): string {
     "",
   );
 
-  // 1. Bloque 1: Register-Check inline de casos de uso de proyecto
+  // 1. Bloque 1: Register-Check inline de piso minimo de casos de uso de proyecto
   c = c.replace(
-    /^\s*#\s*\[PROYECTO\]\s*Piso minimo[^\r\n]*\r?\n\s*Register-Check[^\r\n]*\r?\n/gm,
+    /^\s*#\s*\[PROYECTO\]\s*Piso minimo[^\r\n]*\r?\n\s*Register-Check[^\r\n]*\r?\n(\s*#\s*\[ESTANDAR\]\r?\n)?/gm,
     "",
   );
 
-  // 2. Bloque 2+3: Regla RN-C01 saneada y 4 reglas fantasma hasta Seccion 4 ARC42
+  // 2. Secciones 2 y 3 completas (Historias de Usuario y Reglas/Directrices) marcadas con [PROYECTO]
   c = c.replace(
-    /#\s*\[PROYECTO\]\s*Regla RN-C01 saneada.*?(?=#\s*-{5,}\r?\n#\s*4\.\s*ARC42)/gs,
+    /#\s*-{5,}\r?\n#\s*2\.\s*HISTORIAS DE USUARIO.*?(?=#\s*-{5,}\r?\n#\s*4\.\s*ARC42)/gs,
     "",
   );
 
-  // Limpiar variables residuales de arc42 de proyecto que ya no se usan en estandar
+  // 3. Bloques de proyecto en Seccion 4 (Sincronizacion, PB-001 e Indice de ADRs en Cap 9)
   c = c.replace(
-    /\$cap2Path = Join-Path \$DocsPath "arquitectura\/capitulo-02-restricciones\.md"\r?\n\s*\$cap3Path = Join-Path \$DocsPath "arquitectura\/capitulo-03-contexto-y-alcance\.md"\r?\n\s*\$cap9Path = Join-Path \$DocsPath "arquitectura\/capitulo-09-decisiones\.md"\r?\n\s*\$pb001Path = Join-Path \$DocsPath "arquitectura\/procesos\/PB-001-configuracion-de-examenes\.md"/g,
-    '$cap9Path = Join-Path $DocsPath "arquitectura/capitulo-09-decisiones.md"',
-  );
-
-  // 3. Bloque 4+5: Sincronizacion de infraestructura y PB-001 hasta Recoleccion dinamica
-  c = c.replace(
-    /#\s*\[PROYECTO\]\s*Sincronizacion de infraestructura.*?(?=#\s*\[ESTANDAR\]\s*Recoleccion dinamica)/gs,
+    /#\s*\[PROYECTO\]\s*Sincronizacion de infraestructura.*?(?=#\s*\[ESTANDAR\]\s*Nomenclatura)/gs,
     "",
   );
 
-  // 4. Bloque 6: tabla-nivel-examen-tiempos hasta Seccion 6 HIGIENE GLOBAL
+  // 4. Seccion 5 completa (Onboarding, Glosario, Higiene y tabla-nivel-examen-tiempos)
   c = c.replace(
-    /#\s*\[PROYECTO\]\s*tabla-nivel-examen-tiempos.*?(?=#\s*-{5,}\r?\n#\s*6\.\s*HIGIENE GLOBAL)/gs,
+    /#\s*-{5,}\r?\n#\s*5\.\s*ONBOARDING, GLOSARIO E HIGIENE.*?(?=#\s*-{5,}\r?\n#\s*6\.\s*HIGIENE GLOBAL)/gs,
     "",
   );
 
@@ -312,6 +306,14 @@ export function filtrarBloquesPs1Proyecto(contenido: string): string {
 }
 
 export const TRANSFORMACIONES_DECLARADAS: TransformacionDeclarada[] = [
+  {
+    archivo: "estandar.config.ts",
+    marcadorOPlaceholder: "{{APP_1}}, {{APP_2}}",
+    valorOriginal: "nombres y rutas de aplicaciones front de referencia",
+    valorSustituto: "{{APP_1}}, {{APP_2}}",
+    descripcion:
+      "Parametriza nombres y rutas fuente de aplicaciones frontend en la configuracion centralizada.",
+  },
   {
     archivo: ".agents/AGENTS.md",
     marcadorOPlaceholder: "{{NOMBRE_PROYECTO}}, {{DESCRIPCION_PROYECTO}}",
@@ -480,6 +482,33 @@ export function transformarContenido(
   let c = contenido;
 
   switch (rutaRelativa) {
+    case "estandar.config.ts":
+      c = c.replace(
+        /ej\.\s*'aspirante',\s*'gestion',\s*'web'/g,
+        "ej. 'web', 'admin', 'app'",
+      );
+      c = c.replace(
+        /ej\.\s*'aspirante\/src'\s*o\s*'src'/g,
+        "ej. 'web/src' o 'src'",
+      );
+      c = c.replace(
+        /nombre:\s*"aspirante"/g,
+        'nombre: "{{APP_1}}"',
+      );
+      c = c.replace(
+        /rutaSrc:\s*"aspirante\/src"/g,
+        'rutaSrc: "{{APP_1}}/src"',
+      );
+      c = c.replace(
+        /nombre:\s*"gestion"/g,
+        'nombre: "{{APP_2}}"',
+      );
+      c = c.replace(
+        /rutaSrc:\s*"gestion\/src"/g,
+        'rutaSrc: "{{APP_2}}/src"',
+      );
+      break;
+
     case ".agents/AGENTS.md":
       c = c.replace(
         /# Project Rules\s*([-\u2014\u2013])\s*Sistema de Examenes de Ingreso/g,
@@ -621,6 +650,10 @@ export function transformarContenido(
         /marcas `\[ESTANDAR\]` y `\[PROYECTO\]`/g,
         "marcas `[ESTANDAR]` y de proyecto",
       );
+      c = c.replace(
+        /ej\.\s*`'aspirante\/src'`\s*o\s*`'src'`/g,
+        "ej. `'web/src'` o `'src'`",
+      );
       break;
 
     case "scripts/hooks/validar-commit.ts":
@@ -761,6 +794,20 @@ export function transformarContenido(
 }
 
 export const ARCHIVOS_ESTANDAR: ArchivoEstandar[] = [
+  // 0. Configuracion Centralizada del Estandar
+  {
+    origen: "estandar.config.ts",
+    destino: "estandar.config.ts",
+    categoria: "config",
+    regla:
+      "Configuracion centralizada de rutas y topologia de mecanismos (estandar.config.ts)",
+    requiereAdaptacion: true,
+    guiaAdaptacion:
+      "PRIMER paso de adaptacion: configurar raiz de backend, aplicaciones frontend y capa compartida.",
+    marcadores: ["{{APP_1}}", "{{APP_2}}"],
+    tipoTransformacion: "personalizada",
+  },
+
   // 1. CI y GitHub
   {
     origen: ".github/workflows/ci.yml",
@@ -847,9 +894,9 @@ export const ARCHIVOS_ESTANDAR: ArchivoEstandar[] = [
     destino: "scripts/ci/verificar-migraciones.ts",
     categoria: "scripts",
     regla: "Inmutabilidad de migraciones de base de datos (back/AGENTS.md)",
-    requiereAdaptacion: false,
+    requiereAdaptacion: "Solo via estandar.config.ts",
     guiaAdaptacion:
-      "Copiar directo. Valida _journal.json y archivos .sql inmutables.",
+      "Configurado via estandar.config.ts (back.directorioMigraciones).",
     tipoTransformacion: "copia-directa",
   },
   {
@@ -899,8 +946,8 @@ export const ARCHIVOS_ESTANDAR: ArchivoEstandar[] = [
     destino: "back/tests/arquitectura/aliases.test.ts",
     categoria: "arquitectura-back",
     regla: "Uso de aliases @dominio/, @aplicacion/, etc. (back/AGENTS.md)",
-    requiereAdaptacion: false,
-    guiaAdaptacion: "Copiar directo.",
+    requiereAdaptacion: "Solo via estandar.config.ts",
+    guiaAdaptacion: "Configurado via estandar.config.ts (back.raiz).",
     tipoTransformacion: "copia-directa",
   },
   {
@@ -908,9 +955,8 @@ export const ARCHIVOS_ESTANDAR: ArchivoEstandar[] = [
     destino: "back/tests/arquitectura/dependencias.test.ts",
     categoria: "arquitectura-back",
     regla: "Reglas inviolables de Clean Architecture (back/AGENTS.md)",
-    requiereAdaptacion: false,
-    guiaAdaptacion:
-      "Copiar directo. Verifica limites dominio -> aplicacion -> infraestructura.",
+    requiereAdaptacion: "Solo via estandar.config.ts",
+    guiaAdaptacion: "Configurado via estandar.config.ts (back.raiz).",
     tipoTransformacion: "copia-directa",
   },
   {
@@ -918,8 +964,9 @@ export const ARCHIVOS_ESTANDAR: ArchivoEstandar[] = [
     destino: "back/tests/arquitectura/diManual.test.ts",
     categoria: "arquitectura-back",
     regla: "Composicion via DI manual sin framework (back/AGENTS.md)",
-    requiereAdaptacion: false,
-    guiaAdaptacion: "Copiar directo.",
+    requiereAdaptacion: "Solo via estandar.config.ts",
+    guiaAdaptacion:
+      "Configurado via estandar.config.ts (back.archivosComposicionDIManual).",
     tipoTransformacion: "copia-directa",
   },
   {
@@ -927,17 +974,19 @@ export const ARCHIVOS_ESTANDAR: ArchivoEstandar[] = [
     destino: "back/tests/arquitectura/entidades.test.ts",
     categoria: "arquitectura-back",
     regla: "Patron Entidad y AgregadoRaiz en dominio (back/AGENTS.md)",
-    requiereAdaptacion: false,
-    guiaAdaptacion: "Copiar directo.",
-    tipoTransformacion: "copia-directa",
+    requiereAdaptacion: "Solo via estandar.config.ts",
+    guiaAdaptacion:
+      "Configurado via estandar.config.ts (back.clasesBaseEntidad).",
+    tipoTransformacion: "personalizada",
   },
   {
     origen: "back/tests/arquitectura/logger.test.ts",
     destino: "back/tests/arquitectura/logger.test.ts",
     categoria: "arquitectura-back",
     regla: "Observabilidad estructurada OpenTelemetry (back/AGENTS.md)",
-    requiereAdaptacion: false,
-    guiaAdaptacion: "Copiar directo con fixture sanitizado.",
+    requiereAdaptacion: "Solo via estandar.config.ts",
+    guiaAdaptacion:
+      "Configurado via estandar.config.ts (back.adaptadorLogger, directoriosExcluidosLogger).",
     tipoTransformacion: "personalizada",
   },
   {
@@ -945,8 +994,9 @@ export const ARCHIVOS_ESTANDAR: ArchivoEstandar[] = [
     destino: "back/tests/arquitectura/usecases.test.ts",
     categoria: "arquitectura-back",
     regla: "Patron UseCase con metodo ejecutar() (back/AGENTS.md)",
-    requiereAdaptacion: false,
-    guiaAdaptacion: "Copiar directo.",
+    requiereAdaptacion: "Solo via estandar.config.ts",
+    guiaAdaptacion:
+      "Configurado via estandar.config.ts (back.directorioUseCases).",
     tipoTransformacion: "copia-directa",
   },
   {
@@ -954,8 +1004,8 @@ export const ARCHIVOS_ESTANDAR: ArchivoEstandar[] = [
     destino: "back/tests/arquitectura/uuid.test.ts",
     categoria: "arquitectura-back",
     regla: "Generacion de UUIDv7 en capa de dominio (back/AGENTS.md)",
-    requiereAdaptacion: false,
-    guiaAdaptacion: "Copiar directo.",
+    requiereAdaptacion: "Solo via estandar.config.ts",
+    guiaAdaptacion: "Configurado via estandar.config.ts (back.generadorUuid).",
     tipoTransformacion: "copia-directa",
   },
   {
@@ -963,8 +1013,9 @@ export const ARCHIVOS_ESTANDAR: ArchivoEstandar[] = [
     destino: "back/tests/arquitectura/valueObjects.test.ts",
     categoria: "arquitectura-back",
     regla: "Objetos de Valor inmutables con Object.freeze (back/AGENTS.md)",
-    requiereAdaptacion: false,
-    guiaAdaptacion: "Copiar directo.",
+    requiereAdaptacion: "Solo via estandar.config.ts",
+    guiaAdaptacion:
+      "Configurado via estandar.config.ts (back.claseBaseValueObject).",
     tipoTransformacion: "copia-directa",
   },
 
@@ -974,10 +1025,9 @@ export const ARCHIVOS_ESTANDAR: ArchivoEstandar[] = [
     destino: "front/tests/arquitectura/front-dependencias.test.ts",
     categoria: "arquitectura-front",
     regla: "Reglas RN-F01, RN-F02, RN-F03 y capas FSD (front/AGENTS.md)",
-    requiereAdaptacion: true,
+    requiereAdaptacion: "Solo via estandar.config.ts",
     guiaAdaptacion:
-      "Sustituir marcadores {{APP_1}} y {{APP_2}} por los nombres de las aplicaciones del proyecto.",
-    marcadores: ["{{APP_1}}", "{{APP_2}}", "@{{PROYECTO}}"],
+      "Configurado via estandar.config.ts (front.aplicaciones, capaCompartida, capasFSD). Soporta una o multiples SPAs.",
     tipoTransformacion: "personalizada",
   },
   {
@@ -985,10 +1035,9 @@ export const ARCHIVOS_ESTANDAR: ArchivoEstandar[] = [
     destino: "front/tests/higiene/entorno.test.ts",
     categoria: "higiene-front",
     regla: "Restriccion de variables de entorno frontend (front/AGENTS.md)",
-    requiereAdaptacion: true,
+    requiereAdaptacion: "Solo via estandar.config.ts",
     guiaAdaptacion:
-      "Sustituir marcadores {{APP_1}} y {{APP_2}} en mensaje de asercion si aplica.",
-    marcadores: ["{{APP_1}}", "{{APP_2}}"],
+      "Configurado via estandar.config.ts (front.aplicaciones, capaCompartida).",
     tipoTransformacion: "personalizada",
   },
   {
@@ -996,10 +1045,9 @@ export const ARCHIVOS_ESTANDAR: ArchivoEstandar[] = [
     destino: "front/tests/higiene/storage.test.ts",
     categoria: "higiene-front",
     regla: "Prohibicion de localStorage en portales efimeros (front/AGENTS.md)",
-    requiereAdaptacion: true,
+    requiereAdaptacion: "Solo via estandar.config.ts",
     guiaAdaptacion:
-      "Sustituir marcador {{APP_EFIMERA}} por la aplicacion con sesion efimera requerida.",
-    marcadores: ["{{APP_EFIMERA}}"],
+      "Configurado via estandar.config.ts (aplicaciones con sesionEfimera: true).",
     tipoTransformacion: "personalizada",
   },
 
@@ -1195,6 +1243,17 @@ export function generarManifiestoMd(
     "",
     "---",
     "",
+    "## Paso 1 Obligatorio: Configuracion Centralizada (estandar.config.ts)",
+    "",
+    "`estandar.config.ts` es el PRIMER paso de adaptacion y el UNICO punto de configuracion de rutas.",
+    "Todos los tests de arquitectura (Clean Architecture en backend y FSD en frontend),",
+    "tests de higiene y scripts de integracion continua leen este archivo de forma tipada.",
+    "El adoptante debe configurar aqui la topologia real del proyecto (una o varias SPAs frontend,",
+    "capa compartida opcional, directorio de migraciones y rutas de casos de uso), sin necesidad",
+    "de alterar el codigo de los tests ni de los scripts de verificacion.",
+    "",
+    "---",
+    "",
     "## Marcadores de Sustitucion para Proyectos Adoptantes",
     "",
     "Los proyectos que adopten esta plantilla mediante la skill `adoptar-estandar` deben",
@@ -1205,8 +1264,8 @@ export function generarManifiestoMd(
     "| `{{NOMBRE_PROYECTO}}` | Nombre del sistema o proyecto adoptante | `.agents/AGENTS.md`, `back/AGENTS.md`, `front/AGENTS.md` | Nombre institucional del proyecto |",
     "| `{{DESCRIPCION_PROYECTO}}` | Resumen institucional de proposito y alcance del proyecto | `.agents/AGENTS.md` | Descripcion institucional original de referencia |",
     "| `{{SLUG_PROYECTO}}` | Identificador en kebab-case del vault de documentacion | `docs/AGENTS.md` | Nombre del vault Obsidian |",
-    "| `{{APP_1}}` | Nombre de la primera SPA del portal web | `front/tests/arquitectura/front-dependencias.test.ts`, `front/tests/higiene/entorno.test.ts`, `front/deno.json`, `front/AGENTS.md` | Portal de autoservicio publico |",
-    "| `{{APP_2}}` | Nombre de la segunda SPA del portal web | `front/tests/arquitectura/front-dependencias.test.ts`, `front/tests/higiene/entorno.test.ts`, `front/deno.json`, `front/AGENTS.md` | Portal administrativo y operativo |",
+    "| `{{APP_1}}` | Nombre de la primera SPA del portal web | `estandar.config.ts`, `front/deno.json`, `front/AGENTS.md` | Portal de autoservicio publico |",
+    "| `{{APP_2}}` | Nombre de la segunda SPA del portal web | `estandar.config.ts`, `front/deno.json`, `front/AGENTS.md` | Portal administrativo y operativo |",
     "| `@{{PROYECTO}}` | Prefijo de importacion de paquetes monorepo | `front/tests/arquitectura/front-dependencias.test.ts` | Prefijo de paquete institucional |",
     "| `{{APP_EFIMERA}}` | Nombre de la app con requerimiento estricto de sesion efimera (sessionStorage) | `front/tests/higiene/storage.test.ts` | Aplicacion con sesion temporal |",
     "",
@@ -1222,7 +1281,9 @@ export function generarManifiestoMd(
     const marcadoresStr = a.marcadores && a.marcadores.length > 0
       ? `\`${a.marcadores.join("`, `")}\``
       : "Ninguno";
-    const adaptacionStr = a.requiereAdaptacion ? "**SI**" : "No";
+    const adaptacionStr = typeof a.requiereAdaptacion === "string"
+      ? a.requiereAdaptacion
+      : (a.requiereAdaptacion ? "**SI**" : "No");
     lineas.push(
       `| \`${a.destino}\` | ${a.categoria} | ${a.regla} | ${adaptacionStr} | ${marcadoresStr} | ${a.guiaAdaptacion} |`,
     );

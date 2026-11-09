@@ -11,6 +11,17 @@ deno run -A scripts/extraer-plantilla.ts <ruta-repositorio-examen>
 
 ---
 
+## Paso 1 Obligatorio: Configuracion Centralizada (estandar.config.ts)
+
+`estandar.config.ts` es el PRIMER paso de adaptacion y el UNICO punto de configuracion de rutas.
+Todos los tests de arquitectura (Clean Architecture en backend y FSD en frontend),
+tests de higiene y scripts de integracion continua leen este archivo de forma tipada.
+El adoptante debe configurar aqui la topologia real del proyecto (una o varias SPAs frontend,
+capa compartida opcional, directorio de migraciones y rutas de casos de uso), sin necesidad
+de alterar el codigo de los tests ni de los scripts de verificacion.
+
+---
+
 ## Marcadores de Sustitucion para Proyectos Adoptantes
 
 Los proyectos que adopten esta plantilla mediante la skill `adoptar-estandar` deben
@@ -21,8 +32,8 @@ sustituir los siguientes marcadores de acuerdo con su arquitectura especifica:
 | `{{NOMBRE_PROYECTO}}` | Nombre del sistema o proyecto adoptante | `.agents/AGENTS.md`, `back/AGENTS.md`, `front/AGENTS.md` | Nombre institucional del proyecto |
 | `{{DESCRIPCION_PROYECTO}}` | Resumen institucional de proposito y alcance del proyecto | `.agents/AGENTS.md` | Descripcion institucional original de referencia |
 | `{{SLUG_PROYECTO}}` | Identificador en kebab-case del vault de documentacion | `docs/AGENTS.md` | Nombre del vault Obsidian |
-| `{{APP_1}}` | Nombre de la primera SPA del portal web | `front/tests/arquitectura/front-dependencias.test.ts`, `front/tests/higiene/entorno.test.ts`, `front/deno.json`, `front/AGENTS.md` | Portal de autoservicio publico |
-| `{{APP_2}}` | Nombre de la segunda SPA del portal web | `front/tests/arquitectura/front-dependencias.test.ts`, `front/tests/higiene/entorno.test.ts`, `front/deno.json`, `front/AGENTS.md` | Portal administrativo y operativo |
+| `{{APP_1}}` | Nombre de la primera SPA del portal web | `estandar.config.ts`, `front/deno.json`, `front/AGENTS.md` | Portal de autoservicio publico |
+| `{{APP_2}}` | Nombre de la segunda SPA del portal web | `estandar.config.ts`, `front/deno.json`, `front/AGENTS.md` | Portal administrativo y operativo |
 | `@{{PROYECTO}}` | Prefijo de importacion de paquetes monorepo | `front/tests/arquitectura/front-dependencias.test.ts` | Prefijo de paquete institucional |
 | `{{APP_EFIMERA}}` | Nombre de la app con requerimiento estricto de sesion efimera (sessionStorage) | `front/tests/higiene/storage.test.ts` | Aplicacion con sesion temporal |
 
@@ -32,6 +43,7 @@ sustituir los siguientes marcadores de acuerdo con su arquitectura especifica:
 
 | Archivo en Plantilla | Categoria | Regla que hace cumplir | Requiere Adaptacion | Marcadores | Guia de Adaptacion |
 |---|---|---|---|---|---|
+| `estandar.config.ts` | config | Configuracion centralizada de rutas y topologia de mecanismos (estandar.config.ts) | **SI** | `{{APP_1}}`, `{{APP_2}}` | PRIMER paso de adaptacion: configurar raiz de backend, aplicaciones frontend y capa compartida. |
 | `.github/workflows/ci.yml` | ci | Pipeline completo CI (.agents/AGENTS.md) | No | Ninguno | Copiar directo. Utiliza Deno 2.x, PostgreSQL en testcontainers y jobs paralelos. |
 | `.github/pull_request_template.md` | ci | Workflow de Pull Requests (.agents/AGENTS.md) | No | Ninguno | Copiar directo. Incluye lista de verificacion de reglas de instruccion. |
 | `.githooks/commit-msg` | hooks | Conventional Commits (.agents/AGENTS.md) | No | Ninguno | Copiar directo. Ejecutable bash multiplataforma. |
@@ -40,22 +52,22 @@ sustituir los siguientes marcadores de acuerdo con su arquitectura especifica:
 | `scripts/hooks/validar-commit.test.ts` | scripts | Pruebas de validacion de commits (.agents/AGENTS.md) | No | Ninguno | Copiar directo. |
 | `scripts/hooks/validar-rama.ts` | scripts | Nomenclatura de ramas dedicadas (.agents/AGENTS.md) | No | Ninguno | Copiar directo. |
 | `scripts/hooks/validar-rama.test.ts` | scripts | Pruebas de validacion de ramas (.agents/AGENTS.md) | No | Ninguno | Copiar directo. |
-| `scripts/ci/verificar-migraciones.ts` | scripts | Inmutabilidad de migraciones de base de datos (back/AGENTS.md) | No | Ninguno | Copiar directo. Valida _journal.json y archivos .sql inmutables. |
+| `scripts/ci/verificar-migraciones.ts` | scripts | Inmutabilidad de migraciones de base de datos (back/AGENTS.md) | Solo via estandar.config.ts | Ninguno | Configurado via estandar.config.ts (back.directorioMigraciones). |
 | `scripts/ci/verificar-migraciones.test.ts` | scripts | Pruebas de verificacion de migraciones (back/AGENTS.md) | No | Ninguno | Copiar directo con fixture sintetico generico. |
 | `scripts/higiene/sin-emojis.test.ts` | scripts | Politica de cero emojis (.agents/AGENTS.md) | No | Ninguno | Copiar directo. Escanea directorios de back, front y scripts. |
 | `scripts/lint-docs.ts` | scripts | Ejecucion de linter documental (.agents/AGENTS.md) | No | Ninguno | Copiar directo. Lanzador multiplataforma de doc-linter.ps1. |
 | `scripts/doc-linter.ps1` | scripts | Gobernanza documental bimodal y etiquetas verifica: (docs/AGENTS.md) | No | Ninguno | Filtrados bloques de proyecto. Mantiene validacion estandar bimodal y seccion 8. |
-| `back/tests/arquitectura/aliases.test.ts` | arquitectura-back | Uso de aliases @dominio/, @aplicacion/, etc. (back/AGENTS.md) | No | Ninguno | Copiar directo. |
-| `back/tests/arquitectura/dependencias.test.ts` | arquitectura-back | Reglas inviolables de Clean Architecture (back/AGENTS.md) | No | Ninguno | Copiar directo. Verifica limites dominio -> aplicacion -> infraestructura. |
-| `back/tests/arquitectura/diManual.test.ts` | arquitectura-back | Composicion via DI manual sin framework (back/AGENTS.md) | No | Ninguno | Copiar directo. |
-| `back/tests/arquitectura/entidades.test.ts` | arquitectura-back | Patron Entidad y AgregadoRaiz en dominio (back/AGENTS.md) | No | Ninguno | Copiar directo. |
-| `back/tests/arquitectura/logger.test.ts` | arquitectura-back | Observabilidad estructurada OpenTelemetry (back/AGENTS.md) | No | Ninguno | Copiar directo con fixture sanitizado. |
-| `back/tests/arquitectura/usecases.test.ts` | arquitectura-back | Patron UseCase con metodo ejecutar() (back/AGENTS.md) | No | Ninguno | Copiar directo. |
-| `back/tests/arquitectura/uuid.test.ts` | arquitectura-back | Generacion de UUIDv7 en capa de dominio (back/AGENTS.md) | No | Ninguno | Copiar directo. |
-| `back/tests/arquitectura/valueObjects.test.ts` | arquitectura-back | Objetos de Valor inmutables con Object.freeze (back/AGENTS.md) | No | Ninguno | Copiar directo. |
-| `front/tests/arquitectura/front-dependencias.test.ts` | arquitectura-front | Reglas RN-F01, RN-F02, RN-F03 y capas FSD (front/AGENTS.md) | **SI** | `{{APP_1}}`, `{{APP_2}}`, `@{{PROYECTO}}` | Sustituir marcadores {{APP_1}} y {{APP_2}} por los nombres de las aplicaciones del proyecto. |
-| `front/tests/higiene/entorno.test.ts` | higiene-front | Restriccion de variables de entorno frontend (front/AGENTS.md) | **SI** | `{{APP_1}}`, `{{APP_2}}` | Sustituir marcadores {{APP_1}} y {{APP_2}} en mensaje de asercion si aplica. |
-| `front/tests/higiene/storage.test.ts` | higiene-front | Prohibicion de localStorage en portales efimeros (front/AGENTS.md) | **SI** | `{{APP_EFIMERA}}` | Sustituir marcador {{APP_EFIMERA}} por la aplicacion con sesion efimera requerida. |
+| `back/tests/arquitectura/aliases.test.ts` | arquitectura-back | Uso de aliases @dominio/, @aplicacion/, etc. (back/AGENTS.md) | Solo via estandar.config.ts | Ninguno | Configurado via estandar.config.ts (back.raiz). |
+| `back/tests/arquitectura/dependencias.test.ts` | arquitectura-back | Reglas inviolables de Clean Architecture (back/AGENTS.md) | Solo via estandar.config.ts | Ninguno | Configurado via estandar.config.ts (back.raiz). |
+| `back/tests/arquitectura/diManual.test.ts` | arquitectura-back | Composicion via DI manual sin framework (back/AGENTS.md) | Solo via estandar.config.ts | Ninguno | Configurado via estandar.config.ts (back.archivosComposicionDIManual). |
+| `back/tests/arquitectura/entidades.test.ts` | arquitectura-back | Patron Entidad y AgregadoRaiz en dominio (back/AGENTS.md) | Solo via estandar.config.ts | Ninguno | Configurado via estandar.config.ts (back.clasesBaseEntidad). |
+| `back/tests/arquitectura/logger.test.ts` | arquitectura-back | Observabilidad estructurada OpenTelemetry (back/AGENTS.md) | Solo via estandar.config.ts | Ninguno | Configurado via estandar.config.ts (back.adaptadorLogger, directoriosExcluidosLogger). |
+| `back/tests/arquitectura/usecases.test.ts` | arquitectura-back | Patron UseCase con metodo ejecutar() (back/AGENTS.md) | Solo via estandar.config.ts | Ninguno | Configurado via estandar.config.ts (back.directorioUseCases). |
+| `back/tests/arquitectura/uuid.test.ts` | arquitectura-back | Generacion de UUIDv7 en capa de dominio (back/AGENTS.md) | Solo via estandar.config.ts | Ninguno | Configurado via estandar.config.ts (back.generadorUuid). |
+| `back/tests/arquitectura/valueObjects.test.ts` | arquitectura-back | Objetos de Valor inmutables con Object.freeze (back/AGENTS.md) | Solo via estandar.config.ts | Ninguno | Configurado via estandar.config.ts (back.claseBaseValueObject). |
+| `front/tests/arquitectura/front-dependencias.test.ts` | arquitectura-front | Reglas RN-F01, RN-F02, RN-F03 y capas FSD (front/AGENTS.md) | Solo via estandar.config.ts | Ninguno | Configurado via estandar.config.ts (front.aplicaciones, capaCompartida, capasFSD). Soporta una o multiples SPAs. |
+| `front/tests/higiene/entorno.test.ts` | higiene-front | Restriccion de variables de entorno frontend (front/AGENTS.md) | Solo via estandar.config.ts | Ninguno | Configurado via estandar.config.ts (front.aplicaciones, capaCompartida). |
+| `front/tests/higiene/storage.test.ts` | higiene-front | Prohibicion de localStorage en portales efimeros (front/AGENTS.md) | Solo via estandar.config.ts | Ninguno | Configurado via estandar.config.ts (aplicaciones con sesionEfimera: true). |
 | `.agents/AGENTS.md` | manifiestos | Manifiesto raiz de reglas del estandar (.agents/AGENTS.md) | **SI** | `{{NOMBRE_PROYECTO}}`, `{{DESCRIPCION_PROYECTO}}` | Sustituir {{NOMBRE_PROYECTO}} y {{DESCRIPCION_PROYECTO}} por el titulo y proposito del sistema adoptante. |
 | `back/AGENTS.md` | manifiestos | Manifiesto operacional backend (back/AGENTS.md) | **SI** | `{{NOMBRE_PROYECTO}}` | Sustituir {{NOMBRE_PROYECTO}} por el nombre de la API en el encabezado. |
 | `front/AGENTS.md` | manifiestos | Manifiesto operacional frontend (front/AGENTS.md) | **SI** | `{{NOMBRE_PROYECTO}}`, `{{APP_1}}`, `{{APP_2}}` | Sustituir marcadores {{NOMBRE_PROYECTO}}, {{APP_1}} y {{APP_2}} por los nombres de las aplicaciones front. |
@@ -80,6 +92,7 @@ sustituir los siguientes marcadores de acuerdo con su arquitectura especifica:
 
 | Archivo | Marcador / Placeholder | Valor Original en Examen | Sustituto en Plantilla | Proposito |
 |---|---|---|---|---|
+| `estandar.config.ts` | `{{APP_1}}, {{APP_2}}` | `nombres y rutas de aplicaciones front de referencia` | `{{APP_1}}, {{APP_2}}` | Parametriza nombres y rutas fuente de aplicaciones frontend en la configuracion centralizada. |
 | `.agents/AGENTS.md` | `{{NOMBRE_PROYECTO}}, {{DESCRIPCION_PROYECTO}}` | `preambulo de aplicacion REST original y marco institucional de referencia` | `{{NOMBRE_PROYECTO}} / {{DESCRIPCION_PROYECTO}}` | Parametriza nombre del proyecto y sustituye preambulo especifico por descripcion configurable. |
 | `back/AGENTS.md` | `{{NOMBRE_PROYECTO}}, identificadores personales` | `nombre de aplicacion API original / identificador personal` | `{{NOMBRE_PROYECTO}} API / identificadores personales` | Parametriza encabezado y generaliza ejemplo de PII en directiva de observabilidad. |
 | `front/AGENTS.md` | `{{NOMBRE_PROYECTO}}, {{APP_1}}, {{APP_2}}` | `nombre de aplicacion Web Client original / nombres de portales originales` | `{{NOMBRE_PROYECTO}} Web Client / {{APP_1}}, {{APP_2}}` | Parametriza encabezado y directivas del modelo de capas por portal. |
@@ -104,7 +117,7 @@ sustituir los siguientes marcadores de acuerdo con su arquitectura especifica:
 
 ## Verificacion de Integridad y Cobertura
 
-- Total de archivos estandar exportados: 41
-- Total de transformaciones declaradas: 19
+- Total de archivos estandar exportados: 42
+- Total de transformaciones declaradas: 20
 - Ausencia total de secciones de proyecto garantizada por extractor.
 - Ausencia total de terminos de dominio y alias institucionales garantizada.

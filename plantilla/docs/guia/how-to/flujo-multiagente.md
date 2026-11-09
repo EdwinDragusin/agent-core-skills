@@ -175,3 +175,17 @@ Para asegurar que ninguna directiva de los manifiestos operacionales (`AGENTS.md
    - Todo item con palabras clave normativas (`prohibido`, `obligatorio`, `DEBE`, `nunca`, `jamas`, `siempre`, `inviolable`, `inmutable`) contenga su respectiva etiqueta `verifica:`.
    - Cada ruta indicada en una etiqueta exista en el arbol de trabajo.
    - La cantidad de encabezados de nivel dos y tres coincida con el total de marcas `[ESTANDAR]` y de proyecto.
+
+---
+
+## 8. Configuracion Unica de Rutas del Estandar (`estandar.config.ts`)
+<!-- [ESTANDAR] -->
+
+Para mantener los mecanismos de prueba y gobernanza agnosticos al proyecto, la raiz del repositorio aloja `estandar.config.ts`. Este archivo exporta un objeto fuertemente tipado (`EstandarConfig`) que centraliza rutas y nombres que los mecanismos de arquitectura, higiene e integracion continua consultan dinamicamente.
+
+Bases de ruta unificadas:
+- **Backend (`back`)**: Define `raiz` (ej. `'back'`). Todas las rutas y archivos del backend son estrictamente relativas a dicha raiz (`src/...`), incluyendo `directorioMigraciones`, `archivoEsquema`, `directorioUseCases`, `archivosComposicionDIManual`, `generadorUuid`, `adaptadorLogger` y clases base. Los mecanismos transversales que se ejecutan desde la raiz del repositorio componen la ruta anteponiendo `back.raiz`.
+- **Frontend (`front`)**: Define `raiz` (ej. `'front'`). Todas las rutas del frontend son estrictamente relativas a dicha raiz, incluyendo `rutaSrc` de cada aplicacion SPA (ej. `'web/src'` o `'src'`), la capa compartida (`'shared'`) y el indicador de sesion efimera.
+
+Al clonar o adaptar la plantilla a otro proyecto con distribucion distinta (por ejemplo, una unica SPA en `src/` o migraciones en `src/infraestructura/database/migrations`), basta con actualizar `estandar.config.ts` sin necesidad de alterar los tests de arquitectura ni los scripts de verificacion.
+

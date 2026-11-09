@@ -1,10 +1,13 @@
 import { assert, assertEquals } from "@std/assert";
+import { estandarConfig } from "../../../estandar.config.ts";
 
 export interface ViolacionValueObject {
   archivo: string;
   clase: string;
   motivo: string;
 }
+
+export const CLASE_BASE_VALUE_OBJECT: string = estandarConfig.back.claseBaseValueObject;
 
 /**
  * Analiza clases que heredan de ValueObject o aplican Object.freeze (Value Objects)
@@ -13,6 +16,7 @@ export interface ViolacionValueObject {
 export function detectarViolacionesValueObject(
   archivoRuta: string,
   contenido: string,
+  claseBaseVo: string = CLASE_BASE_VALUE_OBJECT,
 ): ViolacionValueObject[] {
   const normalizada = archivoRuta.replaceAll("\\", "/");
   const violaciones: ViolacionValueObject[] = [];
@@ -27,8 +31,8 @@ export function detectarViolacionesValueObject(
     const claseBase = matchClase[2] ?? "";
     const inicioClase = matchClase.index;
 
-    // Ignorar la clase base abstracta ValueObject
-    if (nombreClase === "ValueObject") continue;
+    // Ignorar la clase base abstracta de Value Object
+    if (nombreClase === claseBaseVo) continue;
 
     // Buscar la llave de apertura del cuerpo de la clase (saltando posibles parametros genericos <...>)
     let nivelGenericos = 0;
@@ -62,7 +66,7 @@ export function detectarViolacionesValueObject(
       ? contenido.substring(indiceLlaveApertura + 1, indiceFinClase)
       : contenido.substring(indiceLlaveApertura + 1);
 
-    const extiendeValueObject = claseBase.startsWith("ValueObject");
+    const extiendeValueObject = claseBase.startsWith(claseBaseVo);
     const usaObjectFreeze = /Object\.freeze\s*\(/.test(cuerpoClase);
 
     // Si es un Value Object (extiende ValueObject o congela su estado con Object.freeze)
@@ -149,7 +153,10 @@ Deno.test("Arquitectura - Autoverificacion sintetica de Value Objects (inmutabil
 
 Deno.test("Arquitectura - Cada Value Object en dominio debe extender ValueObject o usar Object.freeze y exponer crear estatico", () => {
   const archivosDominio = obtenerArchivosTypeScript("src/dominio");
-  assert(archivosDominio.length > 0, "Debe existir al menos un archivo en src/dominio");
+  assert(
+    archivosDominio.length > 0,
+    "Guarda anti-vacuidad: no se encontraron archivos en 'src/dominio'. Verifique la configuracion en estandar.config.ts",
+  );
 
   const todasLasViolaciones: ViolacionValueObject[] = [];
 

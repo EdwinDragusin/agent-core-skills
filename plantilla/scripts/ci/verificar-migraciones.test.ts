@@ -1,12 +1,17 @@
 function assertEquals<T>(actual: T, expected: T, mensaje?: string): void {
   if (actual !== expected) {
     throw new Error(
-      mensaje ?? `Asercion fallida: esperado ${JSON.stringify(expected)}, obtenido ${JSON.stringify(actual)}`,
+      mensaje ??
+        `Asercion fallida: esperado ${JSON.stringify(expected)}, obtenido ${
+          JSON.stringify(actual)
+        }`,
     );
   }
 }
 
 import {
+  componerRutaBack,
+  esArchivoEsquema,
   esArchivoMigracion,
   esJournalMigraciones,
   normalizarRuta,
@@ -17,15 +22,20 @@ import {
 
 Deno.test("normalizarRuta convierte barras invertidas a barras normales", () => {
   assertEquals(
-    normalizarRuta("back\\src\\infraestructura\\persistencia\\migraciones\\0000_init.sql"),
+    normalizarRuta(
+      "back\\src\\infraestructura\\persistencia\\migraciones\\0000_init.sql",
+    ),
     "back/src/infraestructura/persistencia/migraciones/0000_init.sql",
   );
 });
 
 Deno.test("identificacion de archivos de migracion y journal", () => {
-  const rutaSql = "back/src/infraestructura/persistencia/migraciones/0000_lying_mindworm.sql";
-  const rutaJournal = "back/src/infraestructura/persistencia/migraciones/meta/_journal.json";
-  const rutaSnapshot = "back/src/infraestructura/persistencia/migraciones/meta/0000_snapshot.json";
+  const rutaSql =
+    "back/src/infraestructura/persistencia/migraciones/0000_lying_mindworm.sql";
+  const rutaJournal =
+    "back/src/infraestructura/persistencia/migraciones/meta/_journal.json";
+  const rutaSnapshot =
+    "back/src/infraestructura/persistencia/migraciones/meta/0000_snapshot.json";
   const rutaDominio = "back/src/dominio/usuario/Usuario.ts";
 
   assertEquals(esArchivoMigracion(rutaSql), true);
@@ -50,17 +60,32 @@ R100\tback/src/infraestructura/persistencia/migraciones/0002_a.sql\tback/src/inf
   assertEquals(cambios.length, 4);
 
   assertEquals(cambios[0].estado, "M");
-  assertEquals(cambios[0].ruta, "back/src/infraestructura/persistencia/migraciones/0000_init.sql");
+  assertEquals(
+    cambios[0].ruta,
+    "back/src/infraestructura/persistencia/migraciones/0000_init.sql",
+  );
 
   assertEquals(cambios[1].estado, "A");
-  assertEquals(cambios[1].ruta, "back/src/infraestructura/persistencia/migraciones/0015_nueva.sql");
+  assertEquals(
+    cambios[1].ruta,
+    "back/src/infraestructura/persistencia/migraciones/0015_nueva.sql",
+  );
 
   assertEquals(cambios[2].estado, "D");
-  assertEquals(cambios[2].ruta, "back/src/infraestructura/persistencia/migraciones/0001_old.sql");
+  assertEquals(
+    cambios[2].ruta,
+    "back/src/infraestructura/persistencia/migraciones/0001_old.sql",
+  );
 
   assertEquals(cambios[3].estado, "R100");
-  assertEquals(cambios[3].rutaAnterior, "back/src/infraestructura/persistencia/migraciones/0002_a.sql");
-  assertEquals(cambios[3].ruta, "back/src/infraestructura/persistencia/migraciones/0002_b.sql");
+  assertEquals(
+    cambios[3].rutaAnterior,
+    "back/src/infraestructura/persistencia/migraciones/0002_a.sql",
+  );
+  assertEquals(
+    cambios[3].ruta,
+    "back/src/infraestructura/persistencia/migraciones/0002_b.sql",
+  );
 });
 
 Deno.test("verificarEntradasJournal permite agregar nuevas entradas al final", () => {
@@ -77,7 +102,13 @@ Deno.test("verificarEntradasJournal permite agregar nuevas entradas al final", (
     dialect: "postgresql",
     entries: [
       { idx: 0, version: "7", when: 1000, tag: "0000_init", breakpoints: true },
-      { idx: 1, version: "7", when: 2000, tag: "0001_nueva", breakpoints: true },
+      {
+        idx: 1,
+        version: "7",
+        when: 2000,
+        tag: "0001_nueva",
+        breakpoints: true,
+      },
     ],
   });
 
@@ -91,7 +122,13 @@ Deno.test("verificarEntradasJournal rechaza modificacion de entrada previa", () 
     dialect: "postgresql",
     entries: [
       { idx: 0, version: "7", when: 1000, tag: "0000_init", breakpoints: true },
-      { idx: 1, version: "7", when: 2000, tag: "0001_segunda", breakpoints: true },
+      {
+        idx: 1,
+        version: "7",
+        when: 2000,
+        tag: "0001_segunda",
+        breakpoints: true,
+      },
     ],
   });
 
@@ -99,8 +136,20 @@ Deno.test("verificarEntradasJournal rechaza modificacion de entrada previa", () 
     version: "7",
     dialect: "postgresql",
     entries: [
-      { idx: 0, version: "7", when: 1000, tag: "0000_init_alterado", breakpoints: true },
-      { idx: 1, version: "7", when: 2000, tag: "0001_segunda", breakpoints: true },
+      {
+        idx: 0,
+        version: "7",
+        when: 1000,
+        tag: "0000_init_alterado",
+        breakpoints: true,
+      },
+      {
+        idx: 1,
+        version: "7",
+        when: 2000,
+        tag: "0001_segunda",
+        breakpoints: true,
+      },
     ],
   });
 
@@ -114,7 +163,13 @@ Deno.test("verificarEntradasJournal rechaza eliminacion de entrada previa", () =
     dialect: "postgresql",
     entries: [
       { idx: 0, version: "7", when: 1000, tag: "0000_init", breakpoints: true },
-      { idx: 1, version: "7", when: 2000, tag: "0001_segunda", breakpoints: true },
+      {
+        idx: 1,
+        version: "7",
+        when: 2000,
+        tag: "0001_segunda",
+        breakpoints: true,
+      },
     ],
   });
 
@@ -139,7 +194,8 @@ Deno.test("verificarCambiosMigraciones valida escenarios de migracion", async ()
     },
     {
       estado: "A",
-      ruta: "back/src/infraestructura/persistencia/migraciones/meta/0015_snapshot.json",
+      ruta:
+        "back/src/infraestructura/persistencia/migraciones/meta/0015_snapshot.json",
     },
     {
       estado: "A",
@@ -154,7 +210,8 @@ Deno.test("verificarCambiosMigraciones valida escenarios de migracion", async ()
   const cambiosModificados = [
     {
       estado: "M",
-      ruta: "back/src/infraestructura/persistencia/migraciones/0000_lying_mindworm.sql",
+      ruta:
+        "back/src/infraestructura/persistencia/migraciones/0000_lying_mindworm.sql",
     },
   ];
   const res2 = await verificarCambiosMigraciones(cambiosModificados);
@@ -165,7 +222,8 @@ Deno.test("verificarCambiosMigraciones valida escenarios de migracion", async ()
   const cambiosBorrados = [
     {
       estado: "D",
-      ruta: "back/src/infraestructura/persistencia/migraciones/0001_indices.sql",
+      ruta:
+        "back/src/infraestructura/persistencia/migraciones/0001_indices.sql",
     },
   ];
   const res3 = await verificarCambiosMigraciones(cambiosBorrados);
@@ -176,7 +234,8 @@ Deno.test("verificarCambiosMigraciones valida escenarios de migracion", async ()
   const cambiosRenombrados = [
     {
       estado: "R100",
-      rutaAnterior: "back/src/infraestructura/persistencia/migraciones/0001_a.sql",
+      rutaAnterior:
+        "back/src/infraestructura/persistencia/migraciones/0001_a.sql",
       ruta: "back/src/infraestructura/persistencia/migraciones/0001_b.sql",
     },
   ];
@@ -188,7 +247,8 @@ Deno.test("verificarCambiosMigraciones valida escenarios de migracion", async ()
   const journalEliminado = [
     {
       estado: "D",
-      ruta: "back/src/infraestructura/persistencia/migraciones/meta/_journal.json",
+      ruta:
+        "back/src/infraestructura/persistencia/migraciones/meta/_journal.json",
     },
   ];
   const res5 = await verificarCambiosMigraciones(journalEliminado);
@@ -199,13 +259,20 @@ Deno.test("verificarCambiosMigraciones valida escenarios de migracion", async ()
   const journalModificado = [
     {
       estado: "M",
-      ruta: "back/src/infraestructura/persistencia/migraciones/meta/_journal.json",
+      ruta:
+        "back/src/infraestructura/persistencia/migraciones/meta/_journal.json",
     },
   ];
   const baseJournal = JSON.stringify({
     version: "7",
     dialect: "postgresql",
-    entries: [{ idx: 0, version: "7", when: 1, tag: "0000_a", breakpoints: true }],
+    entries: [{
+      idx: 0,
+      version: "7",
+      when: 1,
+      tag: "0000_a",
+      breakpoints: true,
+    }],
   });
   const headJournalValido = JSON.stringify({
     version: "7",
@@ -266,4 +333,59 @@ Deno.test("verificarCambiosMigraciones valida escenarios de migracion", async ()
   const res9 = await verificarCambiosMigraciones(esquemaConMigracion);
   assertEquals(res9.valido, true);
   assertEquals(res9.errores.length, 0);
+});
+
+Deno.test("componerRutaBack combina raiz y subrutas con separador POSIX", () => {
+  assertEquals(
+    componerRutaBack("back", "src/migraciones"),
+    "back/src/migraciones",
+  );
+  assertEquals(
+    componerRutaBack("back/", "/src/migraciones"),
+    "back/src/migraciones",
+  );
+  assertEquals(componerRutaBack(".", "src/migraciones"), "src/migraciones");
+  assertEquals(componerRutaBack("", "src/migraciones"), "src/migraciones");
+});
+
+Deno.test("verificarCambiosMigraciones soporta configuracion personalizada agnostica", async () => {
+  const configPersonalizada = {
+    back: {
+      raiz: "back",
+      directorioMigraciones: "src/infraestructura/database/migrations",
+      archivoEsquema: "src/infraestructura/database/schema.ts",
+      directorioUseCases: "src/aplicacion/use-cases",
+      archivosComposicionDIManual: ["src/main.ts"],
+      generadorUuid: "src/uuid.ts",
+      adaptadorLogger: "src/logger.ts",
+      clasesBaseEntidad: ["Entity"],
+      claseBaseValueObject: "ValueObject",
+    },
+    front: {
+      raiz: "front",
+      aplicaciones: [{ nombre: "web", rutaSrc: "src" }],
+      capasFSD: ["app"],
+    },
+  };
+
+  const rutaSql =
+    "back/src/infraestructura/database/migrations/0001_initial.sql";
+  const rutaJournal =
+    "back/src/infraestructura/database/migrations/meta/_journal.json";
+  const rutaSchema = "back/src/infraestructura/database/schema.ts";
+
+  assertEquals(esArchivoMigracion(rutaSql, configPersonalizada), true);
+  assertEquals(esJournalMigraciones(rutaJournal, configPersonalizada), true);
+  assertEquals(esArchivoEsquema(rutaSchema, configPersonalizada), true);
+
+  // Schema modificado sin migracion bajo config personalizada debe fallar
+  const cambioSchema = [{ estado: "M", ruta: rutaSchema }];
+  const resFallo = await verificarCambiosMigraciones(
+    cambioSchema,
+    undefined,
+    undefined,
+    configPersonalizada,
+  );
+  assertEquals(resFallo.valido, false);
+  assertEquals(resFallo.errores[0].includes("schema.ts"), true);
 });

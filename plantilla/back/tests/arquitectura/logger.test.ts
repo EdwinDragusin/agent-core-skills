@@ -1,4 +1,5 @@
 import { assert, assertEquals } from "@std/assert";
+import { estandarConfig } from "../../../estandar.config.ts";
 
 export interface ViolacionLogger {
   archivo: string;
@@ -10,23 +11,20 @@ export interface ViolacionLogger {
 /**
  * Exclusiones explicitas y autorizadas para el uso de console.* en back/src:
  *
- * 1. Adaptador LoggerConsola:
+ * 1. Adaptador Logger:
  *    Implementacion concreta del puerto Logger (ADR-028) que canaliza la salida
  *    estructurada JSON hacia stdout/stderr del proceso.
  *
- * 2. Scripts de siembra (back/src/infraestructura/persistencia/semillas/**):
+ * 2. Scripts de siembra:
  *    Salida CLI interactiva directa hacia el operador del sistema durante la ejecucion
  *    de migraciones de datos y semillas (herramienta de linea de comandos, no log de servicio).
  */
 export const ARCHIVOS_EXCLUIDOS: readonly string[] = [
-  // Adaptador de infraestructura que canaliza la salida hacia stdout/stderr
-  "src/infraestructura/observabilidad/LoggerConsola.ts",
+  estandarConfig.back.adaptadorLogger,
 ];
 
-export const PATRONES_DIRECTORIOS_EXCLUIDOS: readonly string[] = [
-  // Salida CLI del operador para scripts de siembra en terminal
-  "src/infraestructura/persistencia/semillas/",
-];
+export const PATRONES_DIRECTORIOS_EXCLUIDOS: readonly string[] =
+  estandarConfig.back.directoriosExcluidosLogger ?? [];
 
 /**
  * Elimina comentarios (linea y bloque) y cadenas literales para evitar falsos positivos
@@ -147,7 +145,10 @@ Deno.test("Arquitectura - Autoverificacion sintetica de reglas de Logger sin con
 
 Deno.test("Arquitectura - En back/src no debe haber llamadas a console.* salvo LoggerConsola y semillas CLI", () => {
   const archivosSrc = obtenerArchivosTypeScript("src");
-  assert(archivosSrc.length > 0, "Debe haber archivos en src");
+  assert(
+    archivosSrc.length > 0,
+    "Guarda anti-vacuidad: no se encontraron archivos en 'src'. Verifique la configuracion en estandar.config.ts",
+  );
 
   const todasLasViolaciones: ViolacionLogger[] = [];
 

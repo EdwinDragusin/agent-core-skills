@@ -1,4 +1,5 @@
 import {
+  assert,
   assertEquals,
   assertMatch,
   assertNotMatch,
@@ -90,6 +91,96 @@ Write-Host "Fin de auditoria"
   assertNotMatch(filtrado, /Piso minimo de casos de uso/);
   assertNotMatch(filtrado, /\$rutaEspecifica/);
   assertNotMatch(filtrado, /RN-X01 valida/);
+});
+
+Deno.test("Filtro PS1 - recorte de bloque PROYECTO con formato real sin marca de cierre", () => {
+  const ps1Realista = `# Script Linter
+# -----------------------------------------------------------------
+# 1. CASOS DE USO (docs/guia/referencia/casos-de-uso/CU-*.md)
+# [ESTANDAR]
+# -----------------------------------------------------------------
+Write-Host "Seccion 1 Estandar"
+
+# -----------------------------------------------------------------
+# 2. HISTORIAS DE USUARIO (docs/guia/referencia/historias-de-usuario.md)
+# [PROYECTO]
+# -----------------------------------------------------------------
+Write-Host "Seccion 2 Proyecto"
+$huPath = "docs/guia/referencia/historias-de-usuario.md"
+if (Test-Path $huPath) {
+  Register-Check "HU" "Check de proyecto" $true
+}
+
+# -----------------------------------------------------------------
+# 3. REGLAS Y DIRECTRICES (DIR-FRONT y RN-*)
+# [PROYECTO]
+# -----------------------------------------------------------------
+Write-Host "Seccion 3 Proyecto"
+$dirPath = "docs/arquitectura/directrices"
+Register-Check "Directrices" "Directorio existe" (Test-Path $dirPath)
+
+# -----------------------------------------------------------------
+# 4. ARC42 Y CATALOGO DE ADRS
+# [ESTANDAR]
+# -----------------------------------------------------------------
+Write-Host "Seccion 4 Estandar"
+`;
+
+  const filtrado = filtrarBloquesPs1Proyecto(ps1Realista);
+
+  assertMatch(filtrado, /# 1\. CASOS DE USO/);
+  assertMatch(filtrado, /Seccion 1 Estandar/);
+  assertMatch(filtrado, /# 4\. ARC42 Y CATALOGO DE ADRS/);
+  assertMatch(filtrado, /Seccion 4 Estandar/);
+
+  assertNotMatch(filtrado, /HISTORIAS DE USUARIO/);
+  assertNotMatch(filtrado, /Seccion 2 Proyecto/);
+  assertNotMatch(filtrado, /REGLAS Y DIRECTRICES/);
+  assertNotMatch(filtrado, /Seccion 3 Proyecto/);
+  assertNotMatch(filtrado, /# \[PROYECTO\]/);
+});
+
+Deno.test("Transformacion estandar.config.ts - sustitucion de valores propios por marcadores", () => {
+  const contenidoOriginal = `
+export interface AplicacionFront {
+  /** Nombre identificador de la aplicacion (ej. 'aspirante', 'gestion', 'web') */
+  nombre: string;
+  /** Ruta al directorio fuente de la aplicacion, relativa a front.raiz (ej. 'aspirante/src' o 'src') */
+  rutaSrc: string;
+  sesionEfimera?: boolean;
+}
+
+export const estandarConfig = {
+  front: {
+    raiz: "front",
+    aplicaciones: [
+      {
+        nombre: "aspirante",
+        rutaSrc: "aspirante/src",
+        sesionEfimera: true,
+      },
+      {
+        nombre: "gestion",
+        rutaSrc: "gestion/src",
+        sesionEfimera: false,
+      },
+    ],
+  },
+};
+`;
+
+  const transformado = transformarContenido(
+    "estandar.config.ts",
+    contenidoOriginal,
+  );
+
+  assert(transformado.includes('nombre: "{{APP_1}}"'));
+  assert(transformado.includes('rutaSrc: "{{APP_1}}/src"'));
+  assert(transformado.includes('nombre: "{{APP_2}}"'));
+  assert(transformado.includes('rutaSrc: "{{APP_2}}/src"'));
+  assertNotMatch(transformado, /\baspirante\b/i);
+  assertNotMatch(transformado, /\bgestion\b/i);
+  assertEquals(contieneTerminoDominio(transformado), false);
 });
 
 Deno.test("Deteccion de terminos de dominio - subcadena insensible a mayusculas con excepciones genericas", () => {

@@ -53,7 +53,10 @@ function obtenerImportsDeArchivo(filePath: string): string[] {
 
 Deno.test("Arquitectura - Capa de Dominio no debe tener dependencias externas ni de capas superiores", () => {
   const archivosDominio = obtenerArchivosTypeScript("src/dominio");
-  assert(archivosDominio.length > 0, "Debe existir al menos un archivo en src/dominio");
+  assert(
+    archivosDominio.length > 0,
+    "Guarda anti-vacuidad: no se encontraron archivos en 'src/dominio'. Verifique la configuracion en estandar.config.ts",
+  );
   const violaciones: string[] = [];
   for (const archivo of archivosDominio) {
     const imports = obtenerImportsDeArchivo(archivo);
@@ -84,7 +87,10 @@ Deno.test("Arquitectura - Capa de Dominio no debe tener dependencias externas ni
 });
 Deno.test("Arquitectura - Capa de Aplicacion solo debe importar de Dominio y Aplicacion", () => {
   const archivosAplicacion = obtenerArchivosTypeScript("src/aplicacion");
-  assert(archivosAplicacion.length > 0, "Debe existir al menos un archivo en src/aplicacion");
+  assert(
+    archivosAplicacion.length > 0,
+    "Guarda anti-vacuidad: no se encontraron archivos en 'src/aplicacion'. Verifique la configuracion en estandar.config.ts",
+  );
   const violaciones: string[] = [];
   for (const archivo of archivosAplicacion) {
     const imports = obtenerImportsDeArchivo(archivo);
@@ -116,7 +122,7 @@ Deno.test("Arquitectura - Capa de Infraestructura no debe importar de Interfaz",
   const archivosInfraestructura = obtenerArchivosTypeScript("src/infraestructura");
   assert(
     archivosInfraestructura.length > 0,
-    "Debe existir al menos un archivo en src/infraestructura",
+    "Guarda anti-vacuidad: no se encontraron archivos en 'src/infraestructura'. Verifique la configuracion en estandar.config.ts",
   );
   const violaciones: string[] = [];
   for (const archivo of archivosInfraestructura) {
@@ -142,7 +148,7 @@ Deno.test("Arquitectura - Tests de Aplicacion no deben importar de Interfaz", ()
   const archivosTestsAplicacion = obtenerArchivosTypeScript("tests/aplicacion");
   assert(
     archivosTestsAplicacion.length > 0,
-    "Debe existir al menos un archivo en tests/aplicacion",
+    "Guarda anti-vacuidad: no se encontraron archivos en 'tests/aplicacion'. Verifique la configuracion en estandar.config.ts",
   );
   const violaciones: string[] = [];
   for (const archivo of archivosTestsAplicacion) {

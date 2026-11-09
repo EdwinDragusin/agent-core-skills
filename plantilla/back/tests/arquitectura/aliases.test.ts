@@ -124,7 +124,10 @@ Deno.test("Arquitectura - Autoverificacion sintetica de deteccion de aliases ent
 
 Deno.test("Arquitectura - Todo import en src/ debe usar aliases @capa en lugar de rutas ascendentes ../", () => {
   const archivosSrc = obtenerArchivosTypeScript("src");
-  assert(archivosSrc.length > 0, "Debe haber archivos en src");
+  assert(
+    archivosSrc.length > 0,
+    "Guarda anti-vacuidad: no se encontraron archivos en 'src'. Verifique la configuracion en estandar.config.ts",
+  );
 
   const todasLasViolaciones: ViolacionAlias[] = [];
 

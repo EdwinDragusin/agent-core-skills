@@ -1,5 +1,6 @@
 /// <reference lib="deno.ns" />
 import { assert, assertEquals } from "jsr:@std/assert@^1.0.0";
+import { estandarConfig } from "../../../estandar.config.ts";
 
 export interface ViolacionStorage {
   archivo: string;
@@ -121,7 +122,7 @@ function recolectarArchivosAppEfimeraSrc(dir: string): string[] {
   return archivos;
 }
 
-Deno.test("Higiene Storage - Autoprueba sintetica de prohibicion de localStorage en {{APP_EFIMERA}}", () => {
+Deno.test("Higiene Storage - Autoprueba sintetica de prohibicion de localStorage en sesiones efimeras", () => {
   // Valido: uso exclusivo de sessionStorage o variables locales
   const codigoValido = `
     // Comentario que menciona localStorage como referencia historica
@@ -144,7 +145,7 @@ Deno.test("Higiene Storage - Autoprueba sintetica de prohibicion de localStorage
   assertEquals(violaciones[2].linea, 4);
 });
 
-Deno.test("Higiene Storage - front/{{APP_EFIMERA}}/src no usa localStorage (RN de sesiones efimeras)", () => {
+Deno.test("Higiene Storage - aplicaciones con sesion efimera no usan localStorage", () => {
   const urlTest = new URL(import.meta.url);
   const decodificada = decodeURIComponent(urlTest.pathname);
   const sinSlashWindows = /^\/[A-Za-z]:\//.test(decodificada)
@@ -155,31 +156,38 @@ Deno.test("Higiene Storage - front/{{APP_EFIMERA}}/src no usa localStorage (RN d
     dirPrueba.slice(0, dirPrueba.indexOf("/tests/")),
   );
 
-  const rutaAppEfimeraSrc = `${raizFront}/{{APP_EFIMERA}}/src`;
-  const archivos = recolectarArchivosAppEfimeraSrc(rutaAppEfimeraSrc);
-
-  assert(
-    archivos.length > 30,
-    `Se esperaban mas de 30 archivos en front/{{APP_EFIMERA}}/src, encontrados: ${archivos.length}`,
-  );
-
-  const violaciones: ViolacionStorage[] = [];
-  for (const archivo of archivos) {
-    try {
-      const contenido = Deno.readTextFileSync(archivo);
-      violaciones.push(...detectarUsoLocalStorage(contenido, archivo));
-    } catch (_e) {
-      // Ignorar errores de lectura
-    }
+  const appsEfimeras = estandarConfig.front.aplicaciones.filter((a) => a.sesionEfimera);
+  if (appsEfimeras.length === 0) {
+    return;
   }
 
-  if (violaciones.length > 0) {
-    const detalle = violaciones
-      .map((v) => `${v.archivo}:${v.linea} -> ${v.codigo}`)
-      .join("\n");
+  for (const app of appsEfimeras) {
+    const rutaAppSrc = `${raizFront}/${app.rutaSrc}`;
+    const archivos = recolectarArchivosAppEfimeraSrc(rutaAppSrc);
+
     assert(
-      false,
-      `Se encontro uso prohibido de localStorage en front/{{APP_EFIMERA}}/src:\n${detalle}`,
+      archivos.length > 0,
+      `Guarda anti-vacuidad: no se encontraron archivos en '${app.rutaSrc}' para la aplicacion con sesion efimera '${app.nombre}'. Verifique la configuracion en estandar.config.ts`,
     );
+
+    const violaciones: ViolacionStorage[] = [];
+    for (const archivo of archivos) {
+      try {
+        const contenido = Deno.readTextFileSync(archivo);
+        violaciones.push(...detectarUsoLocalStorage(contenido, archivo));
+      } catch (_e) {
+        // Ignorar errores de lectura
+      }
+    }
+
+    if (violaciones.length > 0) {
+      const detalle = violaciones
+        .map((v) => `${v.archivo}:${v.linea} -> ${v.codigo}`)
+        .join("\n");
+      assert(
+        false,
+        `Se encontro uso prohibido de localStorage en '${app.rutaSrc}':\n${detalle}`,
+      );
+    }
   }
 });
