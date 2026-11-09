@@ -17,7 +17,7 @@
     Por defecto se deduce del remoto 'origin' del repositorio resuelto.
 
 .PARAMETER Checks
-    Cadena separada por comas con los nombres de los status checks requeridos (ej. "governance-check" o "ci").
+    Lista de nombres de status checks requeridos (nombres de job de CI). Usar un elemento por check: -Checks "Backend","Frontend". No separar por comas: los nombres de job pueden contenerlas.
     Por defecto es "governance-check".
 
 .PARAMETER DryRun
@@ -29,13 +29,13 @@
     Aplica proteccion al repositorio del directorio actual con el check "governance-check".
 
 .EXAMPLE
-    .\scripts\protect-main-branch.ps1 -Path "C:\repo" -Checks "ci,lint" -DryRun
+    .\scripts\protect-main-branch.ps1 -Path "C:\repo" -Checks "ci","lint" -DryRun
     Modo seguro para inspeccionar parametros sin aplicar cambios.
 #>
 param(
     [string]$Path = "",
     [string]$Repo = "",
-    [string]$Checks = "governance-check",
+    [string[]]$Checks = @("governance-check"),
     [switch]$DryRun
 )
 
@@ -71,7 +71,7 @@ $RulesetName = "main-pr-only-governance"
 # 3. Formatear lista de required_status_checks
 $checkList = @()
 if ($Checks) {
-    $rawChecks = $Checks -split ',' | ForEach-Object { $_.Trim() } | Where-Object { $_ }
+    $rawChecks = $Checks | ForEach-Object { $_.Trim() } | Where-Object { $_ }
     foreach ($c in $rawChecks) {
         $checkList += @{ context = $c }
     }
@@ -122,7 +122,7 @@ $rulesetBody = @{
 if ($DryRun) {
     Write-Host "[DRY-RUN] Raiz del repositorio: $RepoRoot"
     Write-Host "[DRY-RUN] Repositorio GitHub:   $Repo"
-    Write-Host "[DRY-RUN] Status checks:        $Checks"
+    Write-Host "[DRY-RUN] Status checks:        $($Checks -join " | ")"
     Write-Host "[DRY-RUN] Ruleset Payload:"
     Write-Host $rulesetBody
     exit 0
