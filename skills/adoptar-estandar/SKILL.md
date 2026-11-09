@@ -11,6 +11,15 @@ Orquesta la transferencia de mecanismos, compuertas de calidad y gobernanza de E
 
 ---
 
+## Definicion de Rutas del Plugin
+
+- `RAIZ_PLUGIN`: Dos niveles arriba de este `SKILL.md` (`../../` relativo a `skills/adoptar-estandar/SKILL.md`).
+- `RAIZ_PLUGIN/plantilla/`: Directorio origen de mecanismos estandar.
+- `RAIZ_PLUGIN/plantilla/MANIFIESTO.md`: Catalogo autoritativo de reglas y adaptaciones.
+- `RAIZ_PLUGIN/scripts/protect-main-branch.ps1`: Script de blindaje de rama principal.
+
+---
+
 ## Delegacion en Superpowers
 
 - Planificacion de olas: delegar en `superpowers:writing-plans`.
@@ -35,7 +44,7 @@ Orquesta la transferencia de mecanismos, compuertas de calidad y gobernanza de E
 1. **Detectar stack:** Inspeccionar segun `references/stack.md`:
    - Deno + Hono + Drizzle + React FSD: adopcion completa.
    - Otro stack: advertir al usuario y limitar a mecanismos agnosticos (commits, ramas, higiene, doc-linter, marcas, proteccion de main).
-2. **Cotejo con plantilla:** Contrastar arbol contra `plantilla/MANIFIESTO.md`.
+2. **Cotejo con plantilla:** Contrastar arbol contra `RAIZ_PLUGIN/plantilla/MANIFIESTO.md`.
 3. **Tabla de brechas:** Presentar matriz con mecanismos ausentes, parciales o no bloqueantes.
 4. **Pausa de compuerta:** Solicitar aprobacion humana antes de planificar.
 
@@ -46,7 +55,7 @@ Orquesta la transferencia de mecanismos, compuertas de calidad y gobernanza de E
 Planificar las 5 olas (detalles en `references/olas.md`):
 - **Ola 1: CI Unica y Cobertura:** Pipeline GitHub Actions, runner local y umbrales inmutables (`references/cobertura.md`).
 - **Ola 2: Hooks de Git y Commits:** `commit-msg`, `pre-push`, validador de Conventional Commits y validador de ramas.
-- **Ola 3: Tests de Arquitectura:** Aislamiento de capas backend y frontend. En front, sustituir marcadores `{{APP_1}}`, `{{APP_2}}`, `@{{PROYECTO}}`, `{{APP_EFIMERA}}` segun `plantilla/MANIFIESTO.md`.
+- **Ola 3: Tests de Arquitectura:** Aislamiento de capas backend y frontend. En front, sustituir marcadores `{{APP_1}}`, `{{APP_2}}`, `@{{PROYECTO}}`, `{{APP_EFIMERA}}` segun `RAIZ_PLUGIN/plantilla/MANIFIESTO.md`.
 - **Ola 4: Higiene y Calidad Estatica:** Detector de emojis, aislamiento de variables de entorno y storage.
 - **Ola 5: Gobernanza Documental:** Doc-linter, marcas `[ESTANDAR]`/`[PROYECTO]`, catalogo de ADRs y trazabilidad `verifica:`.
 
@@ -56,7 +65,7 @@ Planificar las 5 olas (detalles en `references/olas.md`):
 
 Para cada ola aprobada:
 1. Crear rama dedicada: `git checkout -b <tipo>/adopcion-<nombre-ola>`.
-2. Copiar archivos desde `plantilla/` segun `plantilla/MANIFIESTO.md`.
+2. Copiar archivos desde `RAIZ_PLUGIN/plantilla/` segun `RAIZ_PLUGIN/plantilla/MANIFIESTO.md`.
 3. Parametrizar variables y marcadores del proyecto (`{{APP_1}}`, `{{APP_2}}`, etc.).
 4. Resolver integracion:
    - Proyecto nuevo: resolver discrepancias de inmediato.
@@ -71,8 +80,11 @@ Para cada ola aprobada:
    - En worktree desechable, inyectar violaciones por mecanismo (`references/olas.md`).
    - Comprobar que CI o hooks rechazan la mutacion con exit != 0.
 2. **Blindaje de rama principal:**
-   - Ejecutar:
-     `pwsh ./scripts/protect-main-branch.ps1 -Repo <owner/name> -Checks <nombres de status checks separados por comas>`
+   - El blindaje altera la configuracion del repositorio en GitHub. Ejecutar con cwd en la raiz del proyecto destino.
+   - Ejecutar primero con `-DryRun` y mostrar el resultado al usuario:
+     `pwsh RAIZ_PLUGIN/scripts/protect-main-branch.ps1 [-Repo <owner/name>] -Checks <nombres de los jobs de CI separados por comas> -DryRun`
+   - Los checks requeridos corresponden a los nombres reales de los jobs del `ci.yml` adoptado (propiedad `name:` de cada job en el workflow).
+   - Aplicar sin `-DryRun` unicamente tras aprobacion explicita del usuario.
    - Confirmar bloqueo de commits y pushes directos a `main`, y ruleset exigiendo PR y checks verdes.
 3. **Auditoria adversarial final (`AUDIT-NNN`):**
    - Ejecutar segun `references/auditoria-final.md`.

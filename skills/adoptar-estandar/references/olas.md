@@ -2,6 +2,8 @@
 
 Este documento define la lista de comprobacion, los marcadores de sustitucion y el protocolo de verificacion por mutacion para cada una de las 5 olas iterativas de adopcion del estandar.
 
+> **RUTAS DEL PLUGIN:** `RAIZ_PLUGIN` corresponde a tres niveles arriba de este archivo (`../../../` relativo a `references/olas.md`, raiz del plugin instalador). Toda plantilla se lee desde `RAIZ_PLUGIN/plantilla/`.
+
 ---
 
 ## Ola 1: CI Unica y Cobertura Bloqueante
@@ -10,12 +12,12 @@ Este documento define la lista de comprobacion, los marcadores de sustitucion y 
 Establecer un pipeline de integracion continua determinista en local y en remoto que bloquee cualquier PR que no compile, no pase pruebas o reduzca la cobertura de codigo.
 
 ### Insumos de Plantilla
-- `.github/workflows/ci.yml`
+- `RAIZ_PLUGIN/plantilla/.github/workflows/ci.yml`
 - Fragmentos de tareas para `deno.json` (`ci`, `check`, `test`, `coverage`)
-- `plantilla/MANIFIESTO.md` (reglas CI-01, COV-01)
+- `RAIZ_PLUGIN/plantilla/MANIFIESTO.md` (reglas CI-01, COV-01)
 
 ### Lista de Comprobacion
-1. Copiar `.github/workflows/ci.yml` al repositorio destino.
+1. Copiar `.github/workflows/ci.yml` desde `RAIZ_PLUGIN/plantilla/` al repositorio destino.
 2. Integrar las tareas de orquestacion en `deno.json` raiz:
    - `deno task ci`: encadena chequeo estatico, pruebas unitarias, integracion y medicion de cobertura.
 3. Medir linea base de cobertura actual (ver `references/cobertura.md`).
@@ -39,13 +41,13 @@ En un worktree o rama temporal, ejecutar estas mutaciones y comprobar que la CI 
 Impedir commits con formato invalido, emojis, lineas de atribucion ajenas o branches fuera de nomenclatura antes de que toquen el historial remoto.
 
 ### Insumos de Plantilla
-- `.githooks/commit-msg`
-- `.githooks/pre-push`
-- `scripts/hooks/validar-commit.ts` (y test asociado)
-- `scripts/hooks/validar-rama.ts` (y test asociado)
+- `RAIZ_PLUGIN/plantilla/.githooks/commit-msg`
+- `RAIZ_PLUGIN/plantilla/.githooks/pre-push`
+- `RAIZ_PLUGIN/plantilla/scripts/hooks/validar-commit.ts` (y test asociado)
+- `RAIZ_PLUGIN/plantilla/scripts/hooks/validar-rama.ts` (y test asociado)
 
 ### Lista de Comprobacion
-1. Copiar `.githooks/` y `scripts/hooks/` al proyecto destino.
+1. Copiar `.githooks/` y `scripts/hooks/` desde `RAIZ_PLUGIN/plantilla/` al proyecto destino.
 2. Configurar la ruta de hooks en Git o mediante tarea `deno task hooks:install`:
    - `git config core.hooksPath .githooks`
 3. Asegurar que los scripts de validacion tengan permisos de ejecucion.
@@ -70,15 +72,15 @@ Impedir commits con formato invalido, emojis, lineas de atribucion ajenas o bran
 Garantizar aislamiento estricto de dependencias en backend (Clean Architecture) y frontend (Feature-Sliced Design), evitando importaciones circulares o acoplamientos prohibidos.
 
 ### Insumos de Plantilla
-- `back/tests/arquitectura/dependencias.test.ts`
-- `back/tests/arquitectura/aliases.test.ts`
-- `back/tests/arquitectura/diManual.test.ts`
-- `back/tests/arquitectura/entidades.test.ts`
-- `back/tests/arquitectura/valueObjects.test.ts`
-- `front/tests/arquitectura/front-dependencias.test.ts`
+- `RAIZ_PLUGIN/plantilla/back/tests/arquitectura/dependencias.test.ts`
+- `RAIZ_PLUGIN/plantilla/back/tests/arquitectura/aliases.test.ts`
+- `RAIZ_PLUGIN/plantilla/back/tests/arquitectura/diManual.test.ts`
+- `RAIZ_PLUGIN/plantilla/back/tests/arquitectura/entidades.test.ts`
+- `RAIZ_PLUGIN/plantilla/back/tests/arquitectura/valueObjects.test.ts`
+- `RAIZ_PLUGIN/plantilla/front/tests/arquitectura/front-dependencias.test.ts`
 
 ### Marcadores de Plantilla Frontend (Sustitucion Obligatoria)
-La plantilla utiliza marcadores parametricos que deben ser reemplazados al inicio de esta ola segun la declaracion de `plantilla/MANIFIESTO.md`:
+La plantilla utiliza marcadores parametricos que deben ser reemplazados al inicio de esta ola segun la declaracion de `RAIZ_PLUGIN/plantilla/MANIFIESTO.md`:
 - `{{APP_1}}`: Nombre del primer modulo o SPA del portal (ej. `aspirante`, `cliente`, `portal`).
 - `{{APP_2}}`: Nombre del segundo modulo o SPA administrativa (ej. `gestion`, `admin`, `backoffice`).
 - `@{{PROYECTO}}`: Prefijo de aliases internos de librerias compartidas.
@@ -87,7 +89,7 @@ La plantilla utiliza marcadores parametricos que deben ser reemplazados al inici
 > **INSTRUCCION CRITICA:** La ola de arquitectura del frontend empieza obligatoriamente por sustituir los marcadores `{{APP_1}}`, `{{APP_2}}`, `@{{PROYECTO}}` y `{{APP_EFIMERA}}` en `front-dependencias.test.ts` y configuraciones asociadas antes de correr las pruebas.
 
 ### Lista de Comprobacion
-1. Copiar tests de arquitectura a `back/tests/arquitectura/` y `front/tests/arquitectura/`.
+1. Copiar tests de arquitectura desde `RAIZ_PLUGIN/plantilla/` a `back/tests/arquitectura/` y `front/tests/arquitectura/`.
 2. Sustituir marcadores de frontend segun la estructura de directorios real.
 3. En proyectos existentes: si existen violaciones preexistentes masivas, registrar una lista base (allowlist) con marcas de TODO en el test para evitar frenar el desarrollo mientras se calendariza el desacoplamiento.
 4. Ejecutar tests de arquitectura e integrarlos en `deno task ci`.
@@ -108,12 +110,12 @@ La plantilla utiliza marcadores parametricos que deben ser reemplazados al inici
 Asegurar que ningun archivo contenga emojis, que las variables de entorno no se filtren a componentes publicos y que el acceso al almacenamiento local este debidamente encapsulado.
 
 ### Insumos de Plantilla
-- `scripts/higiene/sin-emojis.test.ts`
-- `front/tests/higiene/entorno.test.ts`
-- `front/tests/higiene/storage.test.ts`
+- `RAIZ_PLUGIN/plantilla/scripts/higiene/sin-emojis.test.ts`
+- `RAIZ_PLUGIN/plantilla/front/tests/higiene/entorno.test.ts`
+- `RAIZ_PLUGIN/plantilla/front/tests/higiene/storage.test.ts`
 
 ### Lista de Comprobacion
-1. Copiar scripts de higiene a `scripts/higiene/` y `front/tests/higiene/`.
+1. Copiar scripts de higiene desde `RAIZ_PLUGIN/plantilla/` a `scripts/higiene/` y `front/tests/higiene/`.
 2. En proyectos existentes: auditar ocurrencias historicas de emojis o fugas de storage. Si es viable, limpiar de inmediato; si no, registrar lista congelada justificada.
 3. Integrar las pruebas en la tarea `deno task ci`.
 
@@ -133,13 +135,13 @@ Asegurar que ningun archivo contenga emojis, que las variables de entorno no se 
 Verificar que la documentacion tecnica mantenga consistencia con el codigo mediante linters automaticos, marcas de estandar y catalogo inmutable de ADRs.
 
 ### Insumos de Plantilla
-- `scripts/doc-linter.ps1`
-- `scripts/lint-docs.ts`
-- `docs/_plantillas/`
+- `RAIZ_PLUGIN/plantilla/scripts/doc-linter.ps1`
+- `RAIZ_PLUGIN/plantilla/scripts/lint-docs.ts`
+- `RAIZ_PLUGIN/plantilla/docs/_plantillas/`
 - Manifiestos con marcas `<!-- [ESTANDAR] -->` y `<!-- [PROYECTO] -->`
 
 ### Lista de Comprobacion
-1. Copiar `doc-linter.ps1` y `lint-docs.ts` a `scripts/`.
+1. Copiar `doc-linter.ps1` y `lint-docs.ts` desde `RAIZ_PLUGIN/plantilla/` a `scripts/`.
 2. Parametrizar en el linter documental los capitulos de arc42 y Diataxis vigentes en el proyecto.
 3. Verificar que cada regla de gobernanza cuente con su marca y su ancla de verificacion (`verifica:`).
 4. Integrar `scripts/lint-docs.ts` en `deno task ci` o job de CI.
