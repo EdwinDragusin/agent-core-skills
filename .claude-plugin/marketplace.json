@@ -3,11 +3,14 @@
   "owner": {
     "name": "Edwin Dragusin"
   },
+  "allowCrossMarketplaceDependenciesOn": [
+    "superpowers-marketplace"
+  ],
   "plugins": [
     {
       "name": "agent-core-skills",
       "source": "./",
-      "description": "Framework integral de gobernanza Zero-Trust, 8 subagentes SDLC y 32 skills de ingenieria de software."
+      "description": "Nucleo de gobernanza arquitectonica, adopcion de estandar y 17 skills de ingenieria de software."
     }
   ]
 }
