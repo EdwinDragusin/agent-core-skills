@@ -559,19 +559,45 @@ if ($resSynthBadPath.Passed) {
 $synthMsg = if ($synthTestsPassed) { "Cuatro escenarios sinteticos validados en memoria" } else { $synthDetails -join "; " }
 Register-Check "Manifiestos" "Autoprueba sintetica del validador de manifiestos" $synthTestsPassed $synthMsg
 
-# Verificacion de los cuatro archivos AGENTS.md
-$manifestList = @(
-  ".agents/AGENTS.md",
-  "back/AGENTS.md",
-  "docs/AGENTS.md",
-  "front/AGENTS.md"
-)
+# Verificacion de todos los archivos AGENTS.md descubiertos dinamicamente
+$manifestSet = [System.Collections.Generic.HashSet[string]]::new([System.StringComparer]::OrdinalIgnoreCase)
+
+try {
+  $gitTracked = & git -C $repoRoot ls-files "*AGENTS.md" 2>$null
+  if ($gitTracked) {
+    foreach ($line in ($gitTracked -split "`r?`n")) {
+      $trim = $line.Trim().Replace('\', '/')
+      if ($trim) { [void]$manifestSet.Add($trim) }
+    }
+  }
+  $gitUntracked = & git -C $repoRoot ls-files --others --exclude-standard "*AGENTS.md" 2>$null
+  if ($gitUntracked) {
+    foreach ($line in ($gitUntracked -split "`r?`n")) {
+      $trim = $line.Trim().Replace('\', '/')
+      if ($trim) { [void]$manifestSet.Add($trim) }
+    }
+  }
+} catch {}
+
+if ($manifestSet.Count -eq 0) {
+  Get-ChildItem -Path $repoRoot -Recurse -Filter "AGENTS.md" -File |
+    Where-Object {
+      $norm = $_.FullName.Replace('\', '/')
+      $norm -notmatch '/(\.git|\.agents|node_modules|coverage|\.gemini|\.claude)/'
+    } |
+    ForEach-Object {
+      $rel = $_.FullName.Substring($repoRoot.Length).TrimStart('\', '/').Replace('\', '/')
+      [void]$manifestSet.Add($rel)
+    }
+}
+
+$manifestList = @($manifestSet | Sort-Object)
 
 foreach ($relPath in $manifestList) {
   $fullPath = Join-Path $repoRoot $relPath
   $exists = Test-Path $fullPath
   $parentDir = Split-Path $fullPath -Parent
-  $exigirManifiesto = ($relPath -eq "docs/AGENTS.md") -or (Test-Path $parentDir)
+  $exigirManifiesto = ($relPath -eq "docs/AGENTS.md") -or ($relPath -eq "AGENTS.md") -or (Test-Path $parentDir)
 
   if ($exigirManifiesto) {
     Register-Check "Manifiestos" "$relPath - Archivo existe en repositorio" $exists

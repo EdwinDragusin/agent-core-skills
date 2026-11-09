@@ -10,6 +10,51 @@
 
 import * as path from "jsr:@std/path@^1.0.0";
 import { walk } from "jsr:@std/fs@^1.0.0";
+import { estandarConfig } from "../plantilla/estandar.config.ts";
+
+export interface RutasManifiestosConfig {
+  backRaiz: string;
+  frontRaiz: string;
+  rutaShared: string;
+}
+
+export function extraerRutasDeConfig(
+  contenidoConfig?: string,
+): RutasManifiestosConfig {
+  let backRaiz = estandarConfig.back.raiz;
+  let frontRaiz = estandarConfig.front.raiz;
+  let sharedSubruta = estandarConfig.front.capaCompartida?.ruta ?? "shared";
+
+  if (contenidoConfig) {
+    const matchBack = /back\s*:\s*\{[\s\S]*?\braiz\s*:\s*["']([^"']+)["']/
+      .exec(contenidoConfig);
+    const matchFront = /front\s*:\s*\{[\s\S]*?\braiz\s*:\s*["']([^"']+)["']/
+      .exec(contenidoConfig);
+    const matchShared =
+      /capaCompartida\s*:\s*\{[\s\S]*?\bruta\s*:\s*["']([^"']+)["']/
+        .exec(contenidoConfig);
+
+    if (matchBack?.[1]) backRaiz = matchBack[1];
+    if (matchFront?.[1]) frontRaiz = matchFront[1];
+    if (matchShared?.[1]) sharedSubruta = matchShared[1];
+  }
+
+  const backLimpio = backRaiz.replace(/^\/+|\/+$/g, "") || ".";
+  const frontLimpio = frontRaiz.replace(/^\/+|\/+$/g, "") || ".";
+  const sharedLimpio = sharedSubruta.replace(/^\/+|\/+$/g, "");
+  const rutaShared = frontLimpio === "."
+    ? sharedLimpio
+    : `${frontLimpio}/${sharedLimpio}`;
+
+  return {
+    backRaiz: backLimpio,
+    frontRaiz: frontLimpio,
+    rutaShared,
+  };
+}
+
+export const RUTAS_CONFIG_DEFECTO = extraerRutasDeConfig();
+export const RUTA_SHARED_AGENTS = `${RUTAS_CONFIG_DEFECTO.rutaShared}/AGENTS.md`;
 
 export interface TransformacionDeclarada {
   archivo: string;
@@ -367,7 +412,7 @@ export const TRANSFORMACIONES_DECLARADAS: TransformacionDeclarada[] = [
       "Parametriza nombres y rutas fuente de aplicaciones frontend en la configuracion centralizada.",
   },
   {
-    archivo: ".agents/AGENTS.md",
+    archivo: "AGENTS.md",
     marcadorOPlaceholder: "{{NOMBRE_PROYECTO}}, {{DESCRIPCION_PROYECTO}}",
     valorOriginal:
       "preambulo de aplicacion REST original y marco institucional de referencia",
@@ -376,21 +421,29 @@ export const TRANSFORMACIONES_DECLARADAS: TransformacionDeclarada[] = [
       "Parametriza nombre del proyecto y sustituye preambulo especifico por descripcion configurable.",
   },
   {
-    archivo: "back/AGENTS.md",
-    marcadorOPlaceholder: "{{NOMBRE_PROYECTO}}, identificadores personales",
-    valorOriginal: "nombre de aplicacion API original / identificador personal",
-    valorSustituto: "{{NOMBRE_PROYECTO}} API / identificadores personales",
+    archivo: `${RUTAS_CONFIG_DEFECTO.backRaiz}/AGENTS.md`,
+    marcadorOPlaceholder: "{{NOMBRE_PROYECTO}}, control de migraciones",
+    valorOriginal: "nombre de aplicacion API original / termino reservado en indice de capa",
+    valorSustituto: "{{NOMBRE_PROYECTO}} API / control de migraciones",
     descripcion:
-      "Parametriza encabezado y generaliza ejemplo de PII en directiva de observabilidad.",
+      "Parametriza encabezado y neutraliza terminologia en el indice de manifiestos por capa.",
   },
   {
-    archivo: "front/AGENTS.md",
+    archivo: `${RUTAS_CONFIG_DEFECTO.frontRaiz}/AGENTS.md`,
     marcadorOPlaceholder: "{{NOMBRE_PROYECTO}}, {{APP_1}}, {{APP_2}}",
     valorOriginal:
-      "nombre de aplicacion Web Client original / nombres de portales originales",
+      "nombre de aplicacion Web Client original / nombres y flujos de portales originales",
     valorSustituto: "{{NOMBRE_PROYECTO}} Web Client / {{APP_1}}, {{APP_2}}",
     descripcion:
-      "Parametriza encabezado y directivas del modelo de capas por portal.",
+      "Parametriza encabezado e indice de manifiestos de aplicaciones por portal.",
+  },
+  {
+    archivo: RUTA_SHARED_AGENTS,
+    marcadorOPlaceholder: "{{APP_1}}, {{APP_2}}",
+    valorOriginal: "nombres de portales especificos en regla de aislamiento",
+    valorSustituto: "({{APP_1}}/, {{APP_2}}/)",
+    descripcion:
+      "Parametriza nombres de portales en la regla de aislamiento absoluto de la capa compartida.",
   },
   {
     archivo: "docs/AGENTS.md",
@@ -488,6 +541,14 @@ export const TRANSFORMACIONES_DECLARADAS: TransformacionDeclarada[] = [
       "Sustituye modulos y rutas de ejemplo de proceso de negocio por modulos genericos.",
   },
   {
+    archivo: "docs/guia/how-to/flujo-multiagente.md",
+    marcadorOPlaceholder: "{{APP_1}}, {{APP_2}}, web/src",
+    valorOriginal: "ejemplos de rutas y manifiestos de portales originales",
+    valorSustituto: "{{APP_1}}/AGENTS.md, {{APP_2}}/AGENTS.md, web/src",
+    descripcion:
+      "Parametriza referencias a manifiestos de aplicaciones y rutas de ejemplo en guia multiagente.",
+  },
+  {
     archivo: "back/Dockerfile",
     marcadorOPlaceholder: "CMD / COPY",
     valorOriginal: "rutas de scripts y main.ts de referencia",
@@ -562,7 +623,7 @@ export function transformarContenido(
       );
       break;
 
-    case ".agents/AGENTS.md":
+    case "AGENTS.md":
       c = c.replace(
         /# Project Rules\s*([-\u2014\u2013])\s*Sistema de Examenes de Ingreso/g,
         "# Project Rules - {{NOMBRE_PROYECTO}}",
@@ -577,14 +638,20 @@ export function transformarContenido(
       );
       break;
 
+    case `${RUTAS_CONFIG_DEFECTO.backRaiz}/AGENTS.md`:
     case "back/AGENTS.md":
       c = c.replace(
         /# Backend Operational Manifest\s*([-\u2014\u2013])\s*Examen de Ingreso API/g,
         "# Backend Operational Manifest - {{NOMBRE_PROYECTO}} API",
       );
       c = c.replace(/,\s*CURP,/g, ", identificadores personales,");
+      c = c.replace(
+        /y gesti[o\u00f3]n de migraciones/g,
+        "y control de migraciones",
+      );
       break;
 
+    case `${RUTAS_CONFIG_DEFECTO.frontRaiz}/AGENTS.md`:
     case "front/AGENTS.md":
       c = c.replace(
         /# Frontend Operational Manifest\s*([-\u2014\u2013])\s*Examen de Ingreso Web Client/g,
@@ -597,6 +664,21 @@ export function transformarContenido(
       c = c.replace(/\(aspirante\/, gestion\/\)/g, "({{APP_1}}/, {{APP_2}}/)");
       c = c.replace(/exclusivo de gestion/g, "exclusivo de {{APP_2}}");
       c = c.replace(/bundle de\s+aspirante/g, "bundle de {{APP_1}}");
+      c = c.replace(
+        /\[`aspirante\/AGENTS\.md`\]\(aspirante\/AGENTS\.md\):\s*Reglas del examen en vivo \(RN-F05\)/g,
+        "[`{{APP_1}}/AGENTS.md`]({{APP_1}}/AGENTS.md): Reglas del flujo interactivo en vivo",
+      );
+      c = c.replace(
+        /\[`gestion\/AGENTS\.md`\]\(gestion\/AGENTS\.md\):\s*Procesos administrativos,\s*dictamen manual \(ADR-011\),\s*convocatorias/g,
+        "[`{{APP_2}}/AGENTS.md`]({{APP_2}}/AGENTS.md): Procesos administrativos, operaciones de backoffice",
+      );
+      break;
+
+    case RUTA_SHARED_AGENTS:
+      c = c.replace(
+        /\(`aspirante\/`,\s*`gestion\/`\)/g,
+        "(`{{APP_1}}/`, `{{APP_2}}/`)",
+      );
       break;
 
     case "docs/AGENTS.md":
@@ -707,6 +789,14 @@ export function transformarContenido(
       c = c.replace(
         /ej\.\s*`'aspirante\/src'`\s*o\s*`'src'`/g,
         "ej. `'web/src'` o `'src'`",
+      );
+      c = c.replace(
+        /`aspirante\/AGENTS\.md`:\s*Reglas del examen runner en vivo/g,
+        "`{{APP_1}}/AGENTS.md`: Reglas del flujo interactivo en vivo",
+      );
+      c = c.replace(
+        /`gestion\/AGENTS\.md`:\s*Flujos de administracion,\s*dictamen pericial manual,\s*convocatorias/g,
+        "`{{APP_2}}/AGENTS.md`: Flujos de administracion, operaciones de backoffice",
       );
       break;
 
@@ -852,437 +942,500 @@ export function transformarContenido(
   return c;
 }
 
-export const ARCHIVOS_ESTANDAR: ArchivoEstandar[] = [
-  // 0. Configuracion Centralizada del Estandar
-  {
-    origen: "estandar.config.ts",
-    destino: "estandar.config.ts",
-    categoria: "config",
-    regla:
-      "Configuracion centralizada de rutas y topologia de mecanismos (estandar.config.ts)",
-    requiereAdaptacion: true,
-    guiaAdaptacion:
-      "PRIMER paso de adaptacion: configurar raiz de backend, aplicaciones frontend y capa compartida.",
-    marcadores: ["{{APP_1}}", "{{APP_2}}"],
-    tipoTransformacion: "personalizada",
-  },
+export function construirArchivosEstandar(
+  rutas: RutasManifiestosConfig = RUTAS_CONFIG_DEFECTO,
+): ArchivoEstandar[] {
+  const rutaSharedAgents = `${rutas.rutaShared}/AGENTS.md`;
+  return [
+    // 0. Configuracion Centralizada del Estandar
+    {
+      origen: "estandar.config.ts",
+      destino: "estandar.config.ts",
+      categoria: "config",
+      regla:
+        "Configuracion centralizada de rutas y topologia de mecanismos (estandar.config.ts)",
+      requiereAdaptacion: true,
+      guiaAdaptacion:
+        "PRIMER paso de adaptacion: configurar raiz de backend, aplicaciones frontend y capa compartida.",
+      marcadores: ["{{APP_1}}", "{{APP_2}}"],
+      tipoTransformacion: "personalizada",
+    },
 
-  // 1. CI y GitHub
-  {
-    origen: ".github/workflows/ci.yml",
-    destino: ".github/workflows/ci.yml",
-    categoria: "ci",
-    regla: "Pipeline completo CI (.agents/AGENTS.md)",
-    requiereAdaptacion: false,
-    guiaAdaptacion:
-      "Copiar directo. Utiliza Deno 2.x, PostgreSQL en testcontainers y jobs paralelos.",
-    tipoTransformacion: "copia-directa",
-  },
-  {
-    origen: ".github/pull_request_template.md",
-    destino: ".github/pull_request_template.md",
-    categoria: "ci",
-    regla: "Workflow de Pull Requests (.agents/AGENTS.md)",
-    requiereAdaptacion: false,
-    guiaAdaptacion:
-      "Copiar directo. Incluye lista de verificacion de reglas de instruccion.",
-    tipoTransformacion: "personalizada",
-  },
+    // 1. CI y GitHub
+    {
+      origen: ".github/workflows/ci.yml",
+      destino: ".github/workflows/ci.yml",
+      categoria: "ci",
+      regla: "Pipeline completo CI (AGENTS.md)",
+      requiereAdaptacion: false,
+      guiaAdaptacion:
+        "Copiar directo. Utiliza Deno 2.x, PostgreSQL en testcontainers y jobs paralelos.",
+      tipoTransformacion: "copia-directa",
+    },
+    {
+      origen: ".github/pull_request_template.md",
+      destino: ".github/pull_request_template.md",
+      categoria: "ci",
+      regla: "Workflow de Pull Requests (AGENTS.md)",
+      requiereAdaptacion: false,
+      guiaAdaptacion:
+        "Copiar directo. Incluye lista de verificacion de reglas de instruccion.",
+      tipoTransformacion: "personalizada",
+    },
 
-  // 2. Git Hooks
-  {
-    origen: ".githooks/commit-msg",
-    destino: ".githooks/commit-msg",
-    categoria: "hooks",
-    regla: "Conventional Commits (.agents/AGENTS.md)",
-    requiereAdaptacion: false,
-    guiaAdaptacion: "Copiar directo. Ejecutable bash multiplataforma.",
-    tipoTransformacion: "copia-directa",
-  },
-  {
-    origen: ".githooks/pre-push",
-    destino: ".githooks/pre-push",
-    categoria: "hooks",
-    regla: "Validacion de rama y push a main (.agents/AGENTS.md)",
-    requiereAdaptacion: false,
-    guiaAdaptacion:
-      "Copiar directo. Bloquea push directo a main y ramas sin formato.",
-    tipoTransformacion: "copia-directa",
-  },
+    // 2. Git Hooks
+    {
+      origen: ".githooks/commit-msg",
+      destino: ".githooks/commit-msg",
+      categoria: "hooks",
+      regla: "Conventional Commits (AGENTS.md)",
+      requiereAdaptacion: false,
+      guiaAdaptacion: "Copiar directo. Ejecutable bash multiplataforma.",
+      tipoTransformacion: "copia-directa",
+    },
+    {
+      origen: ".githooks/pre-push",
+      destino: ".githooks/pre-push",
+      categoria: "hooks",
+      regla: "Validacion de rama y push a main (AGENTS.md)",
+      requiereAdaptacion: false,
+      guiaAdaptacion:
+        "Copiar directo. Bloquea push directo a main y ramas sin formato.",
+      tipoTransformacion: "copia-directa",
+    },
 
-  // 3. Scripts de validacion y soporte
-  {
-    origen: "scripts/hooks/validar-commit.ts",
-    destino: "scripts/hooks/validar-commit.ts",
-    categoria: "scripts",
-    regla: "Formato y convenciones de commit (.agents/AGENTS.md)",
-    requiereAdaptacion: false,
-    guiaAdaptacion:
-      "Copiar directo. Validador estricto sin emojis ni atribucion.",
-    tipoTransformacion: "copia-directa",
-  },
-  {
-    origen: "scripts/hooks/validar-commit.test.ts",
-    destino: "scripts/hooks/validar-commit.test.ts",
-    categoria: "scripts",
-    regla: "Pruebas de validacion de commits (.agents/AGENTS.md)",
-    requiereAdaptacion: false,
-    guiaAdaptacion: "Copiar directo.",
-    tipoTransformacion: "copia-directa",
-  },
-  {
-    origen: "scripts/hooks/validar-rama.ts",
-    destino: "scripts/hooks/validar-rama.ts",
-    categoria: "scripts",
-    regla: "Nomenclatura de ramas dedicadas (.agents/AGENTS.md)",
-    requiereAdaptacion: false,
-    guiaAdaptacion: "Copiar directo.",
-    tipoTransformacion: "copia-directa",
-  },
-  {
-    origen: "scripts/hooks/validar-rama.test.ts",
-    destino: "scripts/hooks/validar-rama.test.ts",
-    categoria: "scripts",
-    regla: "Pruebas de validacion de ramas (.agents/AGENTS.md)",
-    requiereAdaptacion: false,
-    guiaAdaptacion: "Copiar directo.",
-    tipoTransformacion: "copia-directa",
-  },
-  {
-    origen: "scripts/ci/verificar-migraciones.ts",
-    destino: "scripts/ci/verificar-migraciones.ts",
-    categoria: "scripts",
-    regla: "Inmutabilidad de migraciones de base de datos (back/AGENTS.md)",
-    requiereAdaptacion: "Solo via estandar.config.ts",
-    guiaAdaptacion:
-      "Configurado via estandar.config.ts (back.directorioMigraciones).",
-    tipoTransformacion: "copia-directa",
-  },
-  {
-    origen: "scripts/ci/verificar-migraciones.test.ts",
-    destino: "scripts/ci/verificar-migraciones.test.ts",
-    categoria: "scripts",
-    regla: "Pruebas de verificacion de migraciones (back/AGENTS.md)",
-    requiereAdaptacion: false,
-    guiaAdaptacion: "Copiar directo con fixture sintetico generico.",
-    tipoTransformacion: "personalizada",
-  },
-  {
-    origen: "scripts/higiene/sin-emojis.test.ts",
-    destino: "scripts/higiene/sin-emojis.test.ts",
-    categoria: "scripts",
-    regla: "Politica de cero emojis (.agents/AGENTS.md)",
-    requiereAdaptacion: false,
-    guiaAdaptacion:
-      "Copiar directo. Escanea directorios de back, front y scripts.",
-    tipoTransformacion: "copia-directa",
-  },
-  {
-    origen: "scripts/lint-docs.ts",
-    destino: "scripts/lint-docs.ts",
-    categoria: "scripts",
-    regla: "Ejecucion de linter documental (.agents/AGENTS.md)",
-    requiereAdaptacion: false,
-    guiaAdaptacion:
-      "Copiar directo. Lanzador multiplataforma de doc-linter.ps1.",
-    tipoTransformacion: "copia-directa",
-  },
-  {
-    origen: "scripts/doc-linter.ps1",
-    destino: "scripts/doc-linter.ps1",
-    categoria: "scripts",
-    regla:
-      "Gobernanza documental bimodal y etiquetas verifica: (docs/AGENTS.md)",
-    requiereAdaptacion: false,
-    guiaAdaptacion:
-      "Filtrados bloques de proyecto. Mantiene validacion estandar bimodal y seccion 8.",
-    tipoTransformacion: "filtro-ps1-estandar",
-  },
+    // 3. Scripts de validacion y soporte
+    {
+      origen: "scripts/hooks/validar-commit.ts",
+      destino: "scripts/hooks/validar-commit.ts",
+      categoria: "scripts",
+      regla: "Formato y convenciones de commit (AGENTS.md)",
+      requiereAdaptacion: false,
+      guiaAdaptacion:
+        "Copiar directo. Validador estricto sin emojis ni atribucion.",
+      tipoTransformacion: "copia-directa",
+    },
+    {
+      origen: "scripts/hooks/validar-commit.test.ts",
+      destino: "scripts/hooks/validar-commit.test.ts",
+      categoria: "scripts",
+      regla: "Pruebas de validacion de commits (AGENTS.md)",
+      requiereAdaptacion: false,
+      guiaAdaptacion: "Copiar directo.",
+      tipoTransformacion: "copia-directa",
+    },
+    {
+      origen: "scripts/hooks/validar-rama.ts",
+      destino: "scripts/hooks/validar-rama.ts",
+      categoria: "scripts",
+      regla: "Nomenclatura de ramas dedicadas (AGENTS.md)",
+      requiereAdaptacion: false,
+      guiaAdaptacion: "Copiar directo.",
+      tipoTransformacion: "copia-directa",
+    },
+    {
+      origen: "scripts/hooks/validar-rama.test.ts",
+      destino: "scripts/hooks/validar-rama.test.ts",
+      categoria: "scripts",
+      regla: "Pruebas de validacion de ramas (AGENTS.md)",
+      requiereAdaptacion: false,
+      guiaAdaptacion: "Copiar directo.",
+      tipoTransformacion: "copia-directa",
+    },
+    {
+      origen: "scripts/ci/verificar-migraciones.ts",
+      destino: "scripts/ci/verificar-migraciones.ts",
+      categoria: "scripts",
+      regla: "Inmutabilidad de migraciones de base de datos (back/AGENTS.md)",
+      requiereAdaptacion: "Solo via estandar.config.ts",
+      guiaAdaptacion:
+        "Configurado via estandar.config.ts (back.directorioMigraciones).",
+      tipoTransformacion: "copia-directa",
+    },
+    {
+      origen: "scripts/ci/verificar-migraciones.test.ts",
+      destino: "scripts/ci/verificar-migraciones.test.ts",
+      categoria: "scripts",
+      regla: "Pruebas de verificacion de migraciones (back/AGENTS.md)",
+      requiereAdaptacion: false,
+      guiaAdaptacion: "Copiar directo con fixture sintetico generico.",
+      tipoTransformacion: "personalizada",
+    },
+    {
+      origen: "scripts/higiene/sin-emojis.test.ts",
+      destino: "scripts/higiene/sin-emojis.test.ts",
+      categoria: "scripts",
+      regla: "Politica de cero emojis (AGENTS.md)",
+      requiereAdaptacion: false,
+      guiaAdaptacion:
+        "Copiar directo. Escanea directorios de back, front y scripts.",
+      tipoTransformacion: "copia-directa",
+    },
+    {
+      origen: "scripts/lint-docs.ts",
+      destino: "scripts/lint-docs.ts",
+      categoria: "scripts",
+      regla: "Ejecucion de linter documental (AGENTS.md)",
+      requiereAdaptacion: false,
+      guiaAdaptacion:
+        "Copiar directo. Lanzador multiplataforma de doc-linter.ps1.",
+      tipoTransformacion: "copia-directa",
+    },
+    {
+      origen: "scripts/doc-linter.ps1",
+      destino: "scripts/doc-linter.ps1",
+      categoria: "scripts",
+      regla:
+        "Gobernanza documental bimodal y etiquetas verifica: (docs/AGENTS.md)",
+      requiereAdaptacion: false,
+      guiaAdaptacion:
+        "Filtrados bloques de proyecto. Mantiene validacion estandar bimodal y seccion 8.",
+      tipoTransformacion: "filtro-ps1-estandar",
+    },
 
-  // 4. Arquitectura Backend
-  {
-    origen: "back/tests/arquitectura/aliases.test.ts",
-    destino: "back/tests/arquitectura/aliases.test.ts",
-    categoria: "arquitectura-back",
-    regla: "Uso de aliases @dominio/, @aplicacion/, etc. (back/AGENTS.md)",
-    requiereAdaptacion: "Solo via estandar.config.ts",
-    guiaAdaptacion: "Configurado via estandar.config.ts (back.raiz).",
-    tipoTransformacion: "copia-directa",
-  },
-  {
-    origen: "back/tests/arquitectura/dependencias.test.ts",
-    destino: "back/tests/arquitectura/dependencias.test.ts",
-    categoria: "arquitectura-back",
-    regla: "Reglas inviolables de Clean Architecture (back/AGENTS.md)",
-    requiereAdaptacion: "Solo via estandar.config.ts",
-    guiaAdaptacion: "Configurado via estandar.config.ts (back.raiz).",
-    tipoTransformacion: "copia-directa",
-  },
-  {
-    origen: "back/tests/arquitectura/diManual.test.ts",
-    destino: "back/tests/arquitectura/diManual.test.ts",
-    categoria: "arquitectura-back",
-    regla: "Composicion via DI manual sin framework (back/AGENTS.md)",
-    requiereAdaptacion: "Solo via estandar.config.ts",
-    guiaAdaptacion:
-      "Configurado via estandar.config.ts (back.archivosComposicionDIManual).",
-    tipoTransformacion: "copia-directa",
-  },
-  {
-    origen: "back/tests/arquitectura/entidades.test.ts",
-    destino: "back/tests/arquitectura/entidades.test.ts",
-    categoria: "arquitectura-back",
-    regla: "Patron Entidad y AgregadoRaiz en dominio (back/AGENTS.md)",
-    requiereAdaptacion: "Solo via estandar.config.ts",
-    guiaAdaptacion:
-      "Configurado via estandar.config.ts (back.clasesBaseEntidad).",
-    tipoTransformacion: "personalizada",
-  },
-  {
-    origen: "back/tests/arquitectura/logger.test.ts",
-    destino: "back/tests/arquitectura/logger.test.ts",
-    categoria: "arquitectura-back",
-    regla: "Observabilidad estructurada OpenTelemetry (back/AGENTS.md)",
-    requiereAdaptacion: "Solo via estandar.config.ts",
-    guiaAdaptacion:
-      "Configurado via estandar.config.ts (back.adaptadorLogger, directoriosExcluidosLogger).",
-    tipoTransformacion: "personalizada",
-  },
-  {
-    origen: "back/tests/arquitectura/usecases.test.ts",
-    destino: "back/tests/arquitectura/usecases.test.ts",
-    categoria: "arquitectura-back",
-    regla: "Patron UseCase con metodo ejecutar() (back/AGENTS.md)",
-    requiereAdaptacion: "Solo via estandar.config.ts",
-    guiaAdaptacion:
-      "Configurado via estandar.config.ts (back.directorioUseCases).",
-    tipoTransformacion: "copia-directa",
-  },
-  {
-    origen: "back/tests/arquitectura/uuid.test.ts",
-    destino: "back/tests/arquitectura/uuid.test.ts",
-    categoria: "arquitectura-back",
-    regla: "Generacion de UUIDv7 en capa de dominio (back/AGENTS.md)",
-    requiereAdaptacion: "Solo via estandar.config.ts",
-    guiaAdaptacion: "Configurado via estandar.config.ts (back.generadorUuid).",
-    tipoTransformacion: "copia-directa",
-  },
-  {
-    origen: "back/tests/arquitectura/valueObjects.test.ts",
-    destino: "back/tests/arquitectura/valueObjects.test.ts",
-    categoria: "arquitectura-back",
-    regla: "Objetos de Valor inmutables con Object.freeze (back/AGENTS.md)",
-    requiereAdaptacion: "Solo via estandar.config.ts",
-    guiaAdaptacion:
-      "Configurado via estandar.config.ts (back.claseBaseValueObject).",
-    tipoTransformacion: "copia-directa",
-  },
+    // 4. Arquitectura Backend
+    {
+      origen: "back/tests/arquitectura/aliases.test.ts",
+      destino: "back/tests/arquitectura/aliases.test.ts",
+      categoria: "arquitectura-back",
+      regla: "Uso de aliases @dominio/, @aplicacion/, etc. (back/AGENTS.md)",
+      requiereAdaptacion: "Solo via estandar.config.ts",
+      guiaAdaptacion: "Configurado via estandar.config.ts (back.raiz).",
+      tipoTransformacion: "copia-directa",
+    },
+    {
+      origen: "back/tests/arquitectura/dependencias.test.ts",
+      destino: "back/tests/arquitectura/dependencias.test.ts",
+      categoria: "arquitectura-back",
+      regla: "Reglas inviolables de Clean Architecture (back/AGENTS.md)",
+      requiereAdaptacion: "Solo via estandar.config.ts",
+      guiaAdaptacion: "Configurado via estandar.config.ts (back.raiz).",
+      tipoTransformacion: "copia-directa",
+    },
+    {
+      origen: "back/tests/arquitectura/diManual.test.ts",
+      destino: "back/tests/arquitectura/diManual.test.ts",
+      categoria: "arquitectura-back",
+      regla: "Composicion via DI manual sin framework (back/AGENTS.md)",
+      requiereAdaptacion: "Solo via estandar.config.ts",
+      guiaAdaptacion:
+        "Configurado via estandar.config.ts (back.archivosComposicionDIManual).",
+      tipoTransformacion: "copia-directa",
+    },
+    {
+      origen: "back/tests/arquitectura/entidades.test.ts",
+      destino: "back/tests/arquitectura/entidades.test.ts",
+      categoria: "arquitectura-back",
+      regla: "Patron Entidad y AgregadoRaiz en dominio (back/AGENTS.md)",
+      requiereAdaptacion: "Solo via estandar.config.ts",
+      guiaAdaptacion:
+        "Configurado via estandar.config.ts (back.clasesBaseEntidad).",
+      tipoTransformacion: "personalizada",
+    },
+    {
+      origen: "back/tests/arquitectura/logger.test.ts",
+      destino: "back/tests/arquitectura/logger.test.ts",
+      categoria: "arquitectura-back",
+      regla: "Observabilidad estructurada OpenTelemetry (back/AGENTS.md)",
+      requiereAdaptacion: "Solo via estandar.config.ts",
+      guiaAdaptacion:
+        "Configurado via estandar.config.ts (back.adaptadorLogger, directoriosExcluidosLogger).",
+      tipoTransformacion: "personalizada",
+    },
+    {
+      origen: "back/tests/arquitectura/usecases.test.ts",
+      destino: "back/tests/arquitectura/usecases.test.ts",
+      categoria: "arquitectura-back",
+      regla: "Patron UseCase con metodo ejecutar() (back/AGENTS.md)",
+      requiereAdaptacion: "Solo via estandar.config.ts",
+      guiaAdaptacion:
+        "Configurado via estandar.config.ts (back.directorioUseCases).",
+      tipoTransformacion: "copia-directa",
+    },
+    {
+      origen: "back/tests/arquitectura/uuid.test.ts",
+      destino: "back/tests/arquitectura/uuid.test.ts",
+      categoria: "arquitectura-back",
+      regla: "Generacion de UUIDv7 en capa de dominio (back/AGENTS.md)",
+      requiereAdaptacion: "Solo via estandar.config.ts",
+      guiaAdaptacion: "Configurado via estandar.config.ts (back.generadorUuid).",
+      tipoTransformacion: "copia-directa",
+    },
+    {
+      origen: "back/tests/arquitectura/valueObjects.test.ts",
+      destino: "back/tests/arquitectura/valueObjects.test.ts",
+      categoria: "arquitectura-back",
+      regla: "Objetos de Valor inmutables con Object.freeze (back/AGENTS.md)",
+      requiereAdaptacion: "Solo via estandar.config.ts",
+      guiaAdaptacion:
+        "Configurado via estandar.config.ts (back.claseBaseValueObject).",
+      tipoTransformacion: "copia-directa",
+    },
 
-  // 5. Arquitectura e Higiene Frontend
-  {
-    origen: "front/tests/arquitectura/front-dependencias.test.ts",
-    destino: "front/tests/arquitectura/front-dependencias.test.ts",
-    categoria: "arquitectura-front",
-    regla: "Reglas RN-F01, RN-F02, RN-F03 y capas FSD (front/AGENTS.md)",
-    requiereAdaptacion: "Solo via estandar.config.ts",
-    guiaAdaptacion:
-      "Configurado via estandar.config.ts (front.aplicaciones, capaCompartida, capasFSD). Soporta una o multiples SPAs.",
-    tipoTransformacion: "personalizada",
-  },
-  {
-    origen: "front/tests/higiene/entorno.test.ts",
-    destino: "front/tests/higiene/entorno.test.ts",
-    categoria: "higiene-front",
-    regla: "Restriccion de variables de entorno frontend (front/AGENTS.md)",
-    requiereAdaptacion: "Solo via estandar.config.ts",
-    guiaAdaptacion:
-      "Configurado via estandar.config.ts (front.aplicaciones, capaCompartida).",
-    tipoTransformacion: "personalizada",
-  },
-  {
-    origen: "front/tests/higiene/storage.test.ts",
-    destino: "front/tests/higiene/storage.test.ts",
-    categoria: "higiene-front",
-    regla: "Prohibicion de localStorage en portales efimeros (front/AGENTS.md)",
-    requiereAdaptacion: "Solo via estandar.config.ts",
-    guiaAdaptacion:
-      "Configurado via estandar.config.ts (aplicaciones con sesionEfimera: true).",
-    tipoTransformacion: "personalizada",
-  },
+    // 5. Arquitectura e Higiene Frontend
+    {
+      origen: "front/tests/arquitectura/front-dependencias.test.ts",
+      destino: "front/tests/arquitectura/front-dependencias.test.ts",
+      categoria: "arquitectura-front",
+      regla: "Reglas RN-F01, RN-F02, RN-F03 y capas FSD (front/AGENTS.md)",
+      requiereAdaptacion: "Solo via estandar.config.ts",
+      guiaAdaptacion:
+        "Configurado via estandar.config.ts (front.aplicaciones, capaCompartida, capasFSD). Soporta una o multiples SPAs.",
+      tipoTransformacion: "personalizada",
+    },
+    {
+      origen: "front/tests/higiene/entorno.test.ts",
+      destino: "front/tests/higiene/entorno.test.ts",
+      categoria: "higiene-front",
+      regla: "Restriccion de variables de entorno frontend (front/AGENTS.md)",
+      requiereAdaptacion: "Solo via estandar.config.ts",
+      guiaAdaptacion:
+        "Configurado via estandar.config.ts (front.aplicaciones, capaCompartida).",
+      tipoTransformacion: "personalizada",
+    },
+    {
+      origen: "front/tests/higiene/storage.test.ts",
+      destino: "front/tests/higiene/storage.test.ts",
+      categoria: "higiene-front",
+      regla: "Prohibicion de localStorage en portales efimeros (front/AGENTS.md)",
+      requiereAdaptacion: "Solo via estandar.config.ts",
+      guiaAdaptacion:
+        "Configurado via estandar.config.ts (aplicaciones con sesionEfimera: true).",
+      tipoTransformacion: "personalizada",
+    },
 
-  // 6. Manifiestos Operacionales (AGENTS.md)
-  {
-    origen: ".agents/AGENTS.md",
-    destino: ".agents/AGENTS.md",
-    categoria: "manifiestos",
-    regla: "Manifiesto raiz de reglas del estandar (.agents/AGENTS.md)",
-    requiereAdaptacion: true,
-    guiaAdaptacion:
-      "Sustituir {{NOMBRE_PROYECTO}} y {{DESCRIPCION_PROYECTO}} por el titulo y proposito del sistema adoptante.",
-    marcadores: ["{{NOMBRE_PROYECTO}}", "{{DESCRIPCION_PROYECTO}}"],
-    tipoTransformacion: "filtro-md-estandar",
-  },
-  {
-    origen: "back/AGENTS.md",
-    destino: "back/AGENTS.md",
-    categoria: "manifiestos",
-    regla: "Manifiesto operacional backend (back/AGENTS.md)",
-    requiereAdaptacion: true,
-    guiaAdaptacion:
-      "Sustituir {{NOMBRE_PROYECTO}} por el nombre de la API en el encabezado.",
-    marcadores: ["{{NOMBRE_PROYECTO}}"],
-    tipoTransformacion: "filtro-md-estandar",
-  },
-  {
-    origen: "front/AGENTS.md",
-    destino: "front/AGENTS.md",
-    categoria: "manifiestos",
-    regla: "Manifiesto operacional frontend (front/AGENTS.md)",
-    requiereAdaptacion: true,
-    guiaAdaptacion:
-      "Sustituir marcadores {{NOMBRE_PROYECTO}}, {{APP_1}} y {{APP_2}} por los nombres de las aplicaciones front.",
-    marcadores: ["{{NOMBRE_PROYECTO}}", "{{APP_1}}", "{{APP_2}}"],
-    tipoTransformacion: "filtro-md-estandar",
-  },
-  {
-    origen: "docs/AGENTS.md",
-    destino: "docs/AGENTS.md",
-    categoria: "manifiestos",
-    regla: "Manifiesto operacional de documentacion (docs/AGENTS.md)",
-    requiereAdaptacion: true,
-    guiaAdaptacion:
-      "Sustituir {{SLUG_PROYECTO}} por el nombre del vault de documentacion.",
-    marcadores: ["{{SLUG_PROYECTO}}"],
-    tipoTransformacion: "personalizada",
-  },
+    // 6. Manifiestos Operacionales (AGENTS.md)
+    {
+      origen: "AGENTS.md",
+      destino: "AGENTS.md",
+      categoria: "manifiestos",
+      regla: "Manifiesto raiz de reglas del estandar (AGENTS.md)",
+      requiereAdaptacion: true,
+      guiaAdaptacion:
+        "Sustituir {{NOMBRE_PROYECTO}} y {{DESCRIPCION_PROYECTO}} por el titulo y proposito del sistema adoptante.",
+      marcadores: ["{{NOMBRE_PROYECTO}}", "{{DESCRIPCION_PROYECTO}}"],
+      tipoTransformacion: "filtro-md-estandar",
+    },
+    {
+      origen: `${rutas.backRaiz}/AGENTS.md`,
+      destino: `${rutas.backRaiz}/AGENTS.md`,
+      categoria: "manifiestos",
+      regla: `Manifiesto operacional backend (${rutas.backRaiz}/AGENTS.md)`,
+      requiereAdaptacion: true,
+      guiaAdaptacion:
+        "Sustituir {{NOMBRE_PROYECTO}} por el nombre de la API en el encabezado.",
+      marcadores: ["{{NOMBRE_PROYECTO}}"],
+      tipoTransformacion: "filtro-md-estandar",
+    },
+    {
+      origen: `${rutas.backRaiz}/src/dominio/AGENTS.md`,
+      destino: `${rutas.backRaiz}/src/dominio/AGENTS.md`,
+      categoria: "manifiestos",
+      regla:
+        `Manifiesto operacional de capa de dominio (${rutas.backRaiz}/src/dominio/AGENTS.md)`,
+      requiereAdaptacion: false,
+      guiaAdaptacion:
+        "Copiar directo. Reglas inviolables y recetas de Entidades, Agregados y Value Objects.",
+      tipoTransformacion: "filtro-md-estandar",
+    },
+    {
+      origen: `${rutas.backRaiz}/src/aplicacion/AGENTS.md`,
+      destino: `${rutas.backRaiz}/src/aplicacion/AGENTS.md`,
+      categoria: "manifiestos",
+      regla:
+        `Manifiesto operacional de capa de aplicacion (${rutas.backRaiz}/src/aplicacion/AGENTS.md)`,
+      requiereAdaptacion: false,
+      guiaAdaptacion:
+        "Copiar directo. Reglas inviolables y recetas de Casos de Uso, DTOs y Puertos.",
+      tipoTransformacion: "filtro-md-estandar",
+    },
+    {
+      origen: `${rutas.backRaiz}/src/infraestructura/AGENTS.md`,
+      destino: `${rutas.backRaiz}/src/infraestructura/AGENTS.md`,
+      categoria: "manifiestos",
+      regla:
+        `Manifiesto operacional de capa de infraestructura (${rutas.backRaiz}/src/infraestructura/AGENTS.md)`,
+      requiereAdaptacion: false,
+      guiaAdaptacion:
+        "Copiar directo. Reglas inviolables y recetas de repositorios Drizzle, migraciones y OTel.",
+      tipoTransformacion: "filtro-md-estandar",
+    },
+    {
+      origen: `${rutas.backRaiz}/src/interfaz/AGENTS.md`,
+      destino: `${rutas.backRaiz}/src/interfaz/AGENTS.md`,
+      categoria: "manifiestos",
+      regla:
+        `Manifiesto operacional de capa de interfaz (${rutas.backRaiz}/src/interfaz/AGENTS.md)`,
+      requiereAdaptacion: false,
+      guiaAdaptacion:
+        "Copiar directo. Reglas inviolables y recetas de controladores HTTP, DI manual y jobs.",
+      tipoTransformacion: "filtro-md-estandar",
+    },
+    {
+      origen: `${rutas.frontRaiz}/AGENTS.md`,
+      destino: `${rutas.frontRaiz}/AGENTS.md`,
+      categoria: "manifiestos",
+      regla: `Manifiesto operacional frontend (${rutas.frontRaiz}/AGENTS.md)`,
+      requiereAdaptacion: true,
+      guiaAdaptacion:
+        "Sustituir marcadores {{NOMBRE_PROYECTO}}, {{APP_1}} y {{APP_2}} por los nombres de las aplicaciones front.",
+      marcadores: ["{{NOMBRE_PROYECTO}}", "{{APP_1}}", "{{APP_2}}"],
+      tipoTransformacion: "filtro-md-estandar",
+    },
+    {
+      origen: rutaSharedAgents,
+      destino: rutaSharedAgents,
+      categoria: "manifiestos",
+      regla:
+        `Manifiesto operacional de capa compartida frontend (${rutaSharedAgents})`,
+      requiereAdaptacion: true,
+      guiaAdaptacion:
+        "Sustituir marcadores {{APP_1}} y {{APP_2}} en la regla de aislamiento de portales.",
+      marcadores: ["{{APP_1}}", "{{APP_2}}"],
+      tipoTransformacion: "filtro-md-estandar",
+    },
+    {
+      origen: "docs/AGENTS.md",
+      destino: "docs/AGENTS.md",
+      categoria: "manifiestos",
+      regla: "Manifiesto operacional de documentacion (docs/AGENTS.md)",
+      requiereAdaptacion: true,
+      guiaAdaptacion:
+        "Sustituir {{SLUG_PROYECTO}} por el nombre del vault de documentacion.",
+      marcadores: ["{{SLUG_PROYECTO}}"],
+      tipoTransformacion: "personalizada",
+    },
 
-  // 7. Entorno Docker y Configuracion Deno
-  {
-    origen: "back/Dockerfile",
-    destino: "back/Dockerfile",
-    categoria: "config",
-    regla: "Runtime estandar Deno 2.x en backend (back/AGENTS.md)",
-    requiereAdaptacion: true,
-    guiaAdaptacion:
-      "Ajustar punto de entrada en CMD (ej. src/interfaz/http/main.ts) y directorios a copiar segun la estructura del proyecto destino.",
-    tipoTransformacion: "personalizada",
-  },
-  {
-    origen: "deno.json",
-    destino: "deno.json",
-    categoria: "config",
-    regla: "Comandos deterministas de monorepo (.agents/AGENTS.md)",
-    requiereAdaptacion: false,
-    guiaAdaptacion:
-      "Plantilla con tareas estandar ci, check, fmt, lint, test, coverage, hooks.",
-    tipoTransformacion: "deno-json-raiz",
-  },
-  {
-    origen: "back/deno.json",
-    destino: "back/deno.json",
-    categoria: "config",
-    regla: "Configuracion estricta y tareas de backend (back/AGENTS.md)",
-    requiereAdaptacion: true,
-    guiaAdaptacion:
-      "Ajustar umbrales de cobertura (coverage.thresholds) segun linea base del proyecto.",
-    tipoTransformacion: "deno-json-back",
-  },
-  {
-    origen: "front/deno.json",
-    destino: "front/deno.json",
-    categoria: "config",
-    regla: "Configuracion estricta y tareas de frontend (front/AGENTS.md)",
-    requiereAdaptacion: true,
-    guiaAdaptacion:
-      "Sustituir marcadores {{APP_1}} y {{APP_2}} en workspace y tareas de portales.",
-    marcadores: ["{{APP_1}}", "{{APP_2}}"],
-    tipoTransformacion: "deno-json-front",
-  },
+    // 7. Entorno Docker y Configuracion Deno
+    {
+      origen: "back/Dockerfile",
+      destino: "back/Dockerfile",
+      categoria: "config",
+      regla: "Runtime estandar Deno 2.x en backend (back/AGENTS.md)",
+      requiereAdaptacion: true,
+      guiaAdaptacion:
+        "Ajustar punto de entrada en CMD (ej. src/interfaz/http/main.ts) y directorios a copiar segun la estructura del proyecto destino.",
+      tipoTransformacion: "personalizada",
+    },
+    {
+      origen: "deno.json",
+      destino: "deno.json",
+      categoria: "config",
+      regla: "Comandos deterministas de monorepo (AGENTS.md)",
+      requiereAdaptacion: false,
+      guiaAdaptacion:
+        "Plantilla con tareas estandar ci, check, fmt, lint, test, coverage, hooks.",
+      tipoTransformacion: "deno-json-raiz",
+    },
+    {
+      origen: "back/deno.json",
+      destino: "back/deno.json",
+      categoria: "config",
+      regla: "Configuracion estricta y tareas de backend (back/AGENTS.md)",
+      requiereAdaptacion: true,
+      guiaAdaptacion:
+        "Ajustar umbrales de cobertura (coverage.thresholds) segun linea base del proyecto.",
+      tipoTransformacion: "deno-json-back",
+    },
+    {
+      origen: "front/deno.json",
+      destino: "front/deno.json",
+      categoria: "config",
+      regla: "Configuracion estricta y tareas de frontend (front/AGENTS.md)",
+      requiereAdaptacion: true,
+      guiaAdaptacion:
+        "Sustituir marcadores {{APP_1}} y {{APP_2}} en workspace y tareas de portales.",
+      marcadores: ["{{APP_1}}", "{{APP_2}}"],
+      tipoTransformacion: "deno-json-front",
+    },
 
-  // 8. Plantillas de Documentacion y Guias How-To
-  {
-    origen: "docs/_plantillas/PLANTILLA-ADR.md",
-    destino: "docs/_plantillas/PLANTILLA-ADR.md",
-    categoria: "docs",
-    regla: "Plantilla Nygard de decisiones tecnicas (docs/AGENTS.md)",
-    requiereAdaptacion: false,
-    guiaAdaptacion: "Copiar directo.",
-    tipoTransformacion: "copia-directa",
-  },
-  {
-    origen: "docs/_plantillas/PLANTILLA-Actor.md",
-    destino: "docs/_plantillas/PLANTILLA-Actor.md",
-    categoria: "docs",
-    regla: "Fichas de actor de sistema (docs/AGENTS.md)",
-    requiereAdaptacion: false,
-    guiaAdaptacion: "Copiar directo con ejemplo generico de actor.",
-    tipoTransformacion: "personalizada",
-  },
-  {
-    origen: "docs/_plantillas/PLANTILLA-CU.md",
-    destino: "docs/_plantillas/PLANTILLA-CU.md",
-    categoria: "docs",
-    regla: "Especificacion de Casos de Uso bimodal (docs/AGENTS.md)",
-    requiereAdaptacion: false,
-    guiaAdaptacion: "Copiar directo con ejemplo generico de caso de uso.",
-    tipoTransformacion: "personalizada",
-  },
-  {
-    origen: "docs/_plantillas/PLANTILLA-DS-CU.md",
-    destino: "docs/_plantillas/PLANTILLA-DS-CU.md",
-    categoria: "docs",
-    regla: "Diagramas de secuencia Mermaid por caso de uso (docs/AGENTS.md)",
-    requiereAdaptacion: false,
-    guiaAdaptacion: "Copiar directo con ejemplo generico.",
-    tipoTransformacion: "personalizada",
-  },
-  {
-    origen: "docs/_plantillas/PLANTILLA-PB.md",
-    destino: "docs/_plantillas/PLANTILLA-PB.md",
-    categoria: "docs",
-    regla: "Procesos de negocio (docs/AGENTS.md)",
-    requiereAdaptacion: false,
-    guiaAdaptacion: "Copiar directo con modulos genericos.",
-    tipoTransformacion: "personalizada",
-  },
-  {
-    origen: "docs/_plantillas/PLANTILLA-RN.md",
-    destino: "docs/_plantillas/PLANTILLA-RN.md",
-    categoria: "docs",
-    regla: "Reglas de negocio con anclas Obsidian (docs/AGENTS.md)",
-    requiereAdaptacion: false,
-    guiaAdaptacion: "Copiar directo.",
-    tipoTransformacion: "copia-directa",
-  },
-  {
-    origen: "docs/_plantillas/README.md",
-    destino: "docs/_plantillas/README.md",
-    categoria: "docs",
-    regla: "Catalogo de plantillas Templater del vault (docs/AGENTS.md)",
-    requiereAdaptacion: false,
-    guiaAdaptacion: "Copiar directo.",
-    tipoTransformacion: "copia-directa",
-  },
-  {
-    origen: "docs/guia/how-to/configurar-hooks-git.md",
-    destino: "docs/guia/how-to/configurar-hooks-git.md",
-    categoria: "docs",
-    regla: "Guia de configuracion de hooks locales (.agents/AGENTS.md)",
-    requiereAdaptacion: false,
-    guiaAdaptacion: "Copiar directo.",
-    tipoTransformacion: "copia-directa",
-  },
-  {
-    origen: "docs/guia/how-to/flujo-multiagente.md",
-    destino: "docs/guia/how-to/flujo-multiagente.md",
-    categoria: "docs",
-    regla:
-      "Orquestacion y trabajo en paralelo con worktrees (.agents/AGENTS.md)",
-    requiereAdaptacion: false,
-    guiaAdaptacion: "Copiar directo.",
-    tipoTransformacion: "copia-directa",
-  },
-];
+    // 8. Plantillas de Documentacion y Guias How-To
+    {
+      origen: "docs/_plantillas/PLANTILLA-ADR.md",
+      destino: "docs/_plantillas/PLANTILLA-ADR.md",
+      categoria: "docs",
+      regla: "Plantilla Nygard de decisiones tecnicas (docs/AGENTS.md)",
+      requiereAdaptacion: false,
+      guiaAdaptacion: "Copiar directo.",
+      tipoTransformacion: "copia-directa",
+    },
+    {
+      origen: "docs/_plantillas/PLANTILLA-Actor.md",
+      destino: "docs/_plantillas/PLANTILLA-Actor.md",
+      categoria: "docs",
+      regla: "Fichas de actor de sistema (docs/AGENTS.md)",
+      requiereAdaptacion: false,
+      guiaAdaptacion: "Copiar directo con ejemplo generico de actor.",
+      tipoTransformacion: "personalizada",
+    },
+    {
+      origen: "docs/_plantillas/PLANTILLA-CU.md",
+      destino: "docs/_plantillas/PLANTILLA-CU.md",
+      categoria: "docs",
+      regla: "Especificacion de Casos de Uso bimodal (docs/AGENTS.md)",
+      requiereAdaptacion: false,
+      guiaAdaptacion: "Copiar directo con ejemplo generico de caso de uso.",
+      tipoTransformacion: "personalizada",
+    },
+    {
+      origen: "docs/_plantillas/PLANTILLA-DS-CU.md",
+      destino: "docs/_plantillas/PLANTILLA-DS-CU.md",
+      categoria: "docs",
+      regla: "Diagramas de secuencia Mermaid por caso de uso (docs/AGENTS.md)",
+      requiereAdaptacion: false,
+      guiaAdaptacion: "Copiar directo con ejemplo generico.",
+      tipoTransformacion: "personalizada",
+    },
+    {
+      origen: "docs/_plantillas/PLANTILLA-PB.md",
+      destino: "docs/_plantillas/PLANTILLA-PB.md",
+      categoria: "docs",
+      regla: "Procesos de negocio (docs/AGENTS.md)",
+      requiereAdaptacion: false,
+      guiaAdaptacion: "Copiar directo con modulos genericos.",
+      tipoTransformacion: "personalizada",
+    },
+    {
+      origen: "docs/_plantillas/PLANTILLA-RN.md",
+      destino: "docs/_plantillas/PLANTILLA-RN.md",
+      categoria: "docs",
+      regla: "Reglas de negocio con anclas Obsidian (docs/AGENTS.md)",
+      requiereAdaptacion: false,
+      guiaAdaptacion: "Copiar directo.",
+      tipoTransformacion: "copia-directa",
+    },
+    {
+      origen: "docs/_plantillas/README.md",
+      destino: "docs/_plantillas/README.md",
+      categoria: "docs",
+      regla: "Catalogo de plantillas Templater del vault (docs/AGENTS.md)",
+      requiereAdaptacion: false,
+      guiaAdaptacion: "Copiar directo.",
+      tipoTransformacion: "copia-directa",
+    },
+    {
+      origen: "docs/guia/how-to/configurar-hooks-git.md",
+      destino: "docs/guia/how-to/configurar-hooks-git.md",
+      categoria: "docs",
+      regla: "Guia de configuracion de hooks locales (AGENTS.md)",
+      requiereAdaptacion: false,
+      guiaAdaptacion: "Copiar directo.",
+      tipoTransformacion: "copia-directa",
+    },
+    {
+      origen: "docs/guia/how-to/flujo-multiagente.md",
+      destino: "docs/guia/how-to/flujo-multiagente.md",
+      categoria: "docs",
+      regla:
+        "Orquestacion y trabajo en paralelo con worktrees (AGENTS.md)",
+      requiereAdaptacion: false,
+      guiaAdaptacion: "Copiar directo.",
+      tipoTransformacion: "copia-directa",
+    },
+  ];
+}
+
+export const ARCHIVOS_ESTANDAR: ArchivoEstandar[] = construirArchivosEstandar();
 
 export function generarManifiestoMd(
   archivos: ArchivoEstandar[],
@@ -1320,11 +1473,11 @@ export function generarManifiestoMd(
     "",
     "| Marcador | Proposito | Archivos Afectados | Rol Original en Referencia |",
     "|---|---|---|---|",
-    "| `{{NOMBRE_PROYECTO}}` | Nombre del sistema o proyecto adoptante | `.agents/AGENTS.md`, `back/AGENTS.md`, `front/AGENTS.md` | Nombre institucional del proyecto |",
-    "| `{{DESCRIPCION_PROYECTO}}` | Resumen institucional de proposito y alcance del proyecto | `.agents/AGENTS.md` | Descripcion institucional original de referencia |",
+    "| `{{NOMBRE_PROYECTO}}` | Nombre del sistema o proyecto adoptante | `AGENTS.md`, `back/AGENTS.md`, `front/AGENTS.md` | Nombre institucional del proyecto |",
+    "| `{{DESCRIPCION_PROYECTO}}` | Resumen institucional de proposito y alcance del proyecto | `AGENTS.md` | Descripcion institucional original de referencia |",
     "| `{{SLUG_PROYECTO}}` | Identificador en kebab-case del vault de documentacion | `docs/AGENTS.md` | Nombre del vault Obsidian |",
-    "| `{{APP_1}}` | Nombre de la primera SPA del portal web | `estandar.config.ts`, `front/deno.json`, `front/AGENTS.md` | Portal de autoservicio publico |",
-    "| `{{APP_2}}` | Nombre de la segunda SPA del portal web | `estandar.config.ts`, `front/deno.json`, `front/AGENTS.md` | Portal administrativo y operativo |",
+    `| \`{{APP_1}}\` | Nombre de la primera SPA del portal web | \`estandar.config.ts\`, \`front/deno.json\`, \`front/AGENTS.md\`, \`${RUTA_SHARED_AGENTS}\` | Portal de autoservicio publico |`,
+    `| \`{{APP_2}}\` | Nombre de la segunda SPA del portal web | \`estandar.config.ts\`, \`front/deno.json\`, \`front/AGENTS.md\`, \`${RUTA_SHARED_AGENTS}\` | Portal administrativo y operativo |`,
     "| `@{{PROYECTO}}` | Prefijo de importacion de paquetes monorepo | `front/tests/arquitectura/front-dependencias.test.ts` | Prefijo de paquete institucional |",
     "| `{{APP_EFIMERA}}` | Nombre de la app con requerimiento estricto de sesion efimera (sessionStorage) | `front/tests/higiene/storage.test.ts` | Aplicacion con sesion temporal |",
     "",
@@ -1392,10 +1545,29 @@ export async function extraerPlantilla(
     ? path.resolve(rutaDestinoPlantilla)
     : path.join(raizRepo, "plantilla");
 
+  // Eliminar directorio legado .agents si existiera en destinoBase
+  try {
+    await Deno.remove(path.join(destinoBase, ".agents"), { recursive: true });
+  } catch {
+    // No existe, continuar
+  }
+
+  // Leer estandar.config.ts desde el origen para resolver ubicacion de shared y back dinamicamente
+  let rutasOrigen = RUTAS_CONFIG_DEFECTO;
+  try {
+    const configOrigenTxt = await Deno.readTextFile(
+      path.join(raizExamen, "estandar.config.ts"),
+    );
+    rutasOrigen = extraerRutasDeConfig(configOrigenTxt);
+  } catch {
+    // Usar configuracion por defecto si no se puede leer antes del bucle
+  }
+  const archivosAExtraer = construirArchivosEstandar(rutasOrigen);
+
   const errores: string[] = [];
   let extraidos = 0;
 
-  for (const archivo of ARCHIVOS_ESTANDAR) {
+  for (const archivo of archivosAExtraer) {
     const rutaOrigenCompleta = path.join(raizExamen, archivo.origen);
 
     let contenidoOriginal: string;
@@ -1424,7 +1596,7 @@ export async function extraerPlantilla(
     );
 
     // Si es front/AGENTS.md, tambien se le aplica filtro md
-    if (archivo.origen === "front/AGENTS.md") {
+    if (archivo.origen === `${rutasOrigen.frontRaiz}/AGENTS.md` || archivo.origen === "front/AGENTS.md") {
       contenidoTransformado = filtrarSeccionesMdProyecto(contenidoTransformado);
     }
 
@@ -1470,7 +1642,7 @@ export async function extraerPlantilla(
   // Generar y escribir plantilla/MANIFIESTO.md en ASCII puro
   const manifiestoMd = convertirAAsciiPuro(
     generarManifiestoMd(
-      ARCHIVOS_ESTANDAR,
+      archivosAExtraer,
       TRANSFORMACIONES_DECLARADAS,
     ),
   );
