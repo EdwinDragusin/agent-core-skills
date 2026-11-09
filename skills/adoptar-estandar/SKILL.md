@@ -55,7 +55,7 @@ Orquesta la transferencia de mecanismos, compuertas de calidad y gobernanza de E
 Planificar las 5 olas (detalles en `references/olas.md`):
 - **Ola 1: CI Unica y Cobertura:** Pipeline GitHub Actions, runner local y umbrales inmutables (`references/cobertura.md`).
 - **Ola 2: Hooks de Git y Commits:** `commit-msg`, `pre-push`, validador de Conventional Commits y validador de ramas.
-- **Ola 3: Tests de Arquitectura:** Aislamiento de capas backend y frontend. En front, sustituir marcadores `{{APP_1}}`, `{{APP_2}}`, `@{{PROYECTO}}`, `{{APP_EFIMERA}}` segun `RAIZ_PLUGIN/plantilla/MANIFIESTO.md`.
+- **Ola 3: Tests de Arquitectura:** Aislamiento de capas backend y frontend. La primera accion obligatoria es crear y rellenar estandar.config.ts con la topologia real (una sola SPA FSD plenamente soportada o multiples SPAs, capa compartida opcional, rutas de migraciones/use cases). En front, sustituir marcadores {{APP_1}}, {{APP_2}}, @{{PROYECTO}}, {{APP_EFIMERA}} segun RAIZ_PLUGIN/plantilla/MANIFIESTO.md.
 - **Ola 4: Higiene y Calidad Estatica:** Detector de emojis, aislamiento de variables de entorno y storage.
 - **Ola 5: Gobernanza Documental:** Doc-linter, marcas `[ESTANDAR]`/`[PROYECTO]`, catalogo de ADRs y trazabilidad `verifica:`.
 
@@ -66,7 +66,7 @@ Planificar las 5 olas (detalles en `references/olas.md`):
 Para cada ola aprobada:
 1. Crear rama dedicada: `git checkout -b <tipo>/adopcion-<nombre-ola>`.
 2. Copiar archivos desde `RAIZ_PLUGIN/plantilla/` segun `RAIZ_PLUGIN/plantilla/MANIFIESTO.md`.
-3. Parametrizar variables y marcadores del proyecto (`{{APP_1}}`, `{{APP_2}}`, etc.).
+3. Configurar estandar.config.ts como fuente unica de topologia/rutas y parametrizar marcadores del proyecto ({{APP_1}}, {{APP_2}}, etc.).
 4. Resolver integracion:
    - Proyecto nuevo: resolver discrepancias de inmediato.
    - Proyecto existente: ante violaciones masivas, fijar lista base (allowlist) con TODO formal.

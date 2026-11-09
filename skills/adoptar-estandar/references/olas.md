@@ -72,6 +72,7 @@ Impedir commits con formato invalido, emojis, lineas de atribucion ajenas o bran
 Garantizar aislamiento estricto de dependencias en backend (Clean Architecture) y frontend (Feature-Sliced Design), evitando importaciones circulares o acoplamientos prohibidos.
 
 ### Insumos de Plantilla
+- `RAIZ_PLUGIN/plantilla/estandar.config.ts`
 - `RAIZ_PLUGIN/plantilla/back/tests/arquitectura/dependencias.test.ts`
 - `RAIZ_PLUGIN/plantilla/back/tests/arquitectura/aliases.test.ts`
 - `RAIZ_PLUGIN/plantilla/back/tests/arquitectura/diManual.test.ts`
@@ -79,18 +80,25 @@ Garantizar aislamiento estricto de dependencias en backend (Clean Architecture) 
 - `RAIZ_PLUGIN/plantilla/back/tests/arquitectura/valueObjects.test.ts`
 - `RAIZ_PLUGIN/plantilla/front/tests/arquitectura/front-dependencias.test.ts`
 
+### Configuracion Centralizada de Topologia (estandar.config.ts)
+La primera accion obligatoria de la ola de tests de arquitectura e higiene es crear y rellenar `estandar.config.ts` en la raiz del proyecto adoptante a partir de `RAIZ_PLUGIN/plantilla/estandar.config.ts`.
+Este archivo es la fuente unica de verdad para las rutas del backend y la topologia del frontend:
+- **Topologia Frontend:** Se soporta plenamente una sola SPA FSD (`aplicaciones: [{ nombre: "app", rutaSrc: "src" }]`) o multiples SPAs con capa compartida opcional (`shared`).
+- **Topologia Backend:** Rutas relativas a `back.raiz` para persistencia, migraciones y use cases.
+Todos los tests de arquitectura (`back/tests/arquitectura/`, `front/tests/arquitectura/`), tests de higiene y scripts de migraciones leen su configuracion dinamicamente de este archivo sin requerir modificacion directa de codigo de prueba.
+
 ### Marcadores de Plantilla Frontend (Sustitucion Obligatoria)
-La plantilla utiliza marcadores parametricos que deben ser reemplazados al inicio de esta ola segun la declaracion de `RAIZ_PLUGIN/plantilla/MANIFIESTO.md`:
-- `{{APP_1}}`: Nombre del primer modulo o SPA del portal (ej. `aspirante`, `cliente`, `portal`).
-- `{{APP_2}}`: Nombre del segundo modulo o SPA administrativa (ej. `gestion`, `admin`, `backoffice`).
+La plantilla utiliza marcadores parametricos que deben ser reemplazados al configurar `estandar.config.ts` y aliases segun la declaracion de `RAIZ_PLUGIN/plantilla/MANIFIESTO.md`:
+- `{{APP_1}}`: Nombre del primer modulo o SPA del portal (ej. `portal`, `cliente`, `app`).
+- `{{APP_2}}`: Nombre del segundo modulo o SPA administrativa (ej. `admin`, `backoffice`, `gestion`).
 - `@{{PROYECTO}}`: Prefijo de aliases internos de librerias compartidas.
 - `{{APP_EFIMERA}}`: Directorio de aplicaciones o vistas transitorias si existieran.
 
-> **INSTRUCCION CRITICA:** La ola de arquitectura del frontend empieza obligatoriamente por sustituir los marcadores `{{APP_1}}`, `{{APP_2}}`, `@{{PROYECTO}}` y `{{APP_EFIMERA}}` en `front-dependencias.test.ts` y configuraciones asociadas antes de correr las pruebas.
+> **INSTRUCCION CRITICA:** La ola de arquitectura e higiene empieza obligatoriamente por crear `estandar.config.ts` y sustituir los marcadores `{{APP_1}}`, `{{APP_2}}`, `@{{PROYECTO}}` y `{{APP_EFIMERA}}` segun la topologia real del proyecto antes de correr las pruebas.
 
 ### Lista de Comprobacion
-1. Copiar tests de arquitectura desde `RAIZ_PLUGIN/plantilla/` a `back/tests/arquitectura/` y `front/tests/arquitectura/`.
-2. Sustituir marcadores de frontend segun la estructura de directorios real.
+1. Copiar `estandar.config.ts` desde `RAIZ_PLUGIN/plantilla/` a la raiz del proyecto y configurarlo segun la topologia real (una sola SPA FSD o multi-SPA, rutas de migraciones y use cases).
+2. Copiar tests de arquitectura desde `RAIZ_PLUGIN/plantilla/` a `back/tests/arquitectura/` y `front/tests/arquitectura/`.
 3. En proyectos existentes: si existen violaciones preexistentes masivas, registrar una lista base (allowlist) con marcas de TODO en el test para evitar frenar el desarrollo mientras se calendariza el desacoplamiento.
 4. Ejecutar tests de arquitectura e integrarlos en `deno task ci`.
 
@@ -115,7 +123,7 @@ Asegurar que ningun archivo contenga emojis, que las variables de entorno no se 
 - `RAIZ_PLUGIN/plantilla/front/tests/higiene/storage.test.ts`
 
 ### Lista de Comprobacion
-1. Copiar scripts de higiene desde `RAIZ_PLUGIN/plantilla/` a `scripts/higiene/` y `front/tests/higiene/`.
+1. Copiar scripts de higiene desde `RAIZ_PLUGIN/plantilla/` a `scripts/higiene/` y `front/tests/higiene/` (los tests de front leen automaticamente la topologia desde `estandar.config.ts`).
 2. En proyectos existentes: auditar ocurrencias historicas de emojis o fugas de storage. Si es viable, limpiar de inmediato; si no, registrar lista congelada justificada.
 3. Integrar las pruebas en la tarea `deno task ci`.
 

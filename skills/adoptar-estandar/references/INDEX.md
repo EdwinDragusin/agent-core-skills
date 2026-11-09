@@ -10,9 +10,9 @@ Leer este indice primero. Luego leer solo el rango necesario (read_file con Star
 | 9 | ## Ola 1: CI Unica y Cobertura Bloqueante |
 | 38 | ## Ola 2: Hooks de Git y Convenciones de Commits |
 | 69 | ## Ola 3: Tests de Arquitectura de Capas |
-| 82 | ### Marcadores de Plantilla Frontend (Sustitucion Obligatoria) |
-| 107 | ## Ola 4: Higiene y Calidad Estatica |
-| 132 | ## Ola 5: Gobernanza Documental, Doc-Linter y Trazabilidad |
+| 90 | ### Marcadores de Plantilla Frontend (Sustitucion Obligatoria) |
+| 115 | ## Ola 4: Higiene y Calidad Estatica |
+| 140 | ## Ola 5: Gobernanza Documental, Doc-Linter y Trazabilidad |
 
 ## cobertura.md (4 KB)
 
