@@ -35,11 +35,13 @@ Leer este indice primero. Luego leer solo el rango necesario (read_file con Star
 | 84 | ## 5. Matriz de Remediaciones |
 | 98 | ## 6. Mapa Regla a Mecanismo y Evaluacion de Instrucciones |
 
-## stack.md (5 KB)
+## stack.md (7 KB)
 
 | Linea | Seccion |
 |:--|:--|
 | 1 | # Matriz de Stack y Catalogo de Mecanismos Agnosticos |
 | 9 | ## 1. Deteccion del Stack Tecnologico |
-| 28 | ## 2. Catalogo de Mecanismos Agnosticos Universales |
-| 45 | ### 4. Blindaje de Rama Principal y Politica de PRs |
+| 26 | ### Adaptacion Frontend con Vitest (Alternativa a Deno Test) |
+| 49 | ## 2. Catalogo de Mecanismos Agnosticos Universales |
+| 66 | ### 4. Blindaje de Rama Principal y Politica de PRs |
+| 89 | ## 3. Tratamiento de Violaciones Masivas Preexistentes |

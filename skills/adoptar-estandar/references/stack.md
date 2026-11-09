@@ -23,6 +23,27 @@ Durante la Fase 1 (Auditoria de Solo Lectura), el adoptante evalua los archivos 
 - **Modo Heterogeneo / Stack Alternativo:**
   Emite advertencia en la Fase 1. Se restringe la adopcion a los mecanismos agnosticos universales, absteniendose de transferir tests de capas acoplados al runtime de Deno a menos que se traduzcan al runner nativo del proyecto.
 
+### Adaptacion Frontend con Vitest (Alternativa a Deno Test)
+La plantilla estandar ejecuta las pruebas unitarias y de arquitectura del frontend mediante `deno test`. En proyectos donde el frontend utiliza Vite + Vitest (`vitest` en `package.json` o `vite.config.ts`):
+- **Opcion recomendada:** Mantener Vitest como runner nativo de pruebas frontend y ejecutar `npx vitest run --coverage` (proveedor `@vitest/coverage-v8` o `istanbul`).
+- **Medicion de cobertura y fijacion de umbral:**
+  1. Medir linea base local ejecutando `npx vitest run --coverage`.
+  2. Tomar el porcentaje consolidado de lineas y sentencias obtenido en la linea base (ej. `82.4%`).
+  3. Fijar el umbral bloqueante en `vite.config.ts` o `vitest.config.ts`:
+     ```typescript
+     test: {
+       coverage: {
+         provider: "v8",
+         thresholds: {
+           lines: 82.4,
+           statements: 82.4,
+         },
+       },
+     }
+     ```
+  4. Integrar la ejecucion de `vitest run --coverage` en el pipeline de CI (`deno task ci` o script npm) para hacer cumplir la politica de trinquete (ratchet policy: el umbral jamas desciende).
+- **Tests de arquitectura con Vitest:** Los tests de arquitectura frontend (`front-dependencias.test.ts`) pueden ejecutarse con Deno si el runtime esta instalado en el repositorio (leyendo `estandar.config.ts`), o bien traducirse a la suite de Vitest manteniendo las mismas aserciones de aislamiento entre capas FSD.
+
 ---
 
 ## 2. Catalogo de Mecanismos Agnosticos Universales
@@ -62,3 +83,27 @@ Los siguientes mecanismos no dependen del lenguaje de programacion ni del framew
 ### 6. Politica de Cobertura No Degradable (Ratchet Policy)
 - **Mecanismos:** Configuracion de status checks y medicion de umbrales minimos.
 - **Estandar:** La cobertura del repositorio jamas desciende tras la integracion de una rama; el piso medido en la linea base se consolida como umbral bloqueante en CI.
+
+---
+
+## 3. Tratamiento de Violaciones Masivas Preexistentes
+
+Al adoptar el estandar sobre proyectos existentes o sistemas heredados (legacy), es habitual encontrar cientos de violaciones acumuladas de Clean Architecture o FSD (ej. imports relativos profundos sin alias `@dominio/`, inyeccion de dependencias dispersa fuera de la raiz de composicion, o entidades de dominio sin herencia de clase base `Entidad`/`AgregadoRaiz`).
+
+### Protocolo de Lista Base Congelada (Allowlist con TODO)
+- **Principio:** No bloquear la adopcion del estandar ni forzar una reescritura masiva de alto riesgo en una sola iteracion.
+- **Mecanismo:** Registrar una lista base congelada (`ALLOWLIST`) directamente en el test de arquitectura correspondiente, documentando las rutas o identificadores tolerados:
+  ```typescript
+  // Lista base temporal de archivos heredados pendientes de desacoplamiento
+  // TODO(arquitectura): desacoplar dependencias segun plan de refactor
+  const ARCHIVOS_EXCLUIDOS_HEREDADOS = new Set([
+    "src/dominio/legado/ServicioAntiguo.ts",
+    "src/dominio/legado/HelperRelativo.ts",
+  ]);
+  ```
+- **Asercion estricta contra regresiones:** El test filtra los archivos de la lista base y verifica que no aparezcan nuevas infracciones:
+  ```typescript
+  const violacionesNuevas = violaciones.filter(v => !ARCHIVOS_EXCLUIDOS_HEREDADOS.has(v.archivo));
+  assertEquals(violacionesNuevas.length, 0, `Nuevas violaciones detectadas: ${violacionesNuevas.join(", ")}`);
+  ```
+- **Politica de saneamiento continuo:** Todo codigo nuevo o refactorizado debe cumplir al 100% las reglas de arquitectura. Conforme se limpien archivos heredados, se eliminan del allowlist y se reduce el conjunto tolerado (politica de trinquete de calidad arquitectonica).
