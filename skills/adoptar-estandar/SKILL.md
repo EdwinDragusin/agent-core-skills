@@ -42,7 +42,7 @@ Orquesta la transferencia de mecanismos, compuertas de calidad y gobernanza de E
 **Compuerta:** Prohibido modificar o crear archivos en el proyecto destino.
 
 1. **Detectar stack:** Inspeccionar segun `references/stack.md`:
-   - Deno + Hono + Drizzle + React FSD: adopcion completa.
+   - Deno + Hono + Drizzle + React FSD (Deno Test o Vitest): adopcion completa.
    - Otro stack: advertir al usuario y limitar a mecanismos agnosticos (commits, ramas, higiene, doc-linter, marcas, proteccion de main).
 2. **Cotejo con plantilla:** Contrastar arbol contra `RAIZ_PLUGIN/plantilla/MANIFIESTO.md`.
 3. **Tabla de brechas:** Presentar matriz con mecanismos ausentes, parciales o no bloqueantes.
