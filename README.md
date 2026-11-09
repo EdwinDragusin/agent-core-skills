@@ -73,7 +73,7 @@ El script copia y filtra las secciones de proyecto, garantizando idempotencia y 
 
 ## Plugin Complementario: Extras
 
-Para proyectos que requieran el pipeline SDLC orquestado en 5 fases, los 8 subagentes periciales y la integracion de servidores MCP (Obsidian, Codebase Memory, Playwright):
+Para proyectos que requieran el pipeline SDLC orquestado en 5 fases, los subagentes periciales y la integracion de servidores MCP (Obsidian, Codebase Memory, Playwright):
 - Repositorio: [EdwinDragusin/agent-core-extras](https://github.com/EdwinDragusin/agent-core-extras)
 
 ## Contribucion
