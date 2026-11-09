@@ -36,7 +36,7 @@ Deno.test("identificacion de archivos de migracion y journal", () => {
     "back/src/infraestructura/persistencia/migraciones/meta/_journal.json";
   const rutaSnapshot =
     "back/src/infraestructura/persistencia/migraciones/meta/0000_snapshot.json";
-  const rutaDominio = "back/src/dominio/usuario/Usuario.ts";
+  const rutaDominio = "back/src/dominio/usuarios/Usuario.ts";
 
   assertEquals(esArchivoMigracion(rutaSql), true);
   assertEquals(esArchivoMigracion(rutaJournal), true);
@@ -199,7 +199,7 @@ Deno.test("verificarCambiosMigraciones valida escenarios de migracion", async ()
     },
     {
       estado: "A",
-      ruta: "back/src/dominio/usuario/NuevoCaso.ts",
+      ruta: "back/src/dominio/usuarios/NuevoCaso.ts",
     },
   ];
   const res1 = await verificarCambiosMigraciones(cambiosValidos);

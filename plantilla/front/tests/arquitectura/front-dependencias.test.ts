@@ -173,6 +173,11 @@ function ubicarArchivo(
 
   const restoSinSrc = resto.startsWith("src/") ? resto.slice(4) : resto;
 
+  if (restoSinSrc === "app" || restoSinSrc.startsWith("app/")) {
+    const subrutaApp = restoSinSrc === "app" ? "" : restoSinSrc.slice(4);
+    return { app, capa: "app", subruta: subrutaApp };
+  }
+
   // Capas con division por slices/segmentos en FSD
   const capasConSegmento = new Set([
     "pages",
@@ -183,7 +188,7 @@ function ubicarArchivo(
   ]);
 
   for (const c of config.capasFSD) {
-    if (c === "app" || c === "shared") continue;
+    if (c === "app") continue;
     if (restoSinSrc === c) {
       return { app, capa: c, subruta: "" };
     }
@@ -247,7 +252,7 @@ export function esComponentePresentacionalTsx(
 
   // Soporte SPA unica en src/
   if (
-    /^(?:src\/features\/[^/]+\/(?:components|pages)\/|src\/entities\/[^/]+\/ui\/|src\/(?:components|pages|widgets)\/|src\/widgets\/[^/]+\/ui\/|src\/pages\/[^/]+\/ui\/)/
+    /^(?:src\/features\/[^/]+\/(?:components|pages)\/|src\/entities\/[^/]+\/ui\/|src\/(?:components|pages|widgets)\/|src\/widgets\/[^/]+\/ui\/|src\/pages\/[^/]+\/ui\/|src\/shared\/ui\/)/
       .test(ruta)
   ) {
     return true;
@@ -488,8 +493,9 @@ export const PATRONES_EFECTO_RED_RN_F02: ReadonlyArray<{ etiqueta: string; regex
 export function detectarLlamadasRedPresentacional(
   rutaOrigen: string,
   codigoSinComentarios: string,
+  config: EstandarConfigFront = estandarConfig.front,
 ): Violacion[] {
-  if (!esComponentePresentacionalTsx(rutaOrigen)) {
+  if (!esComponentePresentacionalTsx(rutaOrigen, config)) {
     return [];
   }
 
@@ -504,6 +510,20 @@ export function detectarLlamadasRedPresentacional(
     }
   }
   return hallazgos;
+}
+
+function resolverSubcarpetaEscaneoApp(
+  app: { readonly nombre: string; readonly rutaSrc: string },
+): string {
+  try {
+    const statNombre = Deno.statSync(`${RAIZ_FRONT}/${app.nombre}`);
+    if (statNombre.isDirectory) {
+      return app.nombre;
+    }
+  } catch {
+    // Si no existe directorio con el nombre de la app (ej. SPA unica en front/src), usar rutaSrc
+  }
+  return app.rutaSrc;
 }
 
 function recolectarArchivosFront(subcarpeta: string): string[] {
@@ -540,7 +560,9 @@ function ejecutarEscaneoCompleto(): ResultadoEscaneo {
     return cacheEscaneo;
   }
 
-  const carpetasAEscanear = estandarConfig.front.aplicaciones.map((a) => a.nombre);
+  const carpetasAEscanear = estandarConfig.front.aplicaciones.map((a) =>
+    resolverSubcarpetaEscaneoApp(a)
+  );
   if (estandarConfig.front.capaCompartida) {
     carpetasAEscanear.push(estandarConfig.front.capaCompartida.ruta);
   }
@@ -586,122 +608,143 @@ function afirmarCeroViolaciones(regla: ReglaArquitectura): void {
 }
 
 Deno.test("Arquitectura Front - Autoprueba sintetica de clasificarImport para todas las reglas", () => {
+  const configMonorepo: EstandarConfigFront = {
+    raiz: "front",
+    aplicaciones: [
+      { nombre: "web", rutaSrc: "web/src" },
+      { nombre: "admin", rutaSrc: "admin/src" },
+    ],
+    capaCompartida: { nombre: "shared", ruta: "shared" },
+    capasFSD: ["app", "components", "features", "entities", "api"],
+  };
+
   // RN-F03: valido vs invalido
   assertEquals(
     clasificarImport(
-      "{{APP_1}}/src/features/auth/hooks/useLogin.ts",
+      "web/src/features/auth/hooks/useLogin.ts",
       "@shared/api/httpClient.ts",
+      configMonorepo,
     ),
     null,
   );
   assertEquals(
     clasificarImport(
-      "{{APP_1}}/src/features/auth/hooks/useLogin.ts",
-      "../../../../../{{APP_2}}/src/api/clienteHttp.ts",
+      "web/src/features/auth/hooks/useLogin.ts",
+      "../../../../../admin/src/api/clienteHttp.ts",
+      configMonorepo,
     ),
     {
       regla: "RN-F03",
-      origen: "{{APP_1}}/src/features/auth/hooks/useLogin.ts",
-      destino: "{{APP_2}}/src/api/clienteHttp.ts",
+      origen: "web/src/features/auth/hooks/useLogin.ts",
+      destino: "admin/src/api/clienteHttp.ts",
     },
   );
 
   // SHARED: valido vs invalido
   assertEquals(
-    clasificarImport("shared/ui/Boton.tsx", "../utils/haptica.ts"),
+    clasificarImport("shared/ui/Boton.tsx", "../utils/haptica.ts", configMonorepo),
     null,
   );
   assertEquals(
     clasificarImport(
       "shared/ui/Boton.tsx",
-      "../../{{APP_2}}/src/entities/moduloA/index.ts",
+      "../../admin/src/entities/moduloA/index.ts",
+      configMonorepo,
     ),
     {
       regla: "SHARED",
       origen: "shared/ui/Boton.tsx",
-      destino: "{{APP_2}}/src/entities/moduloA/index.ts",
+      destino: "admin/src/entities/moduloA/index.ts",
     },
   );
 
   // RN-F01: valido vs invalido (incluyendo tests de feature)
   assertEquals(
     clasificarImport(
-      "{{APP_2}}/src/features/convenios/components/PaginaSeguimientoConvenios.tsx",
-      "../hooks/useConvenios.ts",
+      "admin/src/features/tareas/components/PaginaSeguimientoTareas.tsx",
+      "../hooks/useTareas.ts",
+      configMonorepo,
     ),
     null,
   );
   assertEquals(
     clasificarImport(
-      "{{APP_2}}/src/features/convenios/__tests__/convenios.test.tsx",
+      "admin/src/features/tareas/__tests__/tareas.test.tsx",
       "../../monitoreo/api/monitoreoApi.ts",
+      configMonorepo,
     ),
     {
       regla: "RN-F01",
-      origen: "{{APP_2}}/src/features/convenios/__tests__/convenios.test.tsx",
-      destino: "{{APP_2}}/src/features/monitoreo/api/monitoreoApi.ts",
+      origen: "admin/src/features/tareas/__tests__/tareas.test.tsx",
+      destino: "admin/src/features/monitoreo/api/monitoreoApi.ts",
     },
   );
 
   // CAPAS: valido (feature -> entity/index.ts) vs invalidos (component -> feature, entity -> otra entity interna, api -> entity)
   assertEquals(
     clasificarImport(
-      "{{APP_2}}/src/features/convenios/components/PaginaSeguimientoConvenios.tsx",
+      "admin/src/features/tareas/components/PaginaSeguimientoTareas.tsx",
       "../../../entities/sesion/index.ts",
+      configMonorepo,
     ),
     null,
   );
   assertEquals(
     clasificarImport(
-      "{{APP_2}}/src/components/layout/LayoutPrincipal.tsx",
+      "admin/src/components/layout/LayoutPrincipal.tsx",
       "../../features/auth/store/sesionStore.ts",
+      configMonorepo,
     ),
     {
       regla: "CAPAS",
-      origen: "{{APP_2}}/src/components/layout/LayoutPrincipal.tsx",
-      destino: "{{APP_2}}/src/features/auth/store/sesionStore.ts",
+      origen: "admin/src/components/layout/LayoutPrincipal.tsx",
+      destino: "admin/src/features/auth/store/sesionStore.ts",
     },
   );
   assertEquals(
     clasificarImport(
-      "{{APP_2}}/src/entities/moduloA/api/moduloAApi.ts",
+      "admin/src/entities/moduloA/api/moduloAApi.ts",
       "../../sesion/store/sesionStore.ts",
+      configMonorepo,
     ),
     {
       regla: "CAPAS",
-      origen: "{{APP_2}}/src/entities/moduloA/api/moduloAApi.ts",
-      destino: "{{APP_2}}/src/entities/sesion/store/sesionStore.ts",
+      origen: "admin/src/entities/moduloA/api/moduloAApi.ts",
+      destino: "admin/src/entities/sesion/store/sesionStore.ts",
     },
   );
   assertEquals(
     clasificarImport(
-      "{{APP_2}}/src/api/clienteHttp.ts",
+      "admin/src/api/clienteHttp.ts",
       "../entities/sesion/index.ts",
+      configMonorepo,
     ),
     {
       regla: "CAPAS",
-      origen: "{{APP_2}}/src/api/clienteHttp.ts",
-      destino: "{{APP_2}}/src/entities/sesion/index.ts",
+      origen: "admin/src/api/clienteHttp.ts",
+      destino: "admin/src/entities/sesion/index.ts",
     },
   );
 
   // RN-F02: valido (componente importa hook) vs invalido (componente importa api/ o clienteHttp)
   assertEquals(
     clasificarImport(
-      "{{APP_2}}/src/features/convenios/components/DrawerDetalleConvenio.tsx",
-      "../hooks/useConvenios.ts",
+      "admin/src/features/tareas/components/DrawerDetalleTarea.tsx",
+      "../hooks/useTareas.ts",
+      configMonorepo,
     ),
     null,
   );
   assertEquals(
     clasificarImport(
-      "{{APP_2}}/src/features/convenios/components/DrawerDetalleConvenio.tsx",
-      "../api/conveniosApi.ts",
+      "admin/src/features/tareas/components/DrawerDetalleTarea.tsx",
+      "../api/tareasApi.ts",
+      configMonorepo,
     ),
     {
       regla: "RN-F02",
-      origen: "{{APP_2}}/src/features/convenios/components/DrawerDetalleConvenio.tsx",
-      destino: "{{APP_2}}/src/features/convenios/api/conveniosApi.ts",
+      origen: "admin/src/features/tareas/components/DrawerDetalleTarea.tsx",
+      destino: "admin/src/features/tareas/api/tareasApi.ts",
     },
   );
 
@@ -716,29 +759,33 @@ Deno.test("Arquitectura Front - Autoprueba sintetica de clasificarImport para to
     const req = axios.get('/datos');
   `;
   const hallazgosComponents = detectarLlamadasRedPresentacional(
-    "{{APP_2}}/src/features/convenios/components/Vista.tsx",
+    "admin/src/features/tareas/components/Vista.tsx",
     codigoLlamadasRed,
+    configMonorepo,
   );
   assertEquals(hallazgosComponents.length, 7);
 
   const hallazgosPages = detectarLlamadasRedPresentacional(
-    "{{APP_1}}/src/features/runner/pages/PaginaDetalle.tsx",
+    "web/src/features/catalogo/pages/PaginaDetalle.tsx",
     codigoLlamadasRed,
+    configMonorepo,
   );
   assertEquals(hallazgosPages.length, 7);
 
   // En hooks/ o api/ no debe reportar violaciones
   assertEquals(
     detectarLlamadasRedPresentacional(
-      "{{APP_2}}/src/features/convenios/hooks/useConvenios.ts",
+      "admin/src/features/tareas/hooks/useTareas.ts",
       codigoLlamadasRed,
+      configMonorepo,
     ),
     [],
   );
   assertEquals(
     detectarLlamadasRedPresentacional(
-      "{{APP_2}}/src/features/convenios/api/conveniosApi.ts",
+      "admin/src/features/tareas/api/tareasApi.ts",
       codigoLlamadasRed,
+      configMonorepo,
     ),
     [],
   );
@@ -746,7 +793,8 @@ Deno.test("Arquitectura Front - Autoprueba sintetica de clasificarImport para to
 
 Deno.test("Arquitectura Front - Anti-vacuidad: rutas configuradas contienen archivos", () => {
   for (const app of estandarConfig.front.aplicaciones) {
-    const archivosApp = recolectarArchivosFront(app.nombre);
+    const subcarpeta = resolverSubcarpetaEscaneoApp(app);
+    const archivosApp = recolectarArchivosFront(subcarpeta);
     assert(
       archivosApp.length > 0,
       `Guarda anti-vacuidad: no se encontraron archivos en '${app.rutaSrc}' para la aplicacion '${app.nombre}'. Verifique la configuracion en estandar.config.ts`,
@@ -793,72 +841,213 @@ Deno.test("Arquitectura Front - Soporta configuracion con una sola SPA y sin cap
     raiz: "front",
     aplicaciones: [
       {
-        nombre: "portal",
+        nombre: "web",
         rutaSrc: "src",
         sesionEfimera: false,
       },
     ],
-    capasFSD: ["app", "components", "features", "entities", "api"],
+    capasFSD: ["app", "components", "features", "entities", "api", "shared"],
   };
 
-  // 1. Ubicar archivo en SPA unica en src/
-  const uFeature = ubicarArchivo("src/features/catalogo/ui/Buscador.tsx", configUnicaApp);
-  assertEquals(uFeature.app, "portal");
+  // 1. Ubicar archivos en SPA unica en src/ (incluyendo capa app y shared dentro de src/)
+  const uAppRaiz = ubicarArchivo("src/app", configUnicaApp);
+  assertEquals(uAppRaiz, { app: "web", capa: "app", subruta: "" });
+
+  const uAppSub = ubicarArchivo("src/app/providers/RouterProvider.tsx", configUnicaApp);
+  assertEquals(uAppSub, {
+    app: "web",
+    capa: "app",
+    subruta: "providers/RouterProvider.tsx",
+  });
+
+  const uFeature = ubicarArchivo("src/features/tareas/ui/ListaTareas.tsx", configUnicaApp);
+  assertEquals(uFeature.app, "web");
   assertEquals(uFeature.capa, "features");
-  assertEquals(uFeature.segmento, "catalogo");
+  assertEquals(uFeature.segmento, "tareas");
 
   const uComponent = ubicarArchivo("src/components/layout/Navbar.tsx", configUnicaApp);
-  assertEquals(uComponent.app, "portal");
+  assertEquals(uComponent.app, "web");
   assertEquals(uComponent.capa, "components");
 
-  // 2. Clasificar import relativo valido dentro de la misma feature
-  const v1 = clasificarImport(
-    "src/features/catalogo/ui/Buscador.tsx",
-    "../hooks/useCatalogo.ts",
-    configUnicaApp,
-  );
-  assertEquals(v1, null);
+  const uShared = ubicarArchivo("src/shared/ui/Boton.tsx", configUnicaApp);
+  assertEquals(uShared, { app: "web", capa: "shared", subruta: "ui/Boton.tsx" });
 
-  // 3. RN-F03 (aislamiento entre apps) queda exento con 1 sola app
-  const vApp = clasificarImport(
-    "src/features/catalogo/ui/Buscador.tsx",
-    "./Otro.tsx",
-    configUnicaApp,
+  // 2. Clasificar imports de capa app (valido: app -> features; invalido: features -> app)
+  assertEquals(
+    clasificarImport(
+      "src/app/providers/RouterProvider.tsx",
+      "../../features/tareas/components/PaginaTareas.tsx",
+      configUnicaApp,
+    ),
+    null,
   );
-  assertEquals(vApp, null);
+  assertEquals(
+    clasificarImport(
+      "src/features/tareas/hooks/useTareas.ts",
+      "../../../app/providers/RouterProvider.tsx",
+      configUnicaApp,
+    ),
+    {
+      regla: "CAPAS",
+      origen: "src/features/tareas/hooks/useTareas.ts",
+      destino: "src/app/providers/RouterProvider.tsx",
+    },
+  );
 
-  // 4. RN-F01 (cruce entre features hermanas) sigue detectandose en SPA unica
-  const vHermana = clasificarImport(
-    "src/features/catalogo/ui/Buscador.tsx",
-    "../../ventas/api/ventasApi.ts",
-    configUnicaApp,
+  // 3. Clasificar imports con capa shared en src/shared (valido: features -> shared; invalido: shared -> features)
+  assertEquals(
+    clasificarImport(
+      "src/features/tareas/components/PaginaTareas.tsx",
+      "../../../shared/ui/Boton.tsx",
+      configUnicaApp,
+    ),
+    null,
   );
-  assertEquals(vHermana?.regla, "RN-F01");
+  assertEquals(
+    clasificarImport(
+      "src/shared/ui/Boton.tsx",
+      "../../features/tareas/hooks/useTareas.ts",
+      configUnicaApp,
+    ),
+    {
+      regla: "CAPAS",
+      origen: "src/shared/ui/Boton.tsx",
+      destino: "src/features/tareas/hooks/useTareas.ts",
+    },
+  );
 
-  // 5. RN-F02 sigue detectandose en componentes presentacionales de SPA unica
-  const vRed = clasificarImport(
-    "src/features/catalogo/components/Lista.tsx",
-    "../api/catalogoApi.ts",
-    configUnicaApp,
+  // 4. Clasificar import relativo valido dentro de la misma feature y hacia entity publica
+  assertEquals(
+    clasificarImport(
+      "src/features/tareas/ui/ListaTareas.tsx",
+      "../hooks/useTareas.ts",
+      configUnicaApp,
+    ),
+    null,
   );
-  assertEquals(vRed?.regla, "RN-F02");
+  assertEquals(
+    clasificarImport(
+      "src/features/tareas/hooks/useTareas.ts",
+      "../../../entities/usuario/index.ts",
+      configUnicaApp,
+    ),
+    null,
+  );
+
+  // 5. CAPAS invalidos en SPA unica (components -> features, feature -> entity interna, api -> entity)
+  assertEquals(
+    clasificarImport(
+      "src/components/layout/Navbar.tsx",
+      "../../features/tareas/hooks/useTareas.ts",
+      configUnicaApp,
+    ),
+    {
+      regla: "CAPAS",
+      origen: "src/components/layout/Navbar.tsx",
+      destino: "src/features/tareas/hooks/useTareas.ts",
+    },
+  );
+  assertEquals(
+    clasificarImport(
+      "src/features/tareas/hooks/useTareas.ts",
+      "../../../entities/usuario/model/usuarioStore.ts",
+      configUnicaApp,
+    ),
+    {
+      regla: "CAPAS",
+      origen: "src/features/tareas/hooks/useTareas.ts",
+      destino: "src/entities/usuario/model/usuarioStore.ts",
+    },
+  );
+  assertEquals(
+    clasificarImport(
+      "src/api/clienteHttp.ts",
+      "../entities/usuario/index.ts",
+      configUnicaApp,
+    ),
+    {
+      regla: "CAPAS",
+      origen: "src/api/clienteHttp.ts",
+      destino: "src/entities/usuario/index.ts",
+    },
+  );
+
+  // 6. RN-F03 (aislamiento entre apps) queda exento con 1 sola app
+  assertEquals(
+    clasificarImport(
+      "src/features/tareas/ui/ListaTareas.tsx",
+      "./Otro.tsx",
+      configUnicaApp,
+    ),
+    null,
+  );
+
+  // 7. RN-F01 (cruce entre features hermanas) sigue detectandose en SPA unica
+  assertEquals(
+    clasificarImport(
+      "src/features/tareas/ui/ListaTareas.tsx",
+      "../../reportes/api/reportesApi.ts",
+      configUnicaApp,
+    ),
+    {
+      regla: "RN-F01",
+      origen: "src/features/tareas/ui/ListaTareas.tsx",
+      destino: "src/features/reportes/api/reportesApi.ts",
+    },
+  );
+
+  // 8. RN-F02 sigue detectandose en componentes presentacionales de SPA unica (imports y llamadas directas)
+  assertEquals(
+    clasificarImport(
+      "src/features/tareas/components/Lista.tsx",
+      "../api/tareasApi.ts",
+      configUnicaApp,
+    ),
+    {
+      regla: "RN-F02",
+      origen: "src/features/tareas/components/Lista.tsx",
+      destino: "src/features/tareas/api/tareasApi.ts",
+    },
+  );
+  assertEquals(
+    detectarLlamadasRedPresentacional(
+      "src/features/tareas/components/Lista.tsx",
+      "const res = fetch('/api/tareas');",
+      configUnicaApp,
+    ),
+    [
+      {
+        regla: "RN-F02",
+        origen: "src/features/tareas/components/Lista.tsx",
+        destino: "fetch(",
+      },
+    ],
+  );
+  assertEquals(
+    detectarLlamadasRedPresentacional(
+      "src/features/tareas/hooks/useTareas.ts",
+      "const res = fetch('/api/tareas');",
+      configUnicaApp,
+    ),
+    [],
+  );
 });
 
 Deno.test("Arquitectura Front - Soporta jerarquia FSD dinamica con pages y widgets en SPA unica", () => {
   const configFsdCompleto: EstandarConfigFront = {
     raiz: "front",
-    aplicaciones: [{ nombre: "portal", rutaSrc: "src" }],
+    aplicaciones: [{ nombre: "web", rutaSrc: "src" }],
     capasFSD: ["app", "pages", "widgets", "features", "entities", "shared"],
   };
 
   // 1. Clasificacion de capas pages y widgets
   const uPage = ubicarArchivo("src/pages/dashboard/ui/DashboardPage.tsx", configFsdCompleto);
-  assertEquals(uPage.app, "portal");
+  assertEquals(uPage.app, "web");
   assertEquals(uPage.capa, "pages");
   assertEquals(uPage.segmento, "dashboard");
 
   const uWidget = ubicarArchivo("src/widgets/header/ui/Header.tsx", configFsdCompleto);
-  assertEquals(uWidget.app, "portal");
+  assertEquals(uWidget.app, "web");
   assertEquals(uWidget.capa, "widgets");
   assertEquals(uWidget.segmento, "header");
 

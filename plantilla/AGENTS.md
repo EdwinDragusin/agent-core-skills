@@ -147,13 +147,13 @@ Las siguientes reglas de ramas, commits, verificacion y Pull Requests aplican de
    - Todo trabajo se realiza SIEMPRE en una rama dedicada. Si no existe una rama activa para la tarea en curso, hacer checkout de una nueva antes de editar codigo: `git checkout -b <tipo>/<descripcion-kebab-case>`.
      <!-- verifica: instruccion -->
    - Nomenclatura: `<tipo>/<descripcion-kebab-case>`
-     - `feat/`: Nuevas funcionalidades o casos de uso (ej. `feat/baremos`, `feat/auditor-split-screen-expedientes`).
+     - `feat/`: Nuevas funcionalidades o casos de uso (ej. `feat/catalogo`, `feat/auditor-split-screen-detalle`).
      - `fix/`: Correccion de errores o pruebas rotas (ej. `fix/testing-fallando`, `fix/sesion-expirada`).
      - `refactor/`: Reestructuracion de codigo sin alterar comportamiento (ej. `refactor/puertos-almacenamiento`).
      - `test/`: Adicion o mejora de pruebas unitarias/integracion (ej. `test/cobertura-expediente`).
-     - `docs/`: Documentacion arc42, notas del vault o ADRs (ej. `docs/adr-027-baremos`).
+     - `docs/`: Documentacion arc42, notas del vault o ADRs (ej. `docs/adr-027-catalogo`).
      - `chore/`: Mantenimiento, dependencias o configuracion CI (ej. `chore/actualizar-ci`).
-     - `schema/`: Cambios en esquema Drizzle y migraciones en backend (ej. `schema/tabla-baremos`).
+     - `schema/`: Cambios en esquema Drizzle y migraciones en backend (ej. `schema/tabla-catalogo`).
    - *Reglas*: ramas efimeras desde `main`, en minusculas (`kebab-case`), sin acentos ni caracteres especiales, nombres concisos.
 
 2. **Commits granulares y enfocados**:

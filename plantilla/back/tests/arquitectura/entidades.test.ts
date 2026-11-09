@@ -112,12 +112,12 @@ Deno.test("Arquitectura - Autoverificacion sintetica de herencia de Entidad y Ag
   // 1. Entidad valida que extiende Entidad
   const codigoValido1 = `
     /** Entidad: Item de pedido */
-    export class Item extends Entidad {
+    export class ItemPedido extends Entidad {
       constructor(uuid: string) { super(uuid); }
     }
   `;
   const v1 = detectarViolacionesEntidad(
-    "src/dominio/pedidos/Item.ts",
+    "src/dominio/pedidos/ItemPedido.ts",
     codigoValido1,
     entidadesBase,
   );

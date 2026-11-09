@@ -1,7 +1,10 @@
 function assertEquals<T>(actual: T, expected: T, mensaje?: string): void {
   if (actual !== expected) {
     throw new Error(
-      mensaje ?? `Asercion fallida: esperado ${JSON.stringify(expected)}, obtenido ${JSON.stringify(actual)}`,
+      mensaje ??
+        `Asercion fallida: esperado ${JSON.stringify(expected)}, obtenido ${
+          JSON.stringify(actual)
+        }`,
     );
   }
 }
@@ -13,24 +16,24 @@ import {
 } from "./validar-rama.ts";
 
 Deno.test("limpiarNombreRama remueve el prefijo refs/heads/", () => {
-  assertEquals(limpiarNombreRama("refs/heads/feat/baremos"), "feat/baremos");
-  assertEquals(limpiarNombreRama("feat/baremos"), "feat/baremos");
+  assertEquals(limpiarNombreRama("refs/heads/feat/catalogo"), "feat/catalogo");
+  assertEquals(limpiarNombreRama("feat/catalogo"), "feat/catalogo");
   assertEquals(limpiarNombreRama("  refs/heads/main  "), "main");
 });
 
 Deno.test("REGEX_RAMA valida correctamente la sintaxis de tipos y kebab-case", () => {
   const casos: [string, boolean][] = [
-    ["feat/baremos", true],
+    ["feat/catalogo", true],
     ["fix/sesion-expirada", true],
-    ["docs/adr-027-baremos", true],
-    ["test/cobertura-expediente", true],
+    ["docs/adr-027-catalogo", true],
+    ["test/cobertura-usuarios", true],
     ["refactor/puertos-almacenamiento", true],
     ["chore/actualizar-ci", true],
     ["style/espaciado-correcto", true],
     ["perf/carga-masiva-documentos", true],
     ["ci/mecanismos-reglas", true],
     ["build/contenedor-alpine", true],
-    ["schema/tabla-baremos", true],
+    ["schema/tabla-catalogo", true],
     ["revert/revertir-commit", true],
     ["feat/a11y-panel", true],
     ["feat/123-numero-inicial", true],
@@ -38,14 +41,14 @@ Deno.test("REGEX_RAMA valida correctamente la sintaxis de tipos y kebab-case", (
     // Casos no permitidos por la regex directa
     ["main", false], // main se valida por excepcion de negocio en validarNombreRama
     ["master", false],
-    ["feature/baremos", false],
-    ["FEAT/baremos", false],
-    ["feat/Baremos", false],
-    ["feat/baremos_nuevo", false],
-    ["feat/baremos/anidado", false],
+    ["feature/catalogo", false],
+    ["FEAT/catalogo", false],
+    ["feat/Catalogo", false],
+    ["feat/catalogo_nuevo", false],
+    ["feat/catalogo/anidado", false],
     ["feat/", false],
-    ["feat/-baremos", false],
-    ["feat/baremos-", false],
+    ["feat/-catalogo", false],
+    ["feat/catalogo-", false],
     ["sin-tipo", false],
   ];
 
@@ -62,10 +65,10 @@ Deno.test("validarNombreRama acepta ramas validas y main", () => {
   const ramasValidas = [
     "main",
     "refs/heads/main",
-    "feat/baremos",
+    "feat/catalogo",
     "refs/heads/fix/sesion-expirada",
     "ci/mecanismos-reglas",
-    "schema/tabla-baremos",
+    "schema/tabla-catalogo",
   ];
 
   for (const r of ramasValidas) {
@@ -80,10 +83,10 @@ Deno.test("validarNombreRama rechaza ramas invalidas", () => {
     "   ",
     "master",
     "develop",
-    "feature/baremos",
-    "FEAT/baremos",
-    "feat/baremos_nuevo",
-    "feat/baremos/anidado",
+    "feature/catalogo",
+    "FEAT/catalogo",
+    "feat/catalogo_nuevo",
+    "feat/catalogo/anidado",
     "feat/-inicio-guion",
     "feat/fin-guion-",
   ];

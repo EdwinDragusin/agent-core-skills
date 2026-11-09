@@ -91,7 +91,7 @@ function normalizarRutaPosix(ruta: string): string {
   return ruta.replaceAll("\\", "/").replace(/\/+$/, "");
 }
 
-function recolectarArchivosAppEfimeraSrc(dir: string): string[] {
+function recolectarArchivosAppSrc(dir: string): string[] {
   const archivos: string[] = [];
   try {
     for (const entrada of Deno.readDirSync(dir)) {
@@ -105,7 +105,7 @@ function recolectarArchivosAppEfimeraSrc(dir: string): string[] {
       }
       const ruta = `${dir}/${entrada.name}`;
       if (entrada.isDirectory) {
-        archivos.push(...recolectarArchivosAppEfimeraSrc(ruta));
+        archivos.push(...recolectarArchivosAppSrc(ruta));
       } else if (
         entrada.isFile &&
         (entrada.name.endsWith(".ts") ||
@@ -165,7 +165,7 @@ Deno.test("Higiene Storage - aplicaciones con sesion efimera no usan localStorag
 
   for (const app of appsEfimeras) {
     const rutaAppSrc = `${raizFront}/${app.rutaSrc}`;
-    const archivos = recolectarArchivosAppEfimeraSrc(rutaAppSrc);
+    const archivos = recolectarArchivosAppSrc(rutaAppSrc);
 
     assert(
       archivos.length > 0,

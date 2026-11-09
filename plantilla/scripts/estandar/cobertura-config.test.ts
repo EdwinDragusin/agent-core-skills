@@ -352,19 +352,19 @@ Deno.test(
         raiz: "front",
         aplicaciones: [
           {
-            nombre: "{{APP_1}}",
-            rutaSrc: "{{APP_1}}/src",
+            nombre: "web",
+            rutaSrc: "web/src",
             sesionEfimera: true,
           },
-          { nombre: "{{APP_2}}", rutaSrc: "{{APP_2}}/src", sesionEfimera: false },
+          { nombre: "admin", rutaSrc: "admin/src", sesionEfimera: false },
         ],
         capaCompartida: { nombre: "shared", ruta: "shared" },
         capasFSD: ["app", "features", "shared"],
       },
       cobertura: {
         rutasAdicionales: [
-          "front/{{APP_1}}/vite.config.ts",
-          "front/{{APP_2}}/vite.config.ts",
+          "front/web/vite.config.ts",
+          "front/admin/vite.config.ts",
         ],
       },
       listasBase: {},
@@ -374,10 +374,10 @@ Deno.test(
       "back/src/interfaz/http/main.ts",
       "back/tests/arquitectura/dependencias.test.ts",
       "estandar.config.ts",
-      "front/{{APP_1}}/src/App.tsx",
-      "front/{{APP_1}}/vite.config.ts",
-      "front/{{APP_2}}/src/main.tsx",
-      "front/{{APP_2}}/vite.config.ts",
+      "front/web/src/App.tsx",
+      "front/web/vite.config.ts",
+      "front/admin/src/main.tsx",
+      "front/admin/vite.config.ts",
       "front/shared/index.ts",
       "front/tests/arquitectura/front-dependencias.test.ts",
       "scripts/estandar/cobertura-config.test.ts",
@@ -394,14 +394,14 @@ Deno.test(
     const archivosConHuerfano = [
       ...archivosValidos,
       " paquetes-sueltos/experimento.ts",
-      "front/{{APP_1}}/script-suelto.ts",
+      "front/web/script-suelto.ts",
     ];
     const resHuerfano = evaluarCoberturaConfig(archivosConHuerfano, {
       config: configSintetica,
     });
     assertEquals(resHuerfano.archivosHuerfanos, [
       "paquetes-sueltos/experimento.ts",
-      "front/{{APP_1}}/script-suelto.ts",
+      "front/web/script-suelto.ts",
     ]);
 
     // 3. Anti-vacuidad: falla si el conjunto de archivos cubiertos esta vacio

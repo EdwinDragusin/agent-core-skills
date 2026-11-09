@@ -41,7 +41,7 @@ export function validarNombreRama(rama: string): ResultadoValidacionRama {
       error:
         `El nombre de rama "${limpia}" no cumple con el formato obligatorio: <tipo>/<descripcion-kebab-case>.\n` +
         "Tipos validos: feat, fix, docs, test, refactor, chore, style, perf, ci, build, schema, revert.\n" +
-        "Ejemplo valido: feat/baremos o fix/sesion-expirada",
+        "Ejemplo valido: feat/catalogo o fix/sesion-expirada",
     };
   }
 
@@ -68,7 +68,9 @@ if (import.meta.main) {
   }
 
   if (!rama) {
-    console.error("Uso: deno run --allow-read scripts/hooks/validar-rama.ts [<nombre-rama>]");
+    console.error(
+      "Uso: deno run --allow-read scripts/hooks/validar-rama.ts [<nombre-rama>]",
+    );
     Deno.exit(1);
   }
 

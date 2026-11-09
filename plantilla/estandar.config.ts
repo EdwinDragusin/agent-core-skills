@@ -7,7 +7,7 @@
  */
 
 export interface AplicacionFront {
-  /** Nombre identificador de la aplicacion (ej. 'web', 'admin', 'app') */
+  /** Nombre identificador de la aplicacion (ej. 'web', 'admin') */
   nombre: string;
   /** Ruta al directorio fuente de la aplicacion, relativa a front.raiz (ej. 'web/src' o 'src') */
   rutaSrc: string;

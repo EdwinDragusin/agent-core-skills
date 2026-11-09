@@ -1,0 +1,3 @@
+// docs/arquitectura/capitulo-05-vista-de-bloques/relacional.dbml
+// Esquema relacional del sistema en sintaxis DBML nativa.
+// [Describa las tablas del proyecto incluyendo 'version integer [not null, default: 1]' en agregados mutables.]
