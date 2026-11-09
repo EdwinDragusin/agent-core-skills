@@ -107,7 +107,7 @@ Deno.test("Arquitectura - Autoverificacion sintetica de DI manual de adaptadores
   const clasesInfra = new Set([
     "UsuarioRepositoryDrizzle",
     "AlmacenamientoLocalAdapter",
-    "GotenbergAdapter",
+    "PdfRendererAdapter",
     "LoggerConsola",
     "HashServiceArgon2",
   ]);

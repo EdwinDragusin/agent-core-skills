@@ -106,7 +106,7 @@ Deno.test("Arquitectura - Autoverificacion sintetica de reglas de Logger sin con
   const codigoComentario = `
     /**
      * Ejemplo de uso:
-     * console.log(identificador.valor);
+     * console.log(email.valor);
      */
     // console.log("debug previo");
     const valor = 42;

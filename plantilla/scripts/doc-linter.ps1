@@ -1,5 +1,6 @@
 # scripts/doc-linter.ps1
 # Linter de Gobernanza Documental y Estandar Bimodal (Lego)
+# Auditoria de estructura del vault, arc42, ADRs, casos de uso y manifiestos AGENTS.md
 # Cero dependencias externas. Ejecutable en PowerShell 5.1+ y Core.
 
 [CmdletBinding()]

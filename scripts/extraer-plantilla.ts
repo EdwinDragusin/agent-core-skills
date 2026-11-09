@@ -110,6 +110,10 @@ export const TERMINOS_DOMINIO_PROHIBIDOS = [
   "reactivos",
   "calificacion",
   "calificaciones",
+  "convenio",
+  "convenios",
+  "baremo",
+  "baremos",
 ] as const;
 
 export const ALIAS_DOMINIO_PROHIBIDO = "@examen";
