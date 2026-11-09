@@ -64,7 +64,7 @@ Dado que modifica la configuracion del repositorio en GitHub, debe ejecutarse co
 1. **Simulacion y revision previa (`-DryRun`):**
    Ejecutar primero en modo de simulacion y mostrar el resultado exacto al usuario:
    ```powershell
-   pwsh RAIZ_PLUGIN/scripts/protect-main-branch.ps1 [-Repo <owner/name>] -Checks <nombres de los jobs de CI separados por comas> -DryRun
+   pwsh RAIZ_PLUGIN/scripts/protect-main-branch.ps1 [-Repo <owner/name>] -Checks <nombres de los jobs de CI separados por punto y coma> -DryRun
    ```
    - `RAIZ_PLUGIN`: Raiz del plugin (`../../../` relativo a este archivo).
    - `-Repo`: Repositorio `<owner/name>` en GitHub (opcional, por defecto toma el remoto origin).
@@ -74,7 +74,7 @@ Dado que modifica la configuracion del repositorio en GitHub, debe ejecutarse co
 2. **Aplicacion definitiva (Requiere aprobacion explicita):**
    Unicamente tras la aprobacion explicita del usuario frente a la salida del simulador, ejecutar sin la bandera `-DryRun`:
    ```powershell
-   pwsh RAIZ_PLUGIN/scripts/protect-main-branch.ps1 [-Repo <owner/name>] -Checks <nombres de los jobs de CI separados por comas>
+   pwsh RAIZ_PLUGIN/scripts/protect-main-branch.ps1 [-Repo <owner/name>] -Checks <nombres de los jobs de CI separados por punto y coma>
    ```
 
 Se verifica que:
