@@ -13,7 +13,7 @@ Antes de importar o invocar cualquier API de un framework, ORM, SDK o libreria e
 1. **Inspecciona la Version Real Instalada:**
    - Lee `package.json`, `deno.json`, `pyproject.toml`, `Cargo.toml` o `go.mod` y sus respectivos lockfiles para conocer la version exacta en el proyecto.
 2. **Verifica las Firmas Locales de Tipos (Primera Fuente):**
-   - Busca en el grafo (`codebase-memory-mcp`), en las definiciones `.d.ts` instaladas o en el codigo existente del repositorio como ya se invoca esa libreria.
+   - Busca en el grafo (si `codebase-memory-mcp` esta disponible), en las definiciones `.d.ts` instaladas o en el codigo existente del repositorio como ya se invoca esa libreria.
 3. **Consulta Documentacion Oficial si No Esta en Local:**
    - Si es una API que no aparece en el codebase actual, verifica su firma oficial vigente para esa version exacta antes de escribir el test o la implementacion.
 
@@ -27,4 +27,4 @@ Antes de importar o invocar cualquier API de un framework, ORM, SDK o libreria e
 
 ## 3. Trazabilidad en Comentarios In-Code
 
-Cuando utilices un comportamiento especifico de version, una configuracion no obvia de un framework o un workaround documentado oficialmente, cita brevemente la razon bajo el principio del "Por Que" (`code-documentation-mastery`) para que el revisor de Fase 4 (`qa-reviewer`) valide su vigencia.
+Cuando utilices un comportamiento especifico de version, una configuracion no obvia de un framework o un workaround documentado oficialmente, cita brevemente la razon bajo el principio del "Por Que" (`code-documentation-mastery`) para facilitar la revision de codigo y auditoria tecnica.

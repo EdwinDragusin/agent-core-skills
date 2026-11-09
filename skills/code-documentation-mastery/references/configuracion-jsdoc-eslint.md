@@ -38,7 +38,7 @@ En `package.json`:
   "templates": {
     "useLongnameInNav": true,
     "theme_opts": {
-      "title": "API Sistema de Examenes de Ingreso - Gobierno de Hidalgo",
+      "title": "API de Referencia de Arquitectura",
       "search": true,
       "darkMode": true
     }

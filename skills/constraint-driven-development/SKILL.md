@@ -23,6 +23,6 @@ Ningun subagente implementador (Fase 3A/3B) puede introducir ninguno de estos pa
 
 Si el proyecto no define aun sus umbrales en el Arbol de Calidad (`docs/criterios/02-arbol-de-calidad.md`), aplica estos valores base:
 - **Cobertura en Dominio y Casos de Uso (`domain/`, `application/`):** >= 90% de lineas y ramas.
-- **Accesibilidad en UI (`Fase 3B`):** WCAG 2.1 AA (0 violaciones criticas/serias en arbol ARIA y contraste >= 4.5:1).
-- **Errores en Consola del Navegador (`playwright`):** 0 errores, 0 rechazos de promesas no manejados.
-- **Complejidad Ciclomatica por Funcion:** <= 12 (verificable via `query_graph` en `codebase-memory-mcp`).
+- **Accesibilidad en UI:** WCAG 2.1 AA (0 violaciones criticas/serias en arbol ARIA y contraste >= 4.5:1).
+- **Errores en Consola del Navegador:** 0 errores, 0 rechazos de promesas no manejados en pruebas de interfaz.
+- **Complejidad Ciclomatica por Funcion:** <= 12 (verificable via linter o `query_graph` si `codebase-memory-mcp` esta disponible).

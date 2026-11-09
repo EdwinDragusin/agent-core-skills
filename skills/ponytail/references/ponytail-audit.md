@@ -1,6 +1,6 @@
 # Ponytail Audit - Auditoria de Repositorio
 
-Informe unico bajo demanda ("audita el repo", "que puedo borrar"); no modifica codigo. Usado por `system-architect` en Modo Baseline Documental para generar `07-deuda-tecnica-y-riesgos.md`.
+Informe unico bajo demanda ("audita el repo", "que puedo borrar"); no modifica codigo. Util en analisis de arquitectura o linea base documental para registrar deuda tecnica y riesgos.
 
 1. **Mapear:** lee README, config de build/deploy, dependencias, puntos de entrada (rutas, handlers, jobs, CLI) y tests. Declara la carga esperada asumida (un usuario vs muchos procesos). Traza los flujos principales completos (entrada, almacenamiento, salida); lee a fondo lo critico (auth, dinero, escrituras, jobs, estado compartido). En repos grandes declara que partes no leiste.
 2. **Buscar:**

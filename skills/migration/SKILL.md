@@ -25,4 +25,4 @@ Prohibido renombrar o eliminar directamente una columna, tabla o campo de API en
 
 - **Operaciones Peligrosas en PostgreSQL/SQL:** Usa `CREATE INDEX CONCURRENTLY` para no bloquear escrituras; agrega restricciones `NOT NULL` o `FOREIGN KEY` primero como `NOT VALID` y luego ejecuta `VALIDATE CONSTRAINT`.
 - **Prueba de Ida y Vuelta (Up -> Down -> Up):** Ejecuta en entorno de prueba la migracion hacia adelante, verifica los datos, ejecuta el script de rollback (`down`), comprueba que el estado previo se restaura sin perdida, y vuelve a aplicar (`up`).
-- **Sincronizacion Documental:** Actualiza el bloque ```` ```dbml ```` en `docs/arquitectura/04-modelo-de-datos-y-contratos.md` via MCP `obsidian`.
+- **Sincronizacion Documental:** Actualiza el bloque ```` ```dbml ```` en la documentacion de arquitectura (usando MCP de documentacion si esta disponible o directamente en el archivo).

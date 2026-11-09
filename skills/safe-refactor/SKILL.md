@@ -17,7 +17,7 @@ Prohibido mezclar cambios de comportamiento (features/bugfixes) con refactorizac
 
 1. **Anclaje Inicial en Verde:**
    - Ejecuta la suite de pruebas antes de tocar una sola linea. Si algo falla o la zona no tiene cobertura, escribe primero los tests de caracterizacion (*characterization tests*).
-   - Consulta `detect_changes` y `trace_path` (`direction: "inbound"`) en `codebase-memory-mcp` para conocer todos los llamadores afectados por el simbolo a refactorizar.
+   - Si `codebase-memory-mcp` esta disponible, consulta `detect_changes` y `trace_path` (`direction: "inbound"`) para conocer todos los llamadores afectados por el simbolo; en su defecto, usa busqueda textual de referencias o analisis de tipos.
 2. **Transformaciones Atomicas de Claridad (`code-simplification`):**
    - Reemplaza condicionales anidados profundos por **Guard Clauses** (retornos tempranos).
    - Elimina banderas booleanas confusas en parametros dividiendo en funciones con nombre explicito.

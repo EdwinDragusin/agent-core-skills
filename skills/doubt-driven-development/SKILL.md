@@ -19,7 +19,7 @@ Activa este protocolo ante cualquier decision **no trivial**:
 1. **CLAIM (Declarar la Afirmacion):** Escribe en una oracion que propiedad garantizas y que se rompe si es falsa (ej. "Este flujo de confirmacion de orden nunca cobra dos veces aunque el usuario haga doble clic").
 2. **EXTRACT (Aislar el Artefacto):** Extrae unicamente el codigo/esquema real y el contrato que debe cumplir, **eliminando toda tu justificacion narrativa previa** (para no contaminar al revisor con tu sesgo de confirmacion).
 3. **DOUBT (Ataque Adversarial):**
-   - En el orquestador principal (o en Fase 4 `qa-reviewer`), evalua el artefacto con mentalidad de atacante:
+   - En revision arquitectonica o auditoria de calidad, evalua el artefacto con mentalidad de atacante:
      *"Asume que este diseno/codigo tiene un fallo critico bajo concurrencia, red inestable, entrada maliciosa o fallo parcial de base de datos. Encuentra la secuencia exacta de eventos que viola el contrato."*
 4. **RECONCILE (Clasificar Hallazgos contra el Codigo Real):**
    - Verifica cada hallazgo leyendo el archivo y linea exactos:

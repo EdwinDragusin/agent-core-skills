@@ -5,7 +5,7 @@ description: "UI de produccion bajo Feature-Sliced Design: componentes, estado, 
 
 # Frontend UI Engineering - Ingenieria de Componentes y Arquitectura FSD
 
-Complementa `ui-ux-mastery` con las reglas de ingenieria de codigo para construir el frontend en la **Fase 3B (`ui-builder`)**.
+Complementa `ui-ux-mastery` con las reglas de ingenieria de codigo para construir interfaces y componentes de frontend.
 
 ## 1. Arquitectura Modular Feature-Sliced Design (FSD)
 

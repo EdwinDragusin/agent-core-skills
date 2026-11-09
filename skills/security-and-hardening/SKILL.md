@@ -17,5 +17,5 @@ Complementa `exception-resilience-mastery` (que gobierna OWASP A10:2025 Fail-Clo
 | **Autorizacion (BOLA / IDOR)** | Verifica la propiedad del recurso en **cada** caso de uso filtrando por el `usuarioId` o `tenantId` autenticado en la misma consulta de base de datos, nunca solo ocultando botones en la UI. |
 | **Salida en Frontend (XSS)** | Prohibido usar `dangerouslySetInnerHTML`, `v-html` o `innerHTML` con datos de usuario sin sanitizacion estricta con lista blanca (DOMPurify). |
 | **Peticiones Salientes (SSRF)** | Si el backend recibe una URL externa, valida protocolo (`https`), resuelve el DNS y bloquea rangos de IP privados/loopback (`127.0.0.0/8`, `10.0.0.0/8`, `169.254.169.254`). |
-| **Secretos y Credenciales** | Cero credenciales, API keys o tokens hardcodeados en codigo, tests, notas de Obsidian o historial Git. Todo secreto se inyecta por variables de entorno validadas al arranque. |
-| **Dependencias (Supply Chain)** | En Fase 2 (`ponytail`), instala el minimo de paquetes externos. Fija versiones exactas en el lockfile y verifica ausencia de CVEs criticos. |
+| **Secretos y Credenciales** | Cero credenciales, API keys o tokens hardcodeados en codigo, tests, documentacion o historial Git. Todo secreto se inyecta por variables de entorno validadas al arranque. |
+| **Dependencias (Supply Chain)** | Bajo el principio `ponytail`, instala el minimo de paquetes externos. Fija versiones exactas en el lockfile y verifica ausencia de CVEs criticos. |

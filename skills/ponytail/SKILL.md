@@ -30,7 +30,7 @@ Cuando tomes un atajo deliberado para evitar sobreingenieria (ej. cache en memor
 
 ## 3. Protocolo de Revision Anti-Bloat (`ponytail-review`)
 
-Al auditar un cambio o Pull Request (especialmente en Fase 4 `qa-reviewer`), evalua estas 6 preguntas en orden:
+Al auditar un cambio o Pull Request (en revision de codigo o auditoria de calidad), evalua estas 6 preguntas en orden:
 1. **Es correcta la logica?** Resuelve el requerimiento sin romper invariantes existentes?
 2. **Es segura?** Valida entradas en fronteras, evita inyecciones y no expone secretos ni PII?
 3. **Soporta carga real?** Hay consultas N+1, bucles sin cota, fugas de memoria o bloqueos del event loop?
@@ -40,4 +40,4 @@ Al auditar un cambio o Pull Request (especialmente en Fase 4 `qa-reviewer`), eva
 
 ## 4. Auditoria de Repositorio (`ponytail-audit`)
 
-Informe unico bajo demanda ("audita el repo", "que puedo borrar"); no modifica codigo. Lo usa `system-architect` en Modo Baseline Documental para `07-deuda-tecnica-y-riesgos.md`. Protocolo completo (mapear, buscar, verificar, formato de salida): leer [references/ponytail-audit.md](references/ponytail-audit.md) solo al ejecutar esta auditoria.
+Informe unico bajo demanda ("audita el repo", "que puedo borrar"); no modifica codigo. Util en analisis de arquitectura o linea base documental para registrar deuda tecnica y riesgos. Protocolo completo (mapear, buscar, verificar, formato de salida): leer [references/ponytail-audit.md](references/ponytail-audit.md) solo al ejecutar esta auditoria.
