@@ -2,6 +2,8 @@
 
 Este documento define la estructura y el procedimiento para realizar la auditoria adversarial final de adopcion del estandar. Siguiendo el precedente de `AUDIT-035`, ningun proyecto se considera homologado sin una auditoria que certifique el veredicto `VICTORY CONFIRMED`.
 
+> **RUTAS DEL PLUGIN:** `RAIZ_PLUGIN` corresponde a tres niveles arriba de este archivo (`../../../` relativo a `references/auditoria-final.md`, raiz del plugin instalador). Toda plantilla y script vive en `RAIZ_PLUGIN/`.
+
 ---
 
 ## 1. Plantilla de Informe: AUDIT-NNN
@@ -29,7 +31,7 @@ titulo: "Auditoria de victoria: Homologacion del estandar de ingenieria"
 
 - **Objeto**: Rama `main` en commit `<commit_sha>`.
 - **Metodo**: Ejecucion del pipeline completo en limpio, verificacion de status checks y pruebas de mutacion en worktree desechable.
-- **Alcance**: Mecanismos transferidos desde `plantilla/`, convenciones de commit, hooks locales, tests de arquitectura, higiene y reglas de gobernanza.
+- **Alcance**: Mecanismos transferidos desde `RAIZ_PLUGIN/plantilla/`, convenciones de commit, hooks locales, tests de arquitectura, higiene y reglas de gobernanza.
 
 ## 2. Dictamen
 
@@ -55,14 +57,25 @@ Resumen ejecutivo del estado del repositorio y confirmacion de que los mecanismo
 ## 4. Blindaje de la Rama Principal
 
 La adopcion exige que la rama principal este protegida contra pushes directos y merges sin validacion.
-Se ejecuta el script generalizado del plugin:
+Dado que modifica la configuracion del repositorio en GitHub, debe ejecutarse con el cwd en la raiz del proyecto destino.
 
-```powershell
-pwsh ./scripts/protect-main-branch.ps1 -Repo <owner/name> -Checks <nombres de status checks separados por comas>
-```
+### Procedimiento Obligatorio en Dos Pasos
 
-- `-Repo`: Especifica el repositorio `<owner/name>` en GitHub (por defecto toma el remoto origin).
-- `-Checks`: Nombres de los status checks requeridos (ej. `governance-check`, `backend`, `frontend`).
+1. **Simulacion y revision previa (`-DryRun`):**
+   Ejecutar primero en modo de simulacion y mostrar el resultado exacto al usuario:
+   ```powershell
+   pwsh RAIZ_PLUGIN/scripts/protect-main-branch.ps1 [-Repo <owner/name>] -Checks <nombres de los jobs de CI separados por comas> -DryRun
+   ```
+   - `RAIZ_PLUGIN`: Raiz del plugin (`../../../` relativo a este archivo).
+   - `-Repo`: Repositorio `<owner/name>` en GitHub (opcional, por defecto toma el remoto origin).
+   - `-Checks`: Nombres exactos de los status checks requeridos, que corresponden obligatoriamente a los nombres reales de los jobs del `ci.yml` adoptado (valor de la propiedad `name:` de cada job en el workflow).
+   - `-DryRun`: Imprime la configuracion que se enviara a GitHub sin alterar el repositorio.
+
+2. **Aplicacion definitiva (Requiere aprobacion explicita):**
+   Unicamente tras la aprobacion explicita del usuario frente a la salida del simulador, ejecutar sin la bandera `-DryRun`:
+   ```powershell
+   pwsh RAIZ_PLUGIN/scripts/protect-main-branch.ps1 [-Repo <owner/name>] -Checks <nombres de los jobs de CI separados por comas>
+   ```
 
 Se verifica que:
 1. Intentar `git push origin main` sea abortado inmediatamente por `.githooks/pre-push`.
