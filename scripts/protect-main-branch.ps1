@@ -1,21 +1,110 @@
-# Script de Proteccion Integral de la Rama Principal (Local Hooks + GitHub Rulesets API)
-# Uso: .\scripts\protect-main-branch.ps1
+<#
+.SYNOPSIS
+    Script de proteccion de la rama principal (Local Git Hooks + GitHub Rulesets API).
+
+.DESCRIPTION
+    Configura la proteccion integral de la rama principal:
+    1. Instala los hooks locales de Git en .githooks mediante 'git config core.hooksPath .githooks'.
+    2. Crea o actualiza via GitHub CLI (gh) un Ruleset en la rama por defecto (~DEFAULT_BRANCH)
+       que bloquea borrado, non-fast-forward, fuerza historial lineal, exige Pull Request
+       y los status checks indicados.
+
+.PARAMETER Repo
+    Identificador del repositorio en GitHub (<propietario>/<nombre>).
+    Por defecto se deduce de la URL del remoto 'origin'.
+
+.PARAMETER Checks
+    Cadena separada por comas con los nombres de los status checks requeridos (ej. "governance-check" o "CI").
+    Por defecto es "governance-check".
+
+.EXAMPLE
+    .\scripts\protect-main-branch.ps1
+    Aplica proteccion al repositorio remoto origin con el check "governance-check".
+
+.EXAMPLE
+    .\scripts\protect-main-branch.ps1 -Repo "org/proyecto" -Checks "CI,convenciones"
+    Aplica proteccion al repositorio especificado con checks requeridos personalizados.
+#>
+param(
+    [string]$Repo = "",
+    [string]$Checks = "governance-check"
+)
 
 $ErrorActionPreference = "Stop"
 $RepoRoot = Split-Path -Parent $PSScriptRoot
-$RepoSlug = "EdwinDragusin/agent-core-skills"
+
+# 1. Deducir repositorio si no fue proporcionado
+if (-not $Repo) {
+    try {
+        $originUrl = git -C $RepoRoot remote get-url origin 2>$null
+        if ($originUrl -match 'github\.com[:/](?<slug>[^/]+/[^/\.]+)(\.git)?$') {
+            $Repo = $Matches['slug']
+        }
+    } catch {}
+}
+
+if (-not $Repo) {
+    throw "No se pudo deducir el repositorio remoto. Proporciona el parametro -Repo <owner/name>."
+}
+
 $RulesetName = "main-pr-only-governance"
 
-Write-Host "1. Instalando Git Hooks locales (.githooks -> .git/hooks) en el repositorio..."
-Copy-Item -Path "$RepoRoot\.githooks\*" -Destination "$RepoRoot\.git\hooks\" -Force
-Write-Host "   [OK] Hooks locales activos en todas las ramas: pre-commit, commit-msg y pre-push bloquean commits/pushes directos a main."
+# 2. Configurar Git Hooks locales mediante core.hooksPath
+Write-Host "1. Configurando Git Hooks locales via core.hooksPath en .githooks..."
+git -C $RepoRoot config core.hooksPath .githooks
+Write-Host "   [OK] Hooks locales activos con core.hooksPath=.githooks"
 
+# 3. Verificar GitHub CLI
 Write-Host "`n2. Verificando autenticacion en GitHub CLI (gh)..."
 gh auth status | Out-Null
 Write-Host "   [OK] Sesion activa en GitHub CLI."
 
-Write-Host "`n3. Configurando GitHub Repository Ruleset ('$RulesetName') en $RepoSlug..."
-$existingId = (gh api "repos/$RepoSlug/rulesets" | ConvertFrom-Json) | Where-Object { $_.name -eq $RulesetName } | Select-Object -ExpandProperty id -First 1
+# 4. Formatear lista de required_status_checks
+$checkList = @()
+if ($Checks) {
+    $rawChecks = $Checks -split ',' | ForEach-Object { $_.Trim() } | Where-Object { $_ }
+    foreach ($c in $rawChecks) {
+        $checkList += @{ context = $c }
+    }
+}
+
+# 5. Configurar Ruleset en GitHub
+Write-Host "`n3. Configurando GitHub Repository Ruleset ('$RulesetName') en $Repo..."
+$existingId = $null
+try {
+    $rulesets = gh api "repos/$Repo/rulesets" | ConvertFrom-Json
+    $existing = $rulesets | Where-Object { $_.name -eq $RulesetName } | Select-Object -First 1
+    if ($existing) { $existingId = $existing.id }
+} catch {
+    Write-Warning "No se pudo consultar rulesets existentes o no existen permisos."
+}
+
+$rulesArray = @(
+    @{ type = "deletion" },
+    @{ type = "non_fast_forward" },
+    @{ type = "required_linear_history" },
+    @{
+        type = "pull_request"
+        parameters = @{
+            dismiss_stale_reviews_on_push = $true
+            require_code_owner_review = $false
+            require_last_push_approval = $false
+            required_approving_review_count = 0
+            required_review_thread_resolution = $true
+        }
+    }
+)
+
+if ($checkList.Count -gt 0) {
+    $rulesArray += @{
+        type = "required_status_checks"
+        parameters = @{
+            strict_required_status_checks_policy = $true
+            do_not_enforce_on_create = $false
+            required_status_checks = $checkList
+        }
+    }
+}
 
 $rulesetBody = @{
     name = $RulesetName
@@ -28,39 +117,15 @@ $rulesetBody = @{
             exclude = @()
         }
     }
-    rules = @(
-        @{ type = "deletion" },
-        @{ type = "non_fast_forward" },
-        @{ type = "required_linear_history" },
-        @{
-            type = "pull_request"
-            parameters = @{
-                dismiss_stale_reviews_on_push = $true
-                require_code_owner_review = $false
-                require_last_push_approval = $false
-                required_approving_review_count = 0
-                required_review_thread_resolution = $true
-            }
-        },
-        @{
-            type = "required_status_checks"
-            parameters = @{
-                strict_required_status_checks_policy = $true
-                do_not_enforce_on_create = $false
-                required_status_checks = @(
-                    @{ context = "governance-check" }
-                )
-            }
-        }
-    )
+    rules = $rulesArray
 } | ConvertTo-Json -Depth 10
 
 if ($existingId) {
-    $rulesetBody | gh api -X PUT "repos/$RepoSlug/rulesets/$existingId" --input - | Out-Null
+    $rulesetBody | gh api -X PUT "repos/$Repo/rulesets/$existingId" --input - | Out-Null
     Write-Host "   [OK] Ruleset existente (ID: $existingId) actualizado exitosamente."
 } else {
-    $created = $rulesetBody | gh api -X POST "repos/$RepoSlug/rulesets" --input - | ConvertFrom-Json
+    $created = $rulesetBody | gh api -X POST "repos/$Repo/rulesets" --input - | ConvertFrom-Json
     Write-Host "   [OK] Nuevo Ruleset creado exitosamente (ID: $($created.id))."
 }
 
-Write-Host "`nProteccion verificada: Nadie (incluyendo administradores) puede hacer push directo a 'main'. Todo cambio requiere Pull Request y check 'governance-check' en verde."
+Write-Host "`nProteccion verificada: Todo cambio a la rama principal en $Repo requiere Pull Request y status checks en verde."
