@@ -1,5 +1,5 @@
 import { assert, assertEquals } from "@std/assert";
-import { estandarConfig } from "../../../estandar.config.ts";
+import { estandarConfig, resolverRutaBack } from "../../../estandar.config.ts";
 
 export interface ViolacionEntidad {
   archivo: string;
@@ -168,7 +168,7 @@ Deno.test("Arquitectura - Autoverificacion sintetica de herencia de Entidad y Ag
 });
 
 Deno.test("Arquitectura - Toda entidad o sub-entidad en src/dominio debe extender Entidad o AgregadoRaiz", () => {
-  const archivosDominio = obtenerArchivosTypeScript("src/dominio");
+  const archivosDominio = obtenerArchivosTypeScript(resolverRutaBack("src/dominio"));
   assert(
     archivosDominio.length > 0,
     "Guarda anti-vacuidad: no se encontraron archivos en 'src/dominio'. Verifique la configuracion en estandar.config.ts",

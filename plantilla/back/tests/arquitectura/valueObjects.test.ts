@@ -1,5 +1,5 @@
 import { assert, assertEquals } from "@std/assert";
-import { estandarConfig } from "../../../estandar.config.ts";
+import { estandarConfig, resolverRutaBack } from "../../../estandar.config.ts";
 
 export interface ViolacionValueObject {
   archivo: string;
@@ -152,7 +152,7 @@ Deno.test("Arquitectura - Autoverificacion sintetica de Value Objects (inmutabil
 });
 
 Deno.test("Arquitectura - Cada Value Object en dominio debe extender ValueObject o usar Object.freeze y exponer crear estatico", () => {
-  const archivosDominio = obtenerArchivosTypeScript("src/dominio");
+  const archivosDominio = obtenerArchivosTypeScript(resolverRutaBack("src/dominio"));
   assert(
     archivosDominio.length > 0,
     "Guarda anti-vacuidad: no se encontraron archivos en 'src/dominio'. Verifique la configuracion en estandar.config.ts",

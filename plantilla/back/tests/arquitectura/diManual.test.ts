@@ -1,5 +1,5 @@
 import { assert, assertEquals } from "@std/assert";
-import { estandarConfig } from "../../../estandar.config.ts";
+import { estandarConfig, resolverRutaBack } from "../../../estandar.config.ts";
 
 export interface ViolacionDIManual {
   archivo: string;
@@ -169,7 +169,7 @@ Deno.test("Arquitectura - Autoverificacion sintetica de DI manual de adaptadores
 });
 
 Deno.test("Arquitectura - Instanciacion de adaptadores de infraestructura solo en crearApp.ts o main.ts", () => {
-  const archivosInfra = obtenerArchivosTypeScript("src/infraestructura");
+  const archivosInfra = obtenerArchivosTypeScript(resolverRutaBack("src/infraestructura"));
   const clasesInfraestructura = new Set<string>();
 
   // Recopilar todas las clases exportadas de infraestructura
@@ -182,7 +182,7 @@ Deno.test("Arquitectura - Instanciacion de adaptadores de infraestructura solo e
     }
   }
 
-  const archivosSrc = obtenerArchivosTypeScript("src");
+  const archivosSrc = obtenerArchivosTypeScript(resolverRutaBack("src"));
   assert(
     archivosSrc.length > 0,
     "Guarda anti-vacuidad: no se encontraron archivos en 'src'. Verifique la configuracion en estandar.config.ts",

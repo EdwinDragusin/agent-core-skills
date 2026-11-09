@@ -9,6 +9,7 @@
  */
 
 import * as path from "jsr:@std/path@^1.0.0";
+import { walk } from "jsr:@std/fs@^1.0.0";
 
 export interface TransformacionDeclarada {
   archivo: string;
@@ -47,13 +48,23 @@ export interface ArchivoEstandar {
 
 export const TERMINOS_DOMINIO_PROHIBIDOS = [
   "aspirante",
+  "aspirantes",
   "gestion",
   "examen_app",
   "curp",
   "hidalgo",
   "gubernamental",
+  "gubernamentales",
   "postulacion",
+  "postulaciones",
   "vacante",
+  "vacantes",
+  "examen",
+  "examenes",
+  "reactivo",
+  "reactivos",
+  "calificacion",
+  "calificaciones",
 ] as const;
 
 export const ALIAS_DOMINIO_PROHIBIDO = "@examen";
@@ -77,6 +88,41 @@ export const PALABRAS_EXENTAS_GENERICAS = new Set([
   "gestionadas",
   "congestion",
 ]);
+
+/**
+ * Detecta uso de 'enlace' como actor o rol de negocio pericial (a diferencia
+ * de hipervinculos de documentacion o enlaces simbolicos del sistema de archivos).
+ */
+export function detectarEnlaceComoActor(linea: string): string[] {
+  const hallazgos: string[] = [];
+
+  // 1. Contexto explicito de actor o rol con enlace
+  const regexActor =
+    /\b(actor(?:es)?|roles?|participantes?|perfil(?:es)?)\b[^\n\r]*\benlaces?\b|\benlaces?\b[^\n\r]*\b(actor(?:es)?|roles?|participantes?|perfil(?:es)?)\b/gi;
+  for (const m of linea.matchAll(regexActor)) {
+    hallazgos.push(`actor enlace en: '${m[0]}'`);
+  }
+
+  // 2. Ejemplos de actores en prompts o comentarios: ej. Enlace, Operador
+  const regexEjemplo = /\bej\.[^)\n\r]*\benlaces?\b/gi;
+  for (const m of linea.matchAll(regexEjemplo)) {
+    hallazgos.push(`ejemplo de enlace como actor en: '${m[0]}'`);
+  }
+
+  // 3. Tags de Obsidian o identificadores de notas de actor
+  const regexTag = /#(?:actor|rol)\/enlace\b|\[\[enlace\]\]|\benlace\.md\b/gi;
+  for (const m of linea.matchAll(regexTag)) {
+    hallazgos.push(`referencia a actor enlace en: '${m[0]}'`);
+  }
+
+  // 4. Definicion de rol en listas: - **Enlace**: o - **Enlaces**:
+  const regexListaRol = /^\s*[-*]\s+\*\*enlaces?\*\*\s*:/gi;
+  for (const m of linea.matchAll(regexListaRol)) {
+    hallazgos.push(`definicion de rol enlace en: '${m[0]}'`);
+  }
+
+  return hallazgos;
+}
 
 function extraerPalabraCircundante(
   linea: string,
@@ -124,9 +170,15 @@ export function detectarTerminosDominio(texto: string): string[] {
       hallazgos.push(`L${i + 1}: alias '${m[0]}' en '${l.trim()}'`);
     }
 
-    // Chequeo por subcadena de terminos prohibidos
+    // Chequeo de enlace como actor
+    const hallazgosEnlace = detectarEnlaceComoActor(l);
+    for (const h of hallazgosEnlace) {
+      hallazgos.push(`L${i + 1}: ${h} en '${l.trim()}'`);
+    }
+
+    // Chequeo por palabra de terminos prohibidos
     for (const termino of TERMINOS_DOMINIO_PROHIBIDOS) {
-      const regexTerm = new RegExp(termino, "gi");
+      const regexTerm = new RegExp(`\\b${termino}\\b`, "gi");
       const matchesTerm = Array.from(l.matchAll(regexTerm));
       for (const m of matchesTerm) {
         if (m.index === undefined) continue;
@@ -380,10 +432,10 @@ export const TRANSFORMACIONES_DECLARADAS: TransformacionDeclarada[] = [
   {
     archivo: "back/tests/arquitectura/entidades.test.ts",
     marcadorOPlaceholder: "Item, Pedido",
-    valorOriginal: "Seccion de examen, Examen",
+    valorOriginal: "Seccion de evaluacion, Agregado raiz original",
     valorSustituto: "Item de pedido, Pedido",
     descripcion:
-      "Sustituye fixtures de dominio de examen por entidades genericas de pedidos.",
+      "Sustituye fixtures de dominio de referencia por entidades genericas de pedidos.",
   },
   {
     archivo: "back/tests/arquitectura/logger.test.ts",
@@ -411,7 +463,8 @@ export const TRANSFORMACIONES_DECLARADAS: TransformacionDeclarada[] = [
   {
     archivo: "docs/_plantillas/PLANTILLA-CU.md",
     marcadorOPlaceholder: "usuario / registrar-usuario / Facturacion",
-    valorOriginal: "ejemplo de caso de uso de secciones y examen",
+    valorOriginal:
+      "ejemplo de caso de uso de secciones y entidad de referencia",
     valorSustituto: "CU-001-registrar-usuario.md / Facturacion",
     descripcion:
       "Sustituye ejemplos de caso de uso y modulo por conceptos genericos.",
@@ -419,7 +472,7 @@ export const TRANSFORMACIONES_DECLARADAS: TransformacionDeclarada[] = [
   {
     archivo: "docs/_plantillas/PLANTILLA-DS-CU.md",
     marcadorOPlaceholder: "registrar-usuario / Facturacion",
-    valorOriginal: "ejemplo de diagrama de secciones y examen",
+    valorOriginal: "ejemplo de diagrama de secciones y entidad de referencia",
     valorSustituto: "DS-CU-001-registrar-usuario.md / Facturacion",
     descripcion:
       "Sustituye ejemplos de diagrama de secuencia y modulo por conceptos genericos.",
@@ -429,18 +482,18 @@ export const TRANSFORMACIONES_DECLARADAS: TransformacionDeclarada[] = [
     marcadorOPlaceholder:
       "Autenticacion, Facturacion, Notificaciones / proceso-base",
     valorOriginal:
-      "modulos de evaluacion y candidatos / configuracion-de-examenes",
+      "modulos de evaluacion y candidatos / configuracion-de-procesos",
     valorSustituto: "Autenticacion, Facturacion, Notificaciones / proceso-base",
     descripcion:
       "Sustituye modulos y rutas de ejemplo de proceso de negocio por modulos genericos.",
   },
   {
     archivo: "back/Dockerfile",
-    marcadorOPlaceholder: "N/A (cabecera)",
-    valorOriginal: "titulo institucional del gobierno",
-    valorSustituto: "Backend API REST y Background Worker",
+    marcadorOPlaceholder: "CMD / COPY",
+    valorOriginal: "rutas de scripts y main.ts de referencia",
+    valorSustituto: "parametrizable segun proyecto destino",
     descripcion:
-      "Sanitiza cabecera del Dockerfile oficial manteniendo runtime util.",
+      "Requiere adaptar punto de entrada en CMD y directorios a copiar segun topologia real.",
   },
   {
     archivo: ".github/pull_request_template.md",
@@ -586,6 +639,7 @@ export function transformarContenido(
         /features\/examen-runner\/pages\/PaginaExamen\.tsx/g,
         "features/runner/pages/PaginaDetalle.tsx",
       );
+      c = c.replace(/estilo Examen/g, "estilo monorepo");
       break;
 
     case "front/tests/higiene/entorno.test.ts":
@@ -666,6 +720,11 @@ export function transformarContenido(
     case "docs/_plantillas/PLANTILLA-Actor.md":
       c = c.replace(/ej\. aspirante\.md/g, "ej. usuario.md");
       c = c.replace(/ej\. Aspirante/g, "ej. Usuario");
+      c = c.replace(
+        /ej\. Aplicaci[o\u00f3]n y Calificaci[o\u00f3]n/g,
+        "ej. Facturacion",
+      );
+      c = c.replace(/Persona Candidata/g, "Persona Usuaria");
       break;
 
     case "docs/_plantillas/PLANTILLA-CU.md":
@@ -1103,9 +1162,9 @@ export const ARCHIVOS_ESTANDAR: ArchivoEstandar[] = [
     destino: "back/Dockerfile",
     categoria: "config",
     regla: "Runtime estandar Deno 2.x en backend (back/AGENTS.md)",
-    requiereAdaptacion: false,
+    requiereAdaptacion: true,
     guiaAdaptacion:
-      "Dockerfile oficial Deno 2.9.7 Alpine para backend con pre-chequeo estricto.",
+      "Ajustar punto de entrada en CMD (ej. src/interfaz/http/main.ts) y directorios a copiar segun la estructura del proyecto destino.",
     tipoTransformacion: "personalizada",
   },
   {
@@ -1233,12 +1292,12 @@ export function generarManifiestoMd(
     "# MANIFIESTO DE LA PLANTILLA ESTANDAR",
     "",
     "Este catalogo registra cada mecanismo exportado desde el repositorio de referencia",
-    "Examen (commit `3aad52c3`, PR #19) hacia el plugin `agent-core-skills` (v3).",
+    "institucional (commit `3aad52c3`, PR #19) hacia el plugin `agent-core-skills` (v3).",
     "",
     "**IMPORTANTE**: Esta carpeta `plantilla/` es un espejo generado de forma determinista.",
     "No debe editarse manualmente. Para regenerar o actualizar, ejecutar:",
     "```bash",
-    "deno run -A scripts/extraer-plantilla.ts <ruta-repositorio-examen>",
+    "deno run -A scripts/extraer-plantilla.ts <ruta-repositorio-origen>",
     "```",
     "",
     "---",
@@ -1295,7 +1354,7 @@ export function generarManifiestoMd(
     "",
     "## Registro de Transformaciones Declaradas",
     "",
-    "| Archivo | Marcador / Placeholder | Valor Original en Examen | Sustituto en Plantilla | Proposito |",
+    "| Archivo | Marcador / Placeholder | Valor Original en Referencia | Sustituto en Plantilla | Proposito |",
     "|---|---|---|---|---|",
   );
 
@@ -1457,13 +1516,81 @@ export async function validarSintaxisPowerShell(
   }
 }
 
+/**
+ * Verifica recursivamente todos los archivos de un directorio buscando
+ * terminos de dominio prohibidos o marcas [PROYECTO].
+ * Retorna 0 si no hay hallazgos, 1 si hay violaciones.
+ */
+export async function verificarPlantillaCli(
+  dirPlantilla: string = "plantilla",
+): Promise<number> {
+  const rutaCompleta = path.resolve(dirPlantilla);
+  try {
+    const stat = await Deno.stat(rutaCompleta);
+    if (!stat.isDirectory) {
+      console.error(`[ERROR] La ruta no es un directorio: ${rutaCompleta}`);
+      return 1;
+    }
+  } catch (_e) {
+    console.error(`[ERROR] No se pudo acceder a: ${rutaCompleta}`);
+    return 1;
+  }
+
+  const errores: string[] = [];
+  let totalArchivos = 0;
+
+  for await (const entry of walk(rutaCompleta, { includeDirs: false })) {
+    totalArchivos++;
+    const relPath = path.relative(rutaCompleta, entry.path).replaceAll(
+      "\\",
+      "/",
+    );
+    const contenido = await Deno.readTextFile(entry.path);
+
+    // 1. Validar marcas [PROYECTO]
+    if (contenido.includes("[PROYECTO]")) {
+      errores.push(`- '${relPath}' contiene marcas [PROYECTO] no filtradas.`);
+    }
+
+    // 2. Validar terminos de dominio prohibidos
+    const hallazgos = detectarTerminosDominio(contenido);
+    if (hallazgos.length > 0) {
+      errores.push(
+        `- '${relPath}' contiene terminos de dominio prohibidos:\n    ${
+          hallazgos.join("\n    ")
+        }`,
+      );
+    }
+  }
+
+  if (errores.length > 0) {
+    console.error(
+      `[ERROR] Se detectaron ${errores.length} infracciones en ${dirPlantilla}:\n${
+        errores.join("\n")
+      }`,
+    );
+    return 1;
+  }
+
+  console.log(
+    `[OK] ${dirPlantilla} no contiene terminos de dominio ni marcas [PROYECTO]. (${totalArchivos} archivos verificados)`,
+  );
+  return 0;
+}
+
 if (import.meta.main) {
   const args = Deno.args;
   if (args.length === 0) {
     console.error(
-      "Uso: deno run -A scripts/extraer-plantilla.ts <ruta-examen> [<ruta-destino>]",
+      "Uso: deno run -A scripts/extraer-plantilla.ts <ruta-examen> [<ruta-destino>]\n     deno run -A scripts/extraer-plantilla.ts --verificar [<ruta-plantilla>]",
     );
     Deno.exit(1);
+  }
+
+  if (args[0] === "--verificar" || args[0] === "--check") {
+    const dirPlantilla = args[1] || "plantilla";
+    const codigo = await verificarPlantillaCli(dirPlantilla);
+    Deno.exit(codigo);
   }
 
   const rutaExamen = args[0];

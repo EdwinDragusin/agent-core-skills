@@ -5,7 +5,7 @@ const partes = tp.file.title.split("-"); // ["DS","CU","011","slug",...]
 const id = "DS-CU-" + partes[2];
 const cuId = "CU-" + partes[2];
 const tituloLegible = tp.file.title.split("-").slice(3).join(" ").replace(/\b\w/g, c => c.toUpperCase());
-const modulo = await tp.system.prompt("Modulo (ej. Creacion de Examen)");
+const modulo = await tp.system.prompt("Modulo (ej. Registro de solicitudes)");
 const moduloTag = modulo.toLowerCase().normalize("NFD").replace(/[-]/g, "").replace(/\s+/g, "-");
 const actor = await tp.system.prompt("Actor principal");
 -%>

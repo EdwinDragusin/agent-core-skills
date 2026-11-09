@@ -1,12 +1,12 @@
 <%*
 // Requiere archivo ya nombrado como PB-00N-slug-en-minusculas.md
-// (mismo patron que arquitectura/procesos/PB-001-proceso-base.md)
+// (ej. arquitectura/procesos/PB-001-registro-de-solicitudes.md)
 const partes = tp.file.title.split("-");
 const id = partes[0] + "-" + partes[1];
 const tituloLegible = tp.file.title.split("-").slice(2).join(" ").replace(/\b\w/g, c => c.toUpperCase());
-const actorPrincipal = await tp.system.prompt("Actor principal (ej. Administrador, Operador, Usuario)");
-const actoresParticipantes = await tp.system.prompt("Actores participantes (ej. Enlace, Administrador; o dejar vacio)", "");
-const modulo = await tp.system.prompt("Modulo arquitectonico (ej. Autenticacion, Facturacion, Notificaciones)");
+const actorPrincipal = await tp.system.prompt("Actor principal (ej. Administrador, Operador, Ciudadano)");
+const actoresParticipantes = await tp.system.prompt("Actores participantes (ej. Operador, Administrador; o dejar vacio)", "");
+const modulo = await tp.system.prompt("Modulo arquitectonico (ej. Registro de solicitudes, Consulta de expedientes)");
 const moduloTag = modulo.toLowerCase().normalize("NFD").replace(/[-]/g, "").replace(/\s+/g, "-");
 const actorTag = actorPrincipal.toLowerCase().normalize("NFD").replace(/[-]/g, "").replace(/\s+/g, "-");
 -%>

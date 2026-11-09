@@ -1,12 +1,12 @@
 # MANIFIESTO DE LA PLANTILLA ESTANDAR
 
 Este catalogo registra cada mecanismo exportado desde el repositorio de referencia
-Examen (commit `3aad52c3`, PR #19) hacia el plugin `agent-core-skills` (v3).
+institucional (commit `3aad52c3`, PR #19) hacia el plugin `agent-core-skills` (v3).
 
 **IMPORTANTE**: Esta carpeta `plantilla/` es un espejo generado de forma determinista.
 No debe editarse manualmente. Para regenerar o actualizar, ejecutar:
 ```bash
-deno run -A scripts/extraer-plantilla.ts <ruta-repositorio-examen>
+deno run -A scripts/extraer-plantilla.ts <ruta-repositorio-origen>
 ```
 
 ---
@@ -72,7 +72,7 @@ sustituir los siguientes marcadores de acuerdo con su arquitectura especifica:
 | `back/AGENTS.md` | manifiestos | Manifiesto operacional backend (back/AGENTS.md) | **SI** | `{{NOMBRE_PROYECTO}}` | Sustituir {{NOMBRE_PROYECTO}} por el nombre de la API en el encabezado. |
 | `front/AGENTS.md` | manifiestos | Manifiesto operacional frontend (front/AGENTS.md) | **SI** | `{{NOMBRE_PROYECTO}}`, `{{APP_1}}`, `{{APP_2}}` | Sustituir marcadores {{NOMBRE_PROYECTO}}, {{APP_1}} y {{APP_2}} por los nombres de las aplicaciones front. |
 | `docs/AGENTS.md` | manifiestos | Manifiesto operacional de documentacion (docs/AGENTS.md) | **SI** | `{{SLUG_PROYECTO}}` | Sustituir {{SLUG_PROYECTO}} por el nombre del vault de documentacion. |
-| `back/Dockerfile` | config | Runtime estandar Deno 2.x en backend (back/AGENTS.md) | No | Ninguno | Dockerfile oficial Deno 2.9.7 Alpine para backend con pre-chequeo estricto. |
+| `back/Dockerfile` | config | Runtime estandar Deno 2.x en backend (back/AGENTS.md) | **SI** | Ninguno | Ajustar punto de entrada en CMD (ej. src/interfaz/http/main.ts) y directorios a copiar segun la estructura del proyecto destino. |
 | `deno.json` | config | Comandos deterministas de monorepo (.agents/AGENTS.md) | No | Ninguno | Plantilla con tareas estandar ci, check, fmt, lint, test, coverage, hooks. |
 | `back/deno.json` | config | Configuracion estricta y tareas de backend (back/AGENTS.md) | **SI** | Ninguno | Ajustar umbrales de cobertura (coverage.thresholds) segun linea base del proyecto. |
 | `front/deno.json` | config | Configuracion estricta y tareas de frontend (front/AGENTS.md) | **SI** | `{{APP_1}}`, `{{APP_2}}` | Sustituir marcadores {{APP_1}} y {{APP_2}} en workspace y tareas de portales. |
@@ -90,7 +90,7 @@ sustituir los siguientes marcadores de acuerdo con su arquitectura especifica:
 
 ## Registro de Transformaciones Declaradas
 
-| Archivo | Marcador / Placeholder | Valor Original en Examen | Sustituto en Plantilla | Proposito |
+| Archivo | Marcador / Placeholder | Valor Original en Referencia | Sustituto en Plantilla | Proposito |
 |---|---|---|---|---|
 | `estandar.config.ts` | `{{APP_1}}, {{APP_2}}` | `nombres y rutas de aplicaciones front de referencia` | `{{APP_1}}, {{APP_2}}` | Parametriza nombres y rutas fuente de aplicaciones frontend en la configuracion centralizada. |
 | `.agents/AGENTS.md` | `{{NOMBRE_PROYECTO}}, {{DESCRIPCION_PROYECTO}}` | `preambulo de aplicacion REST original y marco institucional de referencia` | `{{NOMBRE_PROYECTO}} / {{DESCRIPCION_PROYECTO}}` | Parametriza nombre del proyecto y sustituye preambulo especifico por descripcion configurable. |
@@ -100,14 +100,14 @@ sustituir los siguientes marcadores de acuerdo con su arquitectura especifica:
 | `front/tests/arquitectura/front-dependencias.test.ts` | `{{APP_1}}, {{APP_2}}, @{{PROYECTO}}, moduloA, LayoutPrincipal` | `portal publico, portal administrativo, alias de paquete monorepo, modulos especificos, layout especifico` | `{{APP_1}}, {{APP_2}}, @{{PROYECTO}}, moduloA, LayoutPrincipal` | Parametriza aplicaciones front, alias de monorepo y generaliza entidades/layouts en tests FSD. |
 | `front/tests/higiene/entorno.test.ts` | `{{APP_1}}, {{APP_2}}` | `directorios de portales especificos en mensaje de error` | `({{APP_1}}/src y {{APP_2}}/src)` | Generaliza mensaje de error de asercion de cantidad minima de portales. |
 | `front/tests/higiene/storage.test.ts` | `{{APP_EFIMERA}}, rutaAppEfimeraSrc` | `nombre de aplicacion efimera y variable de recoleccion original` | `{{APP_EFIMERA}} / rutaAppEfimeraSrc` | Parametriza portal y recolector de codigo con requerimiento de sesion efimera en sessionStorage. |
-| `back/tests/arquitectura/entidades.test.ts` | `Item, Pedido` | `Seccion de examen, Examen` | `Item de pedido, Pedido` | Sustituye fixtures de dominio de examen por entidades genericas de pedidos. |
+| `back/tests/arquitectura/entidades.test.ts` | `Item, Pedido` | `Seccion de evaluacion, Agregado raiz original` | `Item de pedido, Pedido` | Sustituye fixtures de dominio de referencia por entidades genericas de pedidos. |
 | `back/tests/arquitectura/logger.test.ts` | `identificador` | `campo tributario en comentario JSDoc` | `identificador.valor` | Sustituye ejemplo en comentario JSDoc por identificador agnostico. |
 | `scripts/ci/verificar-migraciones.test.ts` | `usuario` | `ruta de entidad de candidato en fixture` | `back/src/dominio/usuario/Usuario.ts` | Sustituye ruta ficticia de fixture de migraciones por entidad generica. |
 | `docs/_plantillas/PLANTILLA-Actor.md` | `usuario` | `ejemplo de actor en plantilla` | `usuario.md / Usuario` | Sustituye ejemplo de actor de dominio por actor generico. |
-| `docs/_plantillas/PLANTILLA-CU.md` | `usuario / registrar-usuario / Facturacion` | `ejemplo de caso de uso de secciones y examen` | `CU-001-registrar-usuario.md / Facturacion` | Sustituye ejemplos de caso de uso y modulo por conceptos genericos. |
-| `docs/_plantillas/PLANTILLA-DS-CU.md` | `registrar-usuario / Facturacion` | `ejemplo de diagrama de secciones y examen` | `DS-CU-001-registrar-usuario.md / Facturacion` | Sustituye ejemplos de diagrama de secuencia y modulo por conceptos genericos. |
-| `docs/_plantillas/PLANTILLA-PB.md` | `Autenticacion, Facturacion, Notificaciones / proceso-base` | `modulos de evaluacion y candidatos / configuracion-de-examenes` | `Autenticacion, Facturacion, Notificaciones / proceso-base` | Sustituye modulos y rutas de ejemplo de proceso de negocio por modulos genericos. |
-| `back/Dockerfile` | `N/A (cabecera)` | `titulo institucional del gobierno` | `Backend API REST y Background Worker` | Sanitiza cabecera del Dockerfile oficial manteniendo runtime util. |
+| `docs/_plantillas/PLANTILLA-CU.md` | `usuario / registrar-usuario / Facturacion` | `ejemplo de caso de uso de secciones y entidad de referencia` | `CU-001-registrar-usuario.md / Facturacion` | Sustituye ejemplos de caso de uso y modulo por conceptos genericos. |
+| `docs/_plantillas/PLANTILLA-DS-CU.md` | `registrar-usuario / Facturacion` | `ejemplo de diagrama de secciones y entidad de referencia` | `DS-CU-001-registrar-usuario.md / Facturacion` | Sustituye ejemplos de diagrama de secuencia y modulo por conceptos genericos. |
+| `docs/_plantillas/PLANTILLA-PB.md` | `Autenticacion, Facturacion, Notificaciones / proceso-base` | `modulos de evaluacion y candidatos / configuracion-de-procesos` | `Autenticacion, Facturacion, Notificaciones / proceso-base` | Sustituye modulos y rutas de ejemplo de proceso de negocio por modulos genericos. |
+| `back/Dockerfile` | `CMD / COPY` | `rutas de scripts y main.ts de referencia` | `parametrizable segun proyecto destino` | Requiere adaptar punto de entrada en CMD y directorios a copiar segun topologia real. |
 | `.github/pull_request_template.md` | `N/A (reglas)` | `reglas de dictamen y prueba pericial` | `reglas operativas estandar` | Elimina directivas especificas de dictamen y evaluacion del template de PR. |
 | `deno.json` | `N/A (tareas)` | `tareas docker y semillas de base de datos` | `tareas estandar de calidad y CI` | Filtra tareas de base de datos especificas preservando pipeline CI estandar. |
 | `back/deno.json` | `N/A (tareas)` | `tareas de reset, rol de app y semillas` | `tareas estandar de compilacion, migraciones y test` | Filtra tareas y scripts de negocio manteniendo suites de arquitectura y CI. |

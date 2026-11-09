@@ -26,7 +26,7 @@ aliases:
 ---
 
 ## Criterios de Aceptacion y Restricciones
--
+- Enunciado normativo de la regla de negocio. ^<% id.toLowerCase() %>-01
 
 ---
 

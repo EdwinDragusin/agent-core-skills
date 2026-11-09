@@ -10,7 +10,7 @@ export interface Violacion {
   destino: string;
 }
 
-type CapaApp = "app" | "components" | "features" | "entities" | "api" | "shared" | "otra";
+type CapaApp = string;
 
 interface UbicacionCapa {
   app: string;
@@ -168,32 +168,30 @@ function ubicarArchivo(
 
   const restoSinSrc = resto.startsWith("src/") ? resto.slice(4) : resto;
 
-  if (restoSinSrc === "components" || restoSinSrc.startsWith("components/")) {
-    return { app, capa: "components" };
-  }
+  // Capas con division por slices/segmentos en FSD
+  const capasConSegmento = new Set([
+    "pages",
+    "widgets",
+    "features",
+    "entities",
+    "processes",
+  ]);
 
-  if (restoSinSrc === "api" || restoSinSrc.startsWith("api/")) {
-    return { app, capa: "api" };
-  }
-
-  const matchFeature = /^features\/([^/]+)(?:\/(.*))?$/.exec(restoSinSrc);
-  if (matchFeature) {
-    return {
-      app,
-      capa: "features",
-      segmento: matchFeature[1],
-      subruta: matchFeature[2] ?? "",
-    };
-  }
-
-  const matchEntidad = /^entities\/([^/]+)(?:\/(.*))?$/.exec(restoSinSrc);
-  if (matchEntidad) {
-    return {
-      app,
-      capa: "entities",
-      segmento: matchEntidad[1],
-      subruta: matchEntidad[2] ?? "",
-    };
+  for (const c of config.capasFSD) {
+    if (c === "app" || c === "shared") continue;
+    if (restoSinSrc === c) {
+      return { app, capa: c, subruta: "" };
+    }
+    if (restoSinSrc.startsWith(`${c}/`)) {
+      const sub = restoSinSrc.slice(c.length + 1);
+      if (capasConSegmento.has(c)) {
+        const idxSlash = sub.indexOf("/");
+        const segmento = idxSlash === -1 ? sub : sub.slice(0, idxSlash);
+        const subruta = idxSlash === -1 ? "" : sub.slice(idxSlash + 1);
+        return { app, capa: c, segmento, subruta };
+      }
+      return { app, capa: c, subruta: sub };
+    }
   }
 
   return { app, capa: "otra", subruta: resto };
@@ -230,7 +228,7 @@ export function esComponentePresentacionalTsx(
       `^(?:${patronApps})\\/src\\/entities\\/[^/]+\\/ui\\/`,
     );
     const regexAppComponents = new RegExp(
-      `^(?:${patronApps})\\/src\\/(?:components|pages)\\/`,
+      `^(?:${patronApps})\\/src\\/(?:components|pages|widgets)\\/`,
     );
 
     if (
@@ -244,7 +242,7 @@ export function esComponentePresentacionalTsx(
 
   // Soporte SPA unica en src/
   if (
-    /^(?:src\/features\/[^/]+\/(?:components|pages)\/|src\/entities\/[^/]+\/ui\/|src\/(?:components|pages)\/)/
+    /^(?:src\/features\/[^/]+\/(?:components|pages)\/|src\/entities\/[^/]+\/ui\/|src\/(?:components|pages|widgets)\/|src\/widgets\/[^/]+\/ui\/|src\/pages\/[^/]+\/ui\/)/
       .test(ruta)
   ) {
     return true;
@@ -324,55 +322,61 @@ export function clasificarImport(
       return { regla: "RN-F01", origen: rutaOrigen, destino };
     }
 
-    // CAPAS (tabla A.2 dentro de la misma SPA)
+    // CAPAS: cumplimiento estricto del modelo de jerarquia FSD segun capasFSD
     if (
       nombresApps.includes(ubicacionOrigen.app) &&
       ubicacionDestino.app === ubicacionOrigen.app
     ) {
-      switch (ubicacionOrigen.capa) {
-        case "app":
-          break;
-        case "components": {
-          const permitido = ubicacionDestino.capa === "components" ||
-            ubicacionDestino.capa === "api" ||
-            (ubicacionDestino.capa === "entities" &&
-              esEntradaPublicaEntidad(ubicacionDestino.subruta));
-          if (!permitido) {
+      const capas = config.capasFSD;
+      const idxOrigen = capas.indexOf(ubicacionOrigen.capa);
+      const idxDestino = capas.indexOf(ubicacionDestino.capa);
+
+      if (idxOrigen === -1 || idxDestino === -1) {
+        return { regla: "CAPAS", origen: rutaOrigen, destino };
+      }
+
+      // Regla FSD: una capa solo puede importar de capas posteriores en la jerarquia
+      if (idxDestino < idxOrigen) {
+        return { regla: "CAPAS", origen: rutaOrigen, destino };
+      }
+
+      // En proyectos con capa 'components' (estilo monorepo), components no puede importar de features
+      if (ubicacionOrigen.capa === "components" && ubicacionDestino.capa === "features") {
+        return { regla: "CAPAS", origen: rutaOrigen, destino };
+      }
+
+      // Mismo nivel jerarquico
+      if (idxDestino === idxOrigen) {
+        if (ubicacionOrigen.capa === "features") {
+          if (ubicacionOrigen.segmento !== ubicacionDestino.segmento) {
             return { regla: "CAPAS", origen: rutaOrigen, destino };
           }
-          break;
-        }
-        case "features": {
-          const mismaFeature = ubicacionDestino.capa === "features" &&
-            ubicacionDestino.segmento === ubicacionOrigen.segmento;
-          const entidadViaIndex = ubicacionDestino.capa === "entities" &&
+        } else if (ubicacionOrigen.capa === "entities") {
+          const mismaEntidad = ubicacionDestino.segmento === ubicacionOrigen.segmento;
+          const otraEntidadViaIndex = ubicacionDestino.segmento !== ubicacionOrigen.segmento &&
             esEntradaPublicaEntidad(ubicacionDestino.subruta);
-          const permitido = mismaFeature || entidadViaIndex || ubicacionDestino.capa === "api";
-          if (!permitido) {
+          if (!mismaEntidad && !otraEntidadViaIndex) {
             return { regla: "CAPAS", origen: rutaOrigen, destino };
           }
-          break;
-        }
-        case "entities": {
-          const mismaEntidad = ubicacionDestino.capa === "entities" &&
-            ubicacionDestino.segmento === ubicacionOrigen.segmento;
-          const otraEntidadViaIndex = ubicacionDestino.capa === "entities" &&
-            ubicacionDestino.segmento !== ubicacionOrigen.segmento &&
-            esEntradaPublicaEntidad(ubicacionDestino.subruta);
-          const permitido = mismaEntidad || otraEntidadViaIndex || ubicacionDestino.capa === "api";
-          if (!permitido) {
+        } else if (ubicacionOrigen.capa === "pages" || ubicacionOrigen.capa === "widgets") {
+          if (
+            ubicacionOrigen.segmento &&
+            ubicacionDestino.segmento &&
+            ubicacionOrigen.segmento !== ubicacionDestino.segmento
+          ) {
             return { regla: "CAPAS", origen: rutaOrigen, destino };
           }
-          break;
         }
-        case "api": {
-          if (ubicacionDestino.capa !== "api") {
-            return { regla: "CAPAS", origen: rutaOrigen, destino };
-          }
-          break;
-        }
-        default:
+      }
+
+      // Capa posterior en la jerarquia: acceso a entities debe ser via index publico
+      if (idxDestino > idxOrigen) {
+        if (
+          ubicacionDestino.capa === "entities" &&
+          !esEntradaPublicaEntidad(ubicacionDestino.subruta)
+        ) {
           return { regla: "CAPAS", origen: rutaOrigen, destino };
+        }
       }
     }
   }
@@ -831,4 +835,39 @@ Deno.test("Arquitectura Front - Soporta configuracion con una sola SPA y sin cap
     configUnicaApp,
   );
   assertEquals(vRed?.regla, "RN-F02");
+});
+
+Deno.test("Arquitectura Front - Soporta jerarquia FSD dinamica con pages y widgets en SPA unica", () => {
+  const configFsdCompleto: EstandarConfigFront = {
+    raiz: "front",
+    aplicaciones: [{ nombre: "portal", rutaSrc: "src" }],
+    capasFSD: ["app", "pages", "widgets", "features", "entities", "shared"],
+  };
+
+  // 1. Clasificacion de capas pages y widgets
+  const uPage = ubicarArchivo("src/pages/dashboard/ui/DashboardPage.tsx", configFsdCompleto);
+  assertEquals(uPage.app, "portal");
+  assertEquals(uPage.capa, "pages");
+  assertEquals(uPage.segmento, "dashboard");
+
+  const uWidget = ubicarArchivo("src/widgets/header/ui/Header.tsx", configFsdCompleto);
+  assertEquals(uWidget.app, "portal");
+  assertEquals(uWidget.capa, "widgets");
+  assertEquals(uWidget.segmento, "header");
+
+  // 2. Import valido pages -> features pasa (capa posterior en la jerarquia)
+  const vValido = clasificarImport(
+    "src/pages/dashboard/ui/DashboardPage.tsx",
+    "../../../features/catalogo/ui/Buscador.tsx",
+    configFsdCompleto,
+  );
+  assertEquals(vValido, null);
+
+  // 3. Import invalido features -> pages falla (capa anterior / superior en la jerarquia)
+  const vInvalido = clasificarImport(
+    "src/features/catalogo/ui/Buscador.tsx",
+    "../../../pages/dashboard/ui/DashboardPage.tsx",
+    configFsdCompleto,
+  );
+  assertEquals(vInvalido?.regla, "CAPAS");
 });
