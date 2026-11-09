@@ -356,15 +356,15 @@ export function filtrarBloquesPs1Proyecto(contenido: string): string {
     "",
   );
 
-  // 3. Bloques de proyecto en Seccion 4 (Sincronizacion, PB-001 e Indice de ADRs en Cap 9)
+  // 3. Bloques de proyecto en Seccion 4 (Sincronizacion y PB-001)
   c = c.replace(
     /#\s*\[PROYECTO\]\s*Sincronizacion de infraestructura.*?(?=#\s*\[ESTANDAR\]\s*Nomenclatura)/gs,
     "",
   );
 
-  // 4. Seccion 5 completa (Onboarding, Glosario, Higiene y tabla-nivel-examen-tiempos)
+  // 4. Bloque de proyecto en Seccion 5 (tabla-nivel-examen-tiempos.md)
   c = c.replace(
-    /#\s*-{5,}\r?\n#\s*5\.\s*ONBOARDING, GLOSARIO E HIGIENE.*?(?=#\s*-{5,}\r?\n#\s*6\.\s*HIGIENE GLOBAL)/gs,
+    /#\s*\[PROYECTO\]\s*tabla-nivel-examen-tiempos\.md.*?(?=#\s*-{5,}\r?\n#\s*6\.\s*HIGIENE GLOBAL)/gs,
     "",
   );
 
@@ -405,11 +405,12 @@ export function filtrarBloquesPs1Proyecto(contenido: string): string {
 export const TRANSFORMACIONES_DECLARADAS: TransformacionDeclarada[] = [
   {
     archivo: "estandar.config.ts",
-    marcadorOPlaceholder: "{{APP_1}}, {{APP_2}}",
-    valorOriginal: "nombres y rutas de aplicaciones front de referencia",
-    valorSustituto: "{{APP_1}}, {{APP_2}}",
+    marcadorOPlaceholder: "{{APP_1}}, {{APP_2}}, listasBase: {}",
+    valorOriginal:
+      "nombres y rutas de aplicaciones front, rutasAdicionales de cobertura y listasBase",
+    valorSustituto: "{{APP_1}}, {{APP_2}}, listasBase: {}",
     descripcion:
-      "Parametriza nombres y rutas fuente de aplicaciones frontend en la configuracion centralizada.",
+      "Parametriza aplicaciones frontend y rutasAdicionales de cobertura (`scripts/estandar/cobertura-config.test.ts`), y deja `listasBase` vacio (`{}`) para el trinquete (`back/tests/arquitectura/listasBase.test.ts`).",
   },
   {
     archivo: "AGENTS.md",
@@ -446,13 +447,21 @@ export const TRANSFORMACIONES_DECLARADAS: TransformacionDeclarada[] = [
       "Parametriza nombres de portales en la regla de aislamiento absoluto de la capa compartida.",
   },
   {
-    archivo: "docs/AGENTS.md",
-    marcadorOPlaceholder: "{{SLUG_PROYECTO}}, flujos de negocio",
+    archivo: "scripts/estandar/cobertura-config.test.ts",
+    marcadorOPlaceholder: "{{APP_1}}, {{APP_2}}",
     valorOriginal:
-      "identificador de vault de referencia / flujos de evaluacion originales",
-    valorSustituto: "{{SLUG_PROYECTO}}-docs / flujos de negocio",
+      "nombres y rutas de aplicaciones frontend en autoverificacion sintetica",
+    valorSustituto: "{{APP_1}}, {{APP_2}}",
     descripcion:
-      "Parametriza identificador de vault Obsidian y generaliza directivas de reglas de negocio.",
+      "Parametriza nombres y rutas de aplicaciones frontend en el test de cobertura de estandar.config.ts.",
+  },
+  {
+    archivo: "docs/AGENTS.md",
+    marcadorOPlaceholder: "{{SLUG_PROYECTO}}",
+    valorOriginal: "identificador de vault de referencia",
+    valorSustituto: "{{SLUG_PROYECTO}}-docs",
+    descripcion:
+      "Parametriza identificador de vault Obsidian en el manifiesto documental raiz.",
   },
   {
     archivo: "front/tests/arquitectura/front-dependencias.test.ts",
@@ -541,6 +550,14 @@ export const TRANSFORMACIONES_DECLARADAS: TransformacionDeclarada[] = [
       "Sustituye modulos y rutas de ejemplo de proceso de negocio por modulos genericos.",
   },
   {
+    archivo: "docs/guia/AGENTS.md",
+    marcadorOPlaceholder: "verifica: instruccion",
+    valorOriginal: "verifica: scripts/doc-linter.ps1#HistoriasDeUsuario",
+    valorSustituto: "verifica: instruccion",
+    descripcion:
+      "Ajusta etiqueta verifica de historias de usuario bimodales tras filtrar el bloque de proyecto de Seccion 2 en doc-linter.ps1.",
+  },
+  {
     archivo: "docs/guia/how-to/flujo-multiagente.md",
     marcadorOPlaceholder: "{{APP_1}}, {{APP_2}}, web/src",
     valorOriginal: "ejemplos de rutas y manifiestos de portales originales",
@@ -565,12 +582,22 @@ export const TRANSFORMACIONES_DECLARADAS: TransformacionDeclarada[] = [
       "Elimina directivas especificas de dictamen y evaluacion del template de PR.",
   },
   {
+    archivo: "scripts/doc-linter.ps1",
+    marcadorOPlaceholder: "N/A (bloques [ESTANDAR])",
+    valorOriginal:
+      "bloques de proyecto (piso CU, HU, directrices, reglas y tiempos de referencia)",
+    valorSustituto:
+      "secciones estandar (Estructura del vault, CU, ADRs, Onboarding/Glosario/TODO, Higiene, Mermaid, Manifiestos, Plantillas)",
+    descripcion:
+      "Filtra bloques especificos de proyecto preservando la verificacion de estructura (`scripts/doc-linter.ps1#Estructura`) y gobernanza bimodal estandar.",
+  },
+  {
     archivo: "deno.json",
     marcadorOPlaceholder: "N/A (tareas)",
     valorOriginal: "tareas docker y semillas de base de datos",
-    valorSustituto: "tareas estandar de calidad y CI",
+    valorSustituto: "tareas estandar de calidad y CI (--allow-read --allow-run en test:scripts)",
     descripcion:
-      "Filtra tareas de base de datos especificas preservando pipeline CI estandar.",
+      "Filtra tareas de base de datos especificas preservando pipeline CI estandar y permisos de `test:scripts` (`scripts/estandar/cobertura-config.test.ts`).",
   },
   {
     archivo: "back/deno.json",
@@ -606,6 +633,10 @@ export function transformarContenido(
         "ej. 'web/src' o 'src'",
       );
       c = c.replace(
+        /ej\.\s*\['front\/aspirante\/vite\.config\.ts',\s*'front\/gestion\/vite\.config\.ts'\]/g,
+        "ej. ['front/web/vite.config.ts', 'front/admin/vite.config.ts']",
+      );
+      c = c.replace(
         /nombre:\s*"aspirante"/g,
         'nombre: "{{APP_1}}"',
       );
@@ -621,6 +652,25 @@ export function transformarContenido(
         /rutaSrc:\s*"gestion\/src"/g,
         'rutaSrc: "{{APP_2}}/src"',
       );
+      c = c.replace(
+        /"front\/aspirante\/vite\.config\.ts"/g,
+        '"front/{{APP_1}}/vite.config.ts"',
+      );
+      c = c.replace(
+        /"front\/gestion\/vite\.config\.ts"/g,
+        '"front/{{APP_2}}/vite.config.ts"',
+      );
+      c = c.replace(
+        /listasBase:\s*\{[\s\S]*?\}(?=\s*,?\s*\n\};)/,
+        "listasBase: {}",
+      );
+      break;
+
+    case "scripts/estandar/cobertura-config.test.ts":
+      c = c.replace(/"aspirante"/g, '"{{APP_1}}"');
+      c = c.replace(/"gestion"/g, '"{{APP_2}}"');
+      c = c.replace(/aspirante\//g, "{{APP_1}}/");
+      c = c.replace(/gestion\//g, "{{APP_2}}/");
       break;
 
     case "AGENTS.md":
@@ -689,6 +739,13 @@ export function transformarContenido(
       c = c.replace(
         /flujos de postulacion y examen/g,
         "flujos de negocio",
+      );
+      break;
+
+    case "docs/guia/AGENTS.md":
+      c = c.replace(
+        /<!--\s*verifica:\s*scripts\/doc-linter\.ps1#HistoriasDeUsuario\s*-->/g,
+        "<!-- verifica: instruccion -->",
       );
       break;
 
@@ -897,7 +954,7 @@ export function transformarContenido(
         "hooks:install": "git config core.hooksPath .githooks",
         "ci:rapido":
           "deno task --cwd back fmt:check && deno task --cwd back lint && deno task --cwd front fmt:check && deno task --cwd front lint",
-        "test:scripts": "deno test --allow-read scripts/",
+        "test:scripts": "deno test --allow-read --allow-run scripts/",
       };
       c = JSON.stringify(parsed, null, 2) + "\n";
       break;
@@ -953,10 +1010,10 @@ export function construirArchivosEstandar(
       destino: "estandar.config.ts",
       categoria: "config",
       regla:
-        "Configuracion centralizada de rutas y topologia de mecanismos (estandar.config.ts)",
+        "Configuracion centralizada de rutas, cobertura y listas base con trinquete (`verifica: scripts/estandar/cobertura-config.test.ts, back/tests/arquitectura/listasBase.test.ts`)",
       requiereAdaptacion: true,
       guiaAdaptacion:
-        "PRIMER paso de adaptacion: configurar raiz de backend, aplicaciones frontend y capa compartida.",
+        "PRIMER paso de adaptacion: configurar raiz de backend, aplicaciones frontend, capa compartida, cobertura.rutasAdicionales y listasBase ({} por defecto).",
       marcadores: ["{{APP_1}}", "{{APP_2}}"],
       tipoTransformacion: "personalizada",
     },
@@ -1062,6 +1119,18 @@ export function construirArchivosEstandar(
       tipoTransformacion: "personalizada",
     },
     {
+      origen: "scripts/estandar/cobertura-config.test.ts",
+      destino: "scripts/estandar/cobertura-config.test.ts",
+      categoria: "scripts",
+      regla:
+        "Cobertura total de archivos .ts/.tsx en estandar.config.ts (`verifica: scripts/estandar/cobertura-config.test.ts`, AGENTS.md)",
+      requiereAdaptacion: "Solo via estandar.config.ts",
+      guiaAdaptacion:
+        "Configurado via estandar.config.ts (back, front, cobertura.rutasAdicionales, listasBase['cobertura/config']).",
+      marcadores: ["{{APP_1}}", "{{APP_2}}"],
+      tipoTransformacion: "personalizada",
+    },
+    {
       origen: "scripts/higiene/sin-emojis.test.ts",
       destino: "scripts/higiene/sin-emojis.test.ts",
       categoria: "scripts",
@@ -1086,10 +1155,10 @@ export function construirArchivosEstandar(
       destino: "scripts/doc-linter.ps1",
       categoria: "scripts",
       regla:
-        "Gobernanza documental bimodal y etiquetas verifica: (docs/AGENTS.md)",
+        "Gobernanza documental bimodal, estructura del vault (`verifica: scripts/doc-linter.ps1#Estructura`) y etiquetas verifica: (docs/AGENTS.md)",
       requiereAdaptacion: false,
       guiaAdaptacion:
-        "Filtrados bloques de proyecto. Mantiene validacion estandar bimodal y seccion 8.",
+        "Filtrados bloques de proyecto. Mantiene validacion de Estructura (Seccion 0), bimodalidad, ADRs, Onboarding/Glosario/TODO, Mermaid, Manifiestos y Plantillas.",
       tipoTransformacion: "filtro-ps1-estandar",
     },
 
@@ -1131,6 +1200,17 @@ export function construirArchivosEstandar(
       guiaAdaptacion:
         "Configurado via estandar.config.ts (back.clasesBaseEntidad).",
       tipoTransformacion: "personalizada",
+    },
+    {
+      origen: "back/tests/arquitectura/listasBase.test.ts",
+      destino: "back/tests/arquitectura/listasBase.test.ts",
+      categoria: "arquitectura-back",
+      regla:
+        "Trinquete de listas base de violaciones arquitectonicas (`verifica: back/tests/arquitectura/listasBase.test.ts`, back/AGENTS.md)",
+      requiereAdaptacion: "Solo via estandar.config.ts",
+      guiaAdaptacion:
+        "Configurado via estandar.config.ts (listasBase). Audita tope, todo obligatorio y entradas muertas.",
+      tipoTransformacion: "copia-directa",
     },
     {
       origen: "back/tests/arquitectura/logger.test.ts",
@@ -1303,7 +1383,51 @@ export function construirArchivosEstandar(
       guiaAdaptacion:
         "Sustituir {{SLUG_PROYECTO}} por el nombre del vault de documentacion.",
       marcadores: ["{{SLUG_PROYECTO}}"],
-      tipoTransformacion: "personalizada",
+      tipoTransformacion: "filtro-md-estandar",
+    },
+    {
+      origen: "docs/adr/AGENTS.md",
+      destino: "docs/adr/AGENTS.md",
+      categoria: "manifiestos",
+      regla:
+        "Manifiesto de area para decisiones de arquitectura ADR (docs/AGENTS.md)",
+      requiereAdaptacion: false,
+      guiaAdaptacion:
+        "Copiar directo. Reglas de numeracion, indexacion en Cap 9 y reemplazo de ADRs.",
+      tipoTransformacion: "filtro-md-estandar",
+    },
+    {
+      origen: "docs/arquitectura/AGENTS.md",
+      destino: "docs/arquitectura/AGENTS.md",
+      categoria: "manifiestos",
+      regla:
+        "Manifiesto de area para capitulos arc42, RN-* y DS-CU-* (docs/AGENTS.md)",
+      requiereAdaptacion: false,
+      guiaAdaptacion:
+        "Copiar directo. Filtradas secciones de proyecto. Reglas de estructura arc42 y trazabilidad.",
+      tipoTransformacion: "filtro-md-estandar",
+    },
+    {
+      origen: "docs/guia/AGENTS.md",
+      destino: "docs/guia/AGENTS.md",
+      categoria: "manifiestos",
+      regla:
+        "Manifiesto de area para marco Diataxis y casos de uso bimodales (docs/AGENTS.md)",
+      requiereAdaptacion: false,
+      guiaAdaptacion:
+        "Copiar directo. Filtradas secciones de proyecto. Reglas bimodales de CU-* e historias de usuario.",
+      tipoTransformacion: "filtro-md-estandar",
+    },
+    {
+      origen: "docs/auditorias/AGENTS.md",
+      destino: "docs/auditorias/AGENTS.md",
+      categoria: "manifiestos",
+      regla:
+        "Manifiesto de area para reportes de auditoria AUDIT-NNN (docs/AGENTS.md)",
+      requiereAdaptacion: false,
+      guiaAdaptacion:
+        "Copiar directo. Reglas de formato, evidencia, TODOs e inmutabilidad de auditorias.",
+      tipoTransformacion: "filtro-md-estandar",
     },
 
     // 7. Entorno Docker y Configuracion Deno
@@ -1545,11 +1669,16 @@ export async function extraerPlantilla(
     ? path.resolve(rutaDestinoPlantilla)
     : path.join(raizRepo, "plantilla");
 
-  // Eliminar directorio legado .agents si existiera en destinoBase
+  // Limpiar entradas previas del espejo en destinoBase preservando intacto esqueleto/
   try {
-    await Deno.remove(path.join(destinoBase, ".agents"), { recursive: true });
+    for await (const entrada of Deno.readDir(destinoBase)) {
+      if (entrada.name === "esqueleto") continue;
+      await Deno.remove(path.join(destinoBase, entrada.name), {
+        recursive: true,
+      });
+    }
   } catch {
-    // No existe, continuar
+    // destinoBase aun no existe, se creara durante la extraccion
   }
 
   // Leer estandar.config.ts desde el origen para resolver ubicacion de shared y back dinamicamente

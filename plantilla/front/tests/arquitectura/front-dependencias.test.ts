@@ -1,6 +1,11 @@
 /// <reference lib="deno.ns" />
 import { assert, assertEquals, fail } from "jsr:@std/assert@^1.0.0";
-import { estandarConfig, type EstandarConfigFront } from "../../../estandar.config.ts";
+import {
+  auditarTrinqueteListasBase,
+  estandarConfig,
+  type EstandarConfigFront,
+  filtrarConListaBase,
+} from "../../../estandar.config.ts";
 
 export type ReglaArquitectura = "RN-F03" | "SHARED" | "RN-F01" | "CAPAS" | "RN-F02";
 
@@ -569,9 +574,11 @@ function ejecutarEscaneoCompleto(): ResultadoEscaneo {
 
 function afirmarCeroViolaciones(regla: ReglaArquitectura): void {
   const { violaciones } = ejecutarEscaneoCompleto();
-  const lineas = violaciones
+  const violacionesRegla = violaciones
     .filter((v) => v.regla === regla)
-    .map((v) => `${v.regla} ${v.origen} -> ${v.destino}`);
+    .map((v) => ({ ...v, ruta: v.origen }));
+  const filtradas = filtrarConListaBase(`front/${regla}`, violacionesRegla);
+  const lineas = filtradas.map((v) => `${v.regla} ${v.origen} -> ${v.destino}`);
 
   if (lineas.length > 0) {
     fail(`\n${lineas.join("\n")}`);
@@ -870,4 +877,18 @@ Deno.test("Arquitectura Front - Soporta jerarquia FSD dinamica con pages y widge
     configFsdCompleto,
   );
   assertEquals(vInvalido?.regla, "CAPAS");
+});
+
+Deno.test("Arquitectura Front - Trinquete de listasBase en estandar.config.ts (front)", () => {
+  const errores = auditarTrinqueteListasBase(
+    estandarConfig.listasBase,
+    undefined,
+    "front/",
+  );
+
+  assertEquals(
+    errores,
+    [],
+    `Violaciones del trinquete en estandar.config.ts (listasBase front):\n${errores.join("\n")}`,
+  );
 });

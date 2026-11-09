@@ -1,5 +1,5 @@
 import { assert, assertEquals } from "@std/assert";
-import { estandarConfig, resolverRutaBack } from "../../../estandar.config.ts";
+import { estandarConfig, filtrarConListaBase, resolverRutaBack } from "../../../estandar.config.ts";
 
 export interface ViolacionLogger {
   archivo: string;
@@ -158,13 +158,18 @@ Deno.test("Arquitectura - En back/src no debe haber llamadas a console.* salvo L
     todasLasViolaciones.push(...violaciones);
   }
 
-  const detalle = todasLasViolaciones
+  const violacionesNoEnListaBase = filtrarConListaBase(
+    "back/logger",
+    todasLasViolaciones.map((v) => ({ ...v, ruta: v.archivo })),
+  );
+
+  const detalle = violacionesNoEnListaBase
     .map((v) => `${v.archivo}:${v.linea} -> ${v.evidencia} (${v.motivo})`)
     .join("\n");
 
   assertEquals(
-    todasLasViolaciones,
+    violacionesNoEnListaBase,
     [],
-    `Se encontraron ${todasLasViolaciones.length} llamadas a console.* en src/:\n${detalle}`,
+    `Se encontraron ${violacionesNoEnListaBase.length} llamadas a console.* en src/:\n${detalle}`,
   );
 });

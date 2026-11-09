@@ -94,3 +94,8 @@ Para reglas detalladas, recetas de codigo y convenciones internas de cada subsis
   `src/infraestructura/persistencia/migraciones/` (registrada en `meta/_journal.json`) es
   inmutable. Todo cambio en `esquema.ts` exige generar una nueva migracion con `drizzle-kit generate`.
   <!-- verifica: scripts/ci/verificar-migraciones.ts, back/deno.json#check:migraciones -->
+- **Lista Base con Trinquete**: Las listas base de violaciones arquitectonicas en `estandar.config.ts`
+  (`listasBase`) solo pueden encogerse: el numero de entradas nunca debe superar su `tope`, debe
+  reducirse el `tope` al eliminar entradas, toda entrada debe declarar un `todo` no vacio y quedan
+  prohibidas las entradas muertas sin violacion real activa.
+  <!-- verifica: back/tests/arquitectura/listasBase.test.ts -->

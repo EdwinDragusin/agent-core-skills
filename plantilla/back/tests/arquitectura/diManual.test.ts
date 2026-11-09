@@ -1,5 +1,5 @@
 import { assert, assertEquals } from "@std/assert";
-import { estandarConfig, resolverRutaBack } from "../../../estandar.config.ts";
+import { estandarConfig, filtrarConListaBase, resolverRutaBack } from "../../../estandar.config.ts";
 
 export interface ViolacionDIManual {
   archivo: string;
@@ -196,13 +196,18 @@ Deno.test("Arquitectura - Instanciacion de adaptadores de infraestructura solo e
     todasLasViolaciones.push(...violaciones);
   }
 
-  const detalle = todasLasViolaciones
+  const violacionesNoEnListaBase = filtrarConListaBase(
+    "back/diManual",
+    todasLasViolaciones.map((v) => ({ ...v, ruta: v.archivo })),
+  );
+
+  const detalle = violacionesNoEnListaBase
     .map((v) => `${v.archivo}:${v.linea} -> new ${v.claseInstanciada}() (${v.motivo})`)
     .join("\n");
 
   assertEquals(
-    todasLasViolaciones,
+    violacionesNoEnListaBase,
     [],
-    `Se encontraron ${todasLasViolaciones.length} instanciaciones ilegales de adaptadores fuera de crearApp/main:\n${detalle}`,
+    `Se encontraron ${violacionesNoEnListaBase.length} instanciaciones ilegales de adaptadores fuera de crearApp/main:\n${detalle}`,
   );
 });

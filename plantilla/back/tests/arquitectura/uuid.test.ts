@@ -1,6 +1,26 @@
 import { assert, assertEquals } from "@std/assert";
-import { estandarConfig, resolverRutaBack } from "../../../estandar.config.ts";
-import { extraerImportsDeCodigo } from "./dependencias.test.ts";
+import { estandarConfig, filtrarConListaBase, resolverRutaBack } from "../../../estandar.config.ts";
+
+/**
+ * Extrae todas las rutas y paquetes importados o reexportados en codigo TypeScript.
+ */
+function extraerImportsDeCodigo(contenido: string): string[] {
+  const patrones = [
+    /(?:^|[\s;])(?:import|export)\s+(?:type\s+)?[\s\S]*?\s+from\s+['"]([^'"]+)['"]/gm,
+    /(?:^|[\s;])import\s+['"]([^'"]+)['"]/gm,
+    /\bimport\s*\(\s*['"]([^'"]+)['"]\s*\)/g,
+  ];
+  const imports: string[] = [];
+
+  for (const patron of patrones) {
+    let match: RegExpExecArray | null;
+    while ((match = patron.exec(contenido)) !== null) {
+      imports.push(match[1]);
+    }
+  }
+
+  return Array.from(new Set(imports));
+}
 
 export interface ViolacionUuid {
   archivo: string;
@@ -116,13 +136,18 @@ Deno.test("Arquitectura - En back/src nadie usa crypto.randomUUID ni paquetes uu
     todasLasViolaciones.push(...violaciones);
   }
 
-  const detalle = todasLasViolaciones
+  const violacionesNoEnListaBase = filtrarConListaBase(
+    "back/uuid",
+    todasLasViolaciones.map((v) => ({ ...v, ruta: v.archivo })),
+  );
+
+  const detalle = violacionesNoEnListaBase
     .map((v) => `${v.archivo}: ${v.motivo} (encontrado: '${v.evidencia}')`)
     .join("\n");
 
   assertEquals(
-    todasLasViolaciones,
+    violacionesNoEnListaBase,
     [],
-    `Se encontraron ${todasLasViolaciones.length} violaciones de generacion de UUID:\n${detalle}`,
+    `Se encontraron ${violacionesNoEnListaBase.length} violaciones de generacion de UUID:\n${detalle}`,
   );
 });

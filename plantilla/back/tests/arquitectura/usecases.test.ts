@@ -1,5 +1,5 @@
 import { assert, assertEquals } from "@std/assert";
-import { estandarConfig, resolverRutaBack } from "../../../estandar.config.ts";
+import { estandarConfig, filtrarConListaBase, resolverRutaBack } from "../../../estandar.config.ts";
 
 export interface ViolacionUseCase {
   archivo: string;
@@ -133,13 +133,18 @@ Deno.test("Arquitectura - Cada clase en aplicacion/usecases/ debe exponer el met
     todasLasViolaciones.push(...violaciones);
   }
 
-  const detalle = todasLasViolaciones
+  const violacionesNoEnListaBase = filtrarConListaBase(
+    "back/usecases",
+    todasLasViolaciones.map((v) => ({ ...v, ruta: v.archivo })),
+  );
+
+  const detalle = violacionesNoEnListaBase
     .map((v) => `${v.archivo}: ${v.motivo}`)
     .join("\n");
 
   assertEquals(
-    todasLasViolaciones,
+    violacionesNoEnListaBase,
     [],
-    `Se encontraron ${todasLasViolaciones.length} use cases sin metodo 'ejecutar(':\n${detalle}`,
+    `Se encontraron ${violacionesNoEnListaBase.length} use cases sin metodo 'ejecutar(':\n${detalle}`,
   );
 });

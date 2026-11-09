@@ -65,6 +65,58 @@ function Register-Warn([string]$Category, [string]$Item, [string]$Details = "") 
 }
 
 # -----------------------------------------------------------------
+# 0. ESTRUCTURA DEL VAULT (Carpetas, Capitulos arc42 y Archivos Base)
+# [ESTANDAR]
+# -----------------------------------------------------------------
+Write-Host "`n--- 0. Verificacion de Estructura Base del Vault ---"
+
+$requiredDirs = @("adr", "arquitectura", "auditorias", "guia", "_plantillas")
+foreach ($dir in $requiredDirs) {
+  $dirFull = Join-Path $DocsPath $dir
+  $dirExists = Test-Path $dirFull -PathType Container
+  Register-Check "Estructura" "Carpeta obligatoria docs/$dir existe" $dirExists $(if (-not $dirExists) { "No existe el directorio $dirFull" } else { "" })
+}
+
+$arqDir = Join-Path $DocsPath "arquitectura"
+for ($capNum = 1; $capNum -le 11; $capNum++) {
+  $capPrefix = "capitulo-{0:D2}-*.md" -f $capNum
+  $capMatches = @()
+  if (Test-Path $arqDir -PathType Container) {
+    $capMatches = @(Get-ChildItem -Path $arqDir -Filter $capPrefix -File)
+  }
+  $capOk = ($capMatches.Count -eq 1)
+  $capDetails = if ($capMatches.Count -eq 1) {
+    $capMatches[0].Name
+  } elseif ($capMatches.Count -eq 0) {
+    "No se encontro ningun archivo docs/arquitectura/$capPrefix"
+  } else {
+    "Se encontraron multiples archivos ($($capMatches.Count)): $($capMatches.Name -join ', ')"
+  }
+  Register-Check "Estructura" ("Capitulo arc42 {0:D2} (docs/arquitectura/$capPrefix)" -f $capNum) $capOk $capDetails
+}
+
+$requiredBaseFiles = @(
+  "ONBOARDING.md",
+  "glosario.md",
+  "TODO.md",
+  "README.md",
+  "auditorias/README.md"
+)
+foreach ($relFile in $requiredBaseFiles) {
+  $fileFull = Join-Path $DocsPath $relFile
+  $fileExists = Test-Path $fileFull -PathType Leaf
+  Register-Check "Estructura" "Archivo obligatorio docs/$relFile existe" $fileExists $(if (-not $fileExists) { "Falta archivo obligatorio $fileFull" } else { "" })
+}
+
+$auditReadmePath = Join-Path $DocsPath "auditorias/README.md"
+if (Test-Path $auditReadmePath -PathType Leaf) {
+  $auditReadmeContent = [System.IO.File]::ReadAllText($auditReadmePath, [System.Text.Encoding]::UTF8)
+  $hasFrontmatter = ($auditReadmeContent -match '(?s)\A---\r?\n.*?\r?\n---')
+  $hasAuditFormat = ($auditReadmeContent -match 'AUDIT-\d{3}|AUDIT-NNN')
+  Register-Check "Estructura" "docs/auditorias/README.md cuenta con frontmatter y formato AUDIT-NNN" ($hasFrontmatter -and $hasAuditFormat) "Frontmatter:$hasFrontmatter FormatoAUDIT:$hasAuditFormat"
+}
+
+# -----------------------------------------------------------------
 # 1. CASOS DE USO (docs/guia/referencia/casos-de-uso/CU-*.md)
 # [ESTANDAR]
 # -----------------------------------------------------------------
@@ -146,6 +198,36 @@ if (Test-Path $adrDirFront) {
   Get-ChildItem -Path $adrDirFront -Filter "ADR-*.md" | ForEach-Object { $adrFiles.Add($_) }
 }
 
+# [ESTANDAR] Indice de ADRs en Capitulo 9
+$cap9Path = Join-Path $DocsPath "arquitectura/capitulo-09-decisiones.md"
+if (Test-Path $cap9Path) {
+  $cap9 = [System.IO.File]::ReadAllText($cap9Path, [System.Text.Encoding]::UTF8)
+  $missingInCap9 = [System.Collections.Generic.List[string]]::new()
+  $duplicatesInCap9 = [System.Collections.Generic.List[string]]::new()
+
+  foreach ($adr in $adrFiles) {
+    $baseName = [System.IO.Path]::GetFileNameWithoutExtension($adr.Name)
+    $adrId = if ($adr.Name -match '^(ADR-(?:\d{3}|F\d{3}))') { $matches[1] } else { $baseName }
+    $escapedBase = [regex]::Escape($baseName)
+    $linkPattern = "(\[\[[^\]]*$escapedBase(?:\\?\|[^\]]*)?\]\]|\([^\)]*$escapedBase\.md\))"
+    $occurrences = [regex]::Matches($cap9, $linkPattern)
+    if ($occurrences.Count -eq 0) {
+      $missingInCap9.Add($adrId)
+    } elseif ($occurrences.Count -gt 1) {
+      $duplicatesInCap9.Add("$adrId($($occurrences.Count))")
+    }
+  }
+
+  $cap9Valid = ($missingInCap9.Count -eq 0 -and $duplicatesInCap9.Count -eq 0)
+  $cap9Details = "Total indexados: $($adrFiles.Count)"
+  if ($missingInCap9.Count -gt 0) { $cap9Details += " | Faltantes en Cap 9: $($missingInCap9 -join ', ')" }
+  if ($duplicatesInCap9.Count -gt 0) { $cap9Details += " | Duplicados en Cap 9: $($duplicatesInCap9 -join ', ')" }
+
+  Register-Check "arc42" "Capitulo 9 indexa todos los ADRs exactamente una vez" $cap9Valid $cap9Details
+} else {
+  Register-Check "arc42" "Capitulo 9 existe" $false
+}
+
 # [ESTANDAR] Nomenclatura, unicidad y resumen ejecutivo de ADRs
 
 # Verificacion de todos los ADRs con Resumen Ejecutivo
@@ -193,6 +275,40 @@ foreach ($adr in $adrFiles) {
 $allAdrsHaveSummary = ($adrsMissingSummary.Count -eq 0)
 $missingDetails = if (-not $allAdrsHaveSummary) { $adrsMissingSummary -join ", " } else { "" }
 Register-Check "ADRs" "Todos los ADRs cuentan con '## Resumen Ejecutivo de Negocio'" $allAdrsHaveSummary $missingDetails
+
+# -----------------------------------------------------------------
+# 5. ONBOARDING, GLOSARIO E HIGIENE
+# [ESTANDAR]
+# -----------------------------------------------------------------
+Write-Host "`n--- 5. Verificacion de Onboarding, Glosario e Higiene ---"
+$onboardingPath = Join-Path $DocsPath "ONBOARDING.md"
+if (Test-Path $onboardingPath) {
+  $onb = [System.IO.File]::ReadAllText($onboardingPath, [System.Text.Encoding]::UTF8)
+  $hasRutaLectura = ($onb -match '(?m)^#{2,3}\s+.*(Ruta[s]?(\s+de\s+(Lectura|Aprendizaje|Incorporaci[oo]n))?|Ruta\s+\d+|Lectura\s+por\s+Rol|Recorrido)')
+  Register-Check "Onboarding" "docs/ONBOARDING.md define al menos una seccion de rutas de lectura" $hasRutaLectura "SeccionRutas:$hasRutaLectura"
+} else {
+  Register-Check "Onboarding" "docs/ONBOARDING.md existe" $false
+}
+
+$glosarioPath = Join-Path $DocsPath "glosario.md"
+if (Test-Path $glosarioPath) {
+  $glo = [System.IO.File]::ReadAllText($glosarioPath, [System.Text.Encoding]::UTF8)
+  $hasSecNegocio = ($glo -match 'T[ee]rminos de Negocio') -or ($glo -match 'Analog[ii]as') -or ($glo -match 'Lenguaje Ubicuo')
+  $hasSecDdd = ($glo -match 'Dominio DDD') -or ($glo -match 'Arquitectura T[ee]cnica') -or ($glo -match 'T[ee]rminos T[ee]cnicos')
+  $gloDual = $hasSecNegocio -and $hasSecDdd
+  Register-Check "Glosario" "docs/glosario.md estructura dual (Negocio + DDD/Arquitectura)" $gloDual "Negocio:$hasSecNegocio DDD:$hasSecDdd"
+} else {
+  Register-Check "Glosario" "docs/glosario.md existe" $false
+}
+
+$todoPath = Join-Path $DocsPath "TODO.md"
+if (Test-Path $todoPath) {
+  $todoContent = [System.IO.File]::ReadAllText($todoPath, [System.Text.Encoding]::UTF8)
+  $hasCollapsible = ($todoContent -match '>\s*\[!\w+\]-') -or ($todoContent -match '<details')
+  Register-Check "TODO" "docs/TODO.md implementa bloques colapsables para Dataview" $hasCollapsible
+} else {
+  Register-Check "TODO" "docs/TODO.md existe" $false
+}
 
 # -----------------------------------------------------------------
 # 6. HIGIENE GLOBAL: CERO EMOJIS EN TODO DOCS/
@@ -477,13 +593,31 @@ function Test-AgentsManifestContent {
           $instruccionCount++
         } else {
           $rutaCount++
-          $cleanPath = ($t -split '#')[0].Trim()
+          $parts = $t -split '#', 2
+          $cleanPath = $parts[0].Trim()
+          $anchor = if ($parts.Length -gt 1) { $parts[1].Trim() } else { "" }
           if ($rootPath) {
             $fullPath = Join-Path $rootPath $cleanPath
             $isRepoRoot = (Test-Path (Join-Path $rootPath ".git")) -or (Test-Path (Join-Path $rootPath "deno.json"))
             if ($cleanPath.StartsWith("docs/") -or $isRepoRoot) {
               if (-not (Test-Path $fullPath)) {
                 $errors.Add( ("L{0}: Ruta de mecanismo inexistente en disco: '{1}'" -f ($i + 1), $cleanPath) )
+              } elseif ($anchor) {
+                $targetContent = [System.IO.File]::ReadAllText($fullPath, [System.Text.Encoding]::UTF8)
+                $escAnchor = [regex]::Escape($anchor)
+                $anchorFound = $false
+                if ($cleanPath -match 'doc-linter\.ps1$') {
+                  $anchorFound = ($targetContent -match "Register-Check\s+`"$escAnchor`"")
+                } elseif ($cleanPath -match 'deno\.json$') {
+                  $anchorFound = ($targetContent -match "`"$escAnchor`"\s*:")
+                } elseif ($cleanPath -match '\.ya?ml$') {
+                  $anchorFound = ($targetContent -match "(?m)^\s*$escAnchor\s*:")
+                } else {
+                  $anchorFound = ($targetContent -match $escAnchor)
+                }
+                if (-not $anchorFound) {
+                  $errors.Add( ("L{0}: Ancla de mecanismo '#{1}' no encontrada en '{2}'" -f ($i + 1), $anchor, $cleanPath) )
+                }
               }
             }
           }

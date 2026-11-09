@@ -1,6 +1,6 @@
 /// <reference lib="deno.ns" />
 import { assert, assertEquals } from "jsr:@std/assert@^1.0.0";
-import { estandarConfig } from "../../../estandar.config.ts";
+import { estandarConfig, filtrarConListaBase } from "../../../estandar.config.ts";
 
 export interface ViolacionStorage {
   archivo: string;
@@ -161,6 +161,8 @@ Deno.test("Higiene Storage - aplicaciones con sesion efimera no usan localStorag
     return;
   }
 
+  const todasLasViolaciones: ViolacionStorage[] = [];
+
   for (const app of appsEfimeras) {
     const rutaAppSrc = `${raizFront}/${app.rutaSrc}`;
     const archivos = recolectarArchivosAppEfimeraSrc(rutaAppSrc);
@@ -170,24 +172,28 @@ Deno.test("Higiene Storage - aplicaciones con sesion efimera no usan localStorag
       `Guarda anti-vacuidad: no se encontraron archivos en '${app.rutaSrc}' para la aplicacion con sesion efimera '${app.nombre}'. Verifique la configuracion en estandar.config.ts`,
     );
 
-    const violaciones: ViolacionStorage[] = [];
     for (const archivo of archivos) {
       try {
         const contenido = Deno.readTextFileSync(archivo);
-        violaciones.push(...detectarUsoLocalStorage(contenido, archivo));
+        todasLasViolaciones.push(...detectarUsoLocalStorage(contenido, archivo));
       } catch (_e) {
         // Ignorar errores de lectura
       }
     }
+  }
 
-    if (violaciones.length > 0) {
-      const detalle = violaciones
-        .map((v) => `${v.archivo}:${v.linea} -> ${v.codigo}`)
-        .join("\n");
-      assert(
-        false,
-        `Se encontro uso prohibido de localStorage en '${app.rutaSrc}':\n${detalle}`,
-      );
-    }
+  const violacionesNoEnListaBase = filtrarConListaBase(
+    "front/storage",
+    todasLasViolaciones.map((v) => ({ ...v, ruta: v.archivo })),
+  );
+
+  if (violacionesNoEnListaBase.length > 0) {
+    const detalle = violacionesNoEnListaBase
+      .map((v) => `${v.archivo}:${v.linea} -> ${v.codigo}`)
+      .join("\n");
+    assert(
+      false,
+      `Se encontro uso prohibido de localStorage en sesiones efimeras:\n${detalle}`,
+    );
   }
 });
