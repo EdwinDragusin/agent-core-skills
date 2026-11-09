@@ -1,6 +1,5 @@
 # scripts/doc-linter.ps1
 # Linter de Gobernanza Documental y Estandar Bimodal (Lego)
-# Sistema de Examenes de Ingreso - Gobierno del Estado de Hidalgo
 # Cero dependencias externas. Ejecutable en PowerShell 5.1+ y Core.
 
 [CmdletBinding()]
@@ -195,10 +194,7 @@ for ($i = 1; $i -le 5; $i++) {
 # [ESTANDAR]
 # -----------------------------------------------------------------
 Write-Host "`n--- 4. Verificacion de arc42 y Catalogo de ADRs ---"
-$cap2Path = Join-Path $DocsPath "arquitectura/capitulo-02-restricciones.md"
-$cap3Path = Join-Path $DocsPath "arquitectura/capitulo-03-contexto-y-alcance.md"
 $cap9Path = Join-Path $DocsPath "arquitectura/capitulo-09-decisiones.md"
-$pb001Path = Join-Path $DocsPath "arquitectura/procesos/PB-001-configuracion-de-examenes.md"
 
 # [ESTANDAR] Recoleccion dinamica, indice del Capitulo 9, nomenclatura y resumen ejecutivo
 # Recoleccion de archivos ADR (backend y frontend)

@@ -1,4 +1,4 @@
-# Frontend Operational Manifest - Examen de Ingreso Web Client
+# Frontend Operational Manifest - {{NOMBRE_PROYECTO}} Web Client
 
 Manifiesto operacional prescriptivo y determinista para agentes de Inteligencia Artificial que
 operan, compilan, refactorizan o prueban el codigo fuente del frontend (`front/`).

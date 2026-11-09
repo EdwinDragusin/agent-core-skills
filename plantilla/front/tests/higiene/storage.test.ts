@@ -155,8 +155,8 @@ Deno.test("Higiene Storage - front/{{APP_EFIMERA}}/src no usa localStorage (RN d
     dirPrueba.slice(0, dirPrueba.indexOf("/tests/")),
   );
 
-  const rutaAspiranteSrc = `${raizFront}/{{APP_EFIMERA}}/src`;
-  const archivos = recolectarArchivosAppEfimeraSrc(rutaAspiranteSrc);
+  const rutaAppEfimeraSrc = `${raizFront}/{{APP_EFIMERA}}/src`;
+  const archivos = recolectarArchivosAppEfimeraSrc(rutaAppEfimeraSrc);
 
   assert(
     archivos.length > 30,

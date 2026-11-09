@@ -1,6 +1,6 @@
 <%*
 // Requiere archivo ya nombrado como PB-00N-slug-en-minusculas.md
-// (mismo patron que arquitectura/procesos/PB-001-configuracion-de-examenes.md)
+// (mismo patron que arquitectura/procesos/PB-001-proceso-base.md)
 const partes = tp.file.title.split("-");
 const id = partes[0] + "-" + partes[1];
 const tituloLegible = tp.file.title.split("-").slice(2).join(" ").replace(/\b\w/g, c => c.toUpperCase());

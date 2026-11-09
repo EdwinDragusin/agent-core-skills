@@ -497,12 +497,12 @@ Deno.test("Arquitectura Front - Autoprueba sintetica de clasificarImport para to
   assertEquals(
     clasificarImport(
       "shared/ui/Boton.tsx",
-      "../../{{APP_2}}/src/entities/postulacion/index.ts",
+      "../../{{APP_2}}/src/entities/moduloA/index.ts",
     ),
     {
       regla: "SHARED",
       origen: "shared/ui/Boton.tsx",
-      destino: "{{APP_2}}/src/entities/postulacion/index.ts",
+      destino: "{{APP_2}}/src/entities/moduloA/index.ts",
     },
   );
 
@@ -536,23 +536,23 @@ Deno.test("Arquitectura Front - Autoprueba sintetica de clasificarImport para to
   );
   assertEquals(
     clasificarImport(
-      "{{APP_2}}/src/components/layout/LayoutGestion.tsx",
+      "{{APP_2}}/src/components/layout/LayoutPrincipal.tsx",
       "../../features/auth/store/sesionStore.ts",
     ),
     {
       regla: "CAPAS",
-      origen: "{{APP_2}}/src/components/layout/LayoutGestion.tsx",
+      origen: "{{APP_2}}/src/components/layout/LayoutPrincipal.tsx",
       destino: "{{APP_2}}/src/features/auth/store/sesionStore.ts",
     },
   );
   assertEquals(
     clasificarImport(
-      "{{APP_2}}/src/entities/postulacion/api/postulacionesApi.ts",
+      "{{APP_2}}/src/entities/moduloA/api/moduloAApi.ts",
       "../../sesion/store/sesionStore.ts",
     ),
     {
       regla: "CAPAS",
-      origen: "{{APP_2}}/src/entities/postulacion/api/postulacionesApi.ts",
+      origen: "{{APP_2}}/src/entities/moduloA/api/moduloAApi.ts",
       destino: "{{APP_2}}/src/entities/sesion/store/sesionStore.ts",
     },
   );
@@ -605,7 +605,7 @@ Deno.test("Arquitectura Front - Autoprueba sintetica de clasificarImport para to
   assertEquals(hallazgosComponents.length, 7);
 
   const hallazgosPages = detectarLlamadasRedPresentacional(
-    "{{APP_1}}/src/features/examen-runner/pages/PaginaExamen.tsx",
+    "{{APP_1}}/src/features/runner/pages/PaginaDetalle.tsx",
     codigoLlamadasRed,
   );
   assertEquals(hallazgosPages.length, 7);

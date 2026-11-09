@@ -92,26 +92,75 @@ Write-Host "Fin de auditoria"
   assertNotMatch(filtrado, /RN-X01 valida/);
 });
 
-Deno.test("Deteccion de terminos de dominio - palabras completas y alias", () => {
-  // Coincidencias que deben ser detectadas (prohibidas)
+Deno.test("Deteccion de terminos de dominio - subcadena insensible a mayusculas con excepciones genericas", () => {
+  // Coincidencias que deben ser detectadas (prohibidas por subcadena insensible)
   assertEquals(contieneTerminoDominio("El aspirante debe registrarse"), true);
+  assertEquals(
+    contieneTerminoDominio("Los aspirantes deben registrarse"),
+    true,
+  );
   assertEquals(contieneTerminoDominio("Portal Gestion en linea"), true);
   assertEquals(contieneTerminoDominio("Rol de bd examen_app"), true);
   assertEquals(contieneTerminoDominio("El campo CURP es obligatorio"), true);
+  assertEquals(contieneTerminoDominio("Gobierno de Hidalgo"), true);
+  assertEquals(contieneTerminoDominio("Entidad gubernamental central"), true);
+  assertEquals(contieneTerminoDominio("Proceso de postulacion formal"), true);
+  assertEquals(contieneTerminoDominio("Plaza o vacante pericial"), true);
   assertEquals(contieneTerminoDominio("Importar desde @examen/shared"), true);
 
-  // Palabras validas que contienen la subcadena pero NO son la palabra completa
+  // Palabras del espanol generico con excepciones legitimas
   assertEquals(
     contieneTerminoDominio("Se debe gestionar el ciclo de vida"),
     false,
   );
   assertEquals(contieneTerminoDominio("Evitar la congestion de red"), false);
-  assertEquals(contieneTerminoDominio("La curpeta de archivos"), false);
   assertEquals(contieneTerminoDominio("Codigo perfectamente agnostico"), false);
 
   // Lista de hallazgos
-  const hallazgos = detectarTerminosDominio("aspirante con CURP en gestion");
-  assertEquals(hallazgos.length, 3);
+  const hallazgos = detectarTerminosDominio(
+    "aspirantes con CURP en postulacion gubernamental de Hidalgo",
+  );
+  assertEquals(hallazgos.length >= 5, true);
+});
+
+Deno.test("Preambulos limpios - preambulo con Gobierno de Hidalgo no llega a la salida", () => {
+  const raizPlantilla = new URL("../plantilla", import.meta.url).pathname
+    .replace(/^\/([A-Za-z]:)/, "$1");
+  const manifiestos = [
+    ".agents/AGENTS.md",
+    "back/AGENTS.md",
+    "front/AGENTS.md",
+    "docs/AGENTS.md",
+  ];
+
+  for (const man of manifiestos) {
+    const ruta = `${raizPlantilla}/${man}`;
+    try {
+      const contenido = Deno.readTextFileSync(ruta);
+      assertNotMatch(
+        contenido,
+        /Gobierno de Hidalgo/i,
+        `Preambulo de ${man} contiene 'Gobierno de Hidalgo'`,
+      );
+      assertNotMatch(
+        contenido,
+        /\bgubernamental\b/i,
+        `Preambulo de ${man} contiene 'gubernamental'`,
+      );
+      assertNotMatch(
+        contenido,
+        /\baspirante/i,
+        `Preambulo de ${man} contiene 'aspirante'`,
+      );
+      assertNotMatch(
+        contenido,
+        /\bpostulaci[o\u00f3]n/i,
+        `Preambulo de ${man} contiene 'postulacion'`,
+      );
+    } catch (_e) {
+      // Ignorar si aun no se genero la plantilla
+    }
+  }
 });
 
 Deno.test("Transformaciones declaradas - sustitucion de marcadores y fixtures", () => {

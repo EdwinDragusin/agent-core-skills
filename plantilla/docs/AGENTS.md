@@ -1,6 +1,6 @@
 # Documentation Manifest - Reglas para `docs/`
 
-Obsidian vault (`examen-docs`): fuente viva de la verdad para reglas de negocio, casos de uso, ADRs y documentacion arquitectonica arc42.
+Obsidian vault (`{{SLUG_PROYECTO}}-docs`): fuente viva de la verdad para reglas de negocio, casos de uso, ADRs y documentacion arquitectonica arc42.
 
 ---
 
@@ -28,7 +28,7 @@ Obsidian vault (`examen-docs`): fuente viva de la verdad para reglas de negocio,
 
 - **ADRs**: Consultar `docs/adr/` (indice canonico en `docs/arquitectura/capitulo-09-decisiones.md`) antes de tomar decisiones de diseno tecnico o proponer nuevas dependencias.
   <!-- verifica: instruccion -->
-- **Reglas de Negocio**: Consultar `docs/arquitectura/reglas/` (`RN-*`) antes de alterar comportamientos del dominio o flujos de postulacion y examen.
+- **Reglas de Negocio**: Consultar `docs/arquitectura/reglas/` (`RN-*`) antes de alterar comportamientos del dominio o flujos de negocio.
   <!-- verifica: instruccion -->
 
 ---

@@ -1,6 +1,6 @@
-# Project Rules - Sistema de Examenes de Ingreso
+# Project Rules - {{NOMBRE_PROYECTO}}
 
-API REST gubernamental (Gobierno de Hidalgo) para postulacion de aspirantes a puestos publicos.
+{{DESCRIPCION_PROYECTO}}
 Stack: Deno 2.x, Hono, PostgreSQL 16, Drizzle ORM, JWT HS256 + Argon2id, Gotenberg 8.
 
 ---
@@ -17,7 +17,7 @@ Stack: Deno 2.x, Hono, PostgreSQL 16, Drizzle ORM, JWT HS256 + Argon2id, Gotenbe
   <!-- verifica: instruccion -->
 - **Esperar la conclusion completa del proceso**: Monitorear y esperar la terminacion de `deno task ci` (codigo de salida 0) antes de reportar la solucion al usuario.
   <!-- verifica: instruccion -->
-- **Recreacion obligatoria de contenedores backend**: Tras CUALQUIER modificacion de codigo en `back/`, ejecutar desde `examen/back/`:
+- **Recreacion obligatoria de contenedores backend**: Tras CUALQUIER modificacion de codigo en `back/`, ejecutar desde `back/`:
   ```bash
   docker compose down; docker compose up -d --force-recreate
   ```
