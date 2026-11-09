@@ -1,40 +1,45 @@
-<!-- SDLC Framework -->
+<!-- Agent Core Skills Framework v3 -->
 
 ## 1. Modos Globales de Operacion
 
-- **Modo Ponytail (`full`):** Minimo codigo que resuelve el problema. Reutilizar antes de dependencias; dependencias antes de codigo nuevo. Prohibida abstraccion prematura. Atajos con `shortcut:` y cierre con 1-2 lineas de omisiones/riesgos.
+- **Modo Ponytail (`full`):** Minimo codigo necesario. Reutilizar antes de dependencias; dependencias antes de codigo nuevo. Prohibida abstraccion prematura. Atajos con `shortcut:` y cierre con 1-2 lineas de omisiones/riesgos.
 - **Modificacion Minima (Prose Preservation Gate):** Prohibido parafrasear prosa previa valida. Ediciones limitadas al delta tecnico. Cero churn cosmetico.
-- **Caveman Alto / Regla Absoluta Anti-Emojis:** respuesta primero, telegrafica, cero emojis en cualquier artefacto (detalle en skill `caveman`).
-- **Regla Anti-Suposicion (Zero-Guesswork Gate):** Prohibido asumir requisitos o variantes tecnicas. Ante ambiguedad, pausar y consultar via `[CONSULTA_USUARIO]`.
-- **Handoff Inter-Agente (Ultracave):** Traspaso telegrafico: solo payload (rutas, tipos, comandos, commits), sin conectores ni relleno. Prohibido pasar planes en el handoff.
-- **Plan de Ejecucion Pre-Fase:** Previo a tocar codigo/docs, subagente envia `[PLAN_PRE_FASE]` al orquestador: 1) Insumos tomados del handoff, 2) Que modificara (archivos, contratos, DBML, endpoints, UI o tests), 3) Por que (DIR-*, RN-*, ponytail). Orquestador presenta a usuario para aprobacion obligatoria.
+- **Caveman Alto / Regla Absoluta Anti-Emojis:** Respuesta telegrafica primero, directa, concisa y sin rodeos. Prohibicion absoluta de emojis en respuestas, codigo, comentarios, cadenas, commits, notas, documentacion, artefactos o Pull Requests.
+- **Regla Anti-Suposicion (Zero-Guesswork Gate):** Prohibido asumir requisitos o reglas tecnicas. Ante ambiguedad, pausar y consultar al usuario.
+- **Compuerta de Plan de Ejecucion Pre-Fase:** Previo a modificar codigo o documentacion, presentar al usuario plan para aprobacion obligatoria: insumos tecnicos, lista exacta de archivos a tocar y justificacion.
 
-## 2. Protocolo de Servidores MCP
+## 2. Proceso de Ingenieria Delegado en Superpowers
 
-- **`codebase-memory-mcp` (estatico):** Grafo antes que grep/glob (detalle en skill `codebase-memory-mastery`). `index_repository` obligatorio al cierre de Fase 3A y 3B.
-- **`playwright` (estatico):** UI en navegador real. Obligatorio en Fase 3B (4 estados FSM, WCAG 2.1 AA) y Fase 4 (E2E BDD).
-- **`obsidian` (`@bitbonsai/mcpvault@latest`, dinamico):** `product-architect` propone `"Mis documentos/<nombre-proyecto>/docs"`, crea carpetas e inicializa el MCP antes de la primera nota.
+El proceso de desarrollo se delega en las skills de Superpowers:
+- Diseno y descomposicion: `brainstorming`, `writing-plans` y `subagent-driven-development`.
+- Ejecucion y calidad: TDD (`test-driven-development`), `systematic-debugging` y `verification-before-completion`.
+- Si las skills de Superpowers no estan instaladas: avisar al usuario una sola vez con comando de instalacion (`agy plugin install superpowers@superpowers-marketplace` en Antigravity, o via marketplace en Claude Code).
+- Si el repositorio carece de pipeline de CI unificada, hooks o estructura del estandar: sugerir la skill `adoptar-estandar`.
 
-## 3. Pipeline SDLC (subagentes en `agents/`; protocolo completo al invocarlos)
+## 3. Reglas de Instruccion del Estandar de Ingenieria
 
-| Fase | Subagente | Entregable / DoD | Skills clave |
-| :--- | :--- | :--- | :--- |
-| 1 | `product-architect` | docs/, `ONBOARDING.md`, Actores, Procesos, CUs (sec 1-5), `historias-de-usuario.md`, arc42 (1-3, 10), glosario. Handoff `is_baseline_only`. Cero codigo. | `brainstorming`, `spec-driven-development`, `interview-me`, `docs-governance-mastery` |
-| 2 | `system-architect` | arc42 (4-9, 11), `relacional.dbml` CAS (`version`), `DS-CU-NNN`, `RN-XNN` (^ancla), `DIR-*`, DTOs RFC 9457, ADRs. `is_baseline_only == true`: cierra cap 11; `false`: plan `[PARALELO]`. | `writing-plans`, `domain-driven-design`, `api-and-interface-design`, `git-workflow-mastery` |
-| 3A | `core-builder` | Backend TDD Red-Green-Refactor, RFC 9457, Docs-as-Code en 12 carpetas, committer diferido, `index_repository`. Handoff: `has_frontend == true` a 3B; `false` a 4. | `test-driven-development`, `subagent-driven-development`, `exception-resilience-mastery`, `ponytail` |
-| 3B | `ui-builder` | FSD, 4 estados FSM, WCAG 2.1 AA, Docs-as-Code. Gatekeeper: `ux-auditor` con `playwright` vivo (APPROVE/REJECT) previo a commit e indexacion. | `ui-ux-mastery`, `frontend-ui-engineering`, `browser-testing-with-devtools` |
-| 4 | `qa-reviewer` | Auditoria sin editar codigo: CUs, RN (^ancla), `DIR-*`, DTOs RFC 9457, Blast Radius, E2E Playwright vivo, OWASP, D1-D10. Dictamen `PASS`/`FAIL` en `docs/auditorias/AUDIT-Fase4.md`. | `code-review-and-quality`, `doubt-driven-development`, `security-and-hardening` |
-| 5 | `release-engineer` | Suite verde, Trunk-Based, tags SemVer, worktrees limpios, `index_status` limpio. | `verification-before-completion`, `git-workflow-mastery`, `caveman` |
-| Pre | `software-doc-architect` | Transversal pre-codigo: DDD, Clean Architecture, RFC 9457, DBML CAS, directrices y Living Knowledge Graph. | `docs-governance-mastery`, `domain-driven-design`, `api-and-interface-design` |
+### Verificacion Continua y Calidad
+- Ejecucion obligatoria de la suite completa de verificacion (CI) tras cualquier cambio de codigo o pruebas antes de commit o completar tarea.
+- Prohibido asumir exito con pruebas parciales aisladas (e.g. unitarias sin integracion o constraints de BD).
+- Esperar terminacion completa con codigo de salida 0 antes de reportar la solucion.
 
-## 4. Protocolo del Orquestador y Compuertas Bloqueantes
+### Flujo de Trabajo Git
+- Ramas dedicadas obligatorias: trabajo siempre en rama dedicada (`git checkout -b <tipo>/<descripcion-kebab-case>`). Prohibido editar directo en rama principal.
+- Commits atomicos y granulares: Conventional Commits (`<tipo>(<alcance>): <descripcion>`), en espanol, minusculas, sin acentos, sin emojis, sin lineas de atribucion de herramientas.
+- Pull Requests: no abrir PR prematuramente tras cada commit aislado. Abrir PR solo con funcionalidad terminada y CI en verde.
+- Prohibicion estricta de auto-merge: el agente nunca debe ejecutar merge a rama principal ni auto-fusionar PRs. Revision y merge corresponden exclusivamente al usuario.
 
-- **Pre-Change Interview Gate:** Entrevista previa con 2+ alternativas, trade-offs y recomendacion ponytail antes de despachar subagentes.
-- **Human-in-the-Loop Relay:** Todo `[CONSULTA_USUARIO]` y `[PLAN_PRE_FASE]` se escala al usuario via `ask_question`; aprobacion o instruccion se retransmite via `send_message`. Prohibido ejecutar cambios sin aprobacion explicita.
-- **Rol Supervisor:** Prohibido trabajo obrero en sesion principal. Despachar a `agents/` via `invoke_subagent`. Pipeline: 1 -> 2 -> 3A -> 3B -> 4 -> 5.
-- **Compuertas Bloqueantes:**
-  - *Aprobacion Pre-Fase (todas):* Bloquear ejecucion hasta que el usuario apruebe `[PLAN_PRE_FASE]` (insumos, modificaciones y justificacion).
-  - *Fase 1:* Rechazar si CUs/HUs tienen fuga en sec 1-5 (DTO, SQL, HTTP), falta `ONBOARDING.md`, `historias-de-usuario.md` o glosario.
-  - *Fase 2:* Rechazar si faltan `DIR-*`, ADRs sin resumen ejecutivo o DTOs no coinciden 1:1 con Zod/TS (Source-Driven DTO Gate).
-  - *Fase 3B:* Rechazar si falta dictamen `APPROVE` de `ux-auditor`.
-  - *Fase 4:* Rechazar `PASS` si falta evidencia E2E Playwright vivo en navegador real o linter documental falla.
+### Arquitectura y Diseno de Dominio
+- Clean Architecture / Puertos y Adaptadores: dominio puro sin frameworks ni dependencias externas; aplicacion orquesta dominio; infraestructura implementa puertos.
+- Casos de uso con DI en constructor; Value Objects inmutables (`Object.freeze`) con factory `crear()` y `equals()`.
+- Concurrencia optimista Compare-And-Swap (CAS) con columna `version` en agregados mutables.
+- Errores de dominio planos mapeados a excepciones tipadas en aplicacion y RFC 9457 en interfaz. Error 500 generico ante fallos no controlados sin filtrar detalles internos.
+- Observabilidad: identificador de correlacion (`trace_id`) propagado asincronamente; enmascaramiento automatico de datos sensibles (PII/secretos).
+- Frontend (FSD): componentes presentacionales puros sin efectos de red directos; logica asincrona en hooks; formularios validados con esquemas tipados; accesibilidad ARIA y manejo explicito de estados.
+
+### Gobernanza y Documentacion
+- Atomicidad en edicion de notas y trazabilidad bidireccional entre requerimientos, arquitectura y codigo.
+- Formato con metadatos YAML, enlaces internos, callouts GFM y tareas pendientes persistidas en su nota de origen (`- [ ] Descripcion #todo/<dominio> #prioridad/<nivel>`).
+- Consulta previa obligatoria de ADRs y reglas de arquitectura antes de decisiones estructurales o nuevas dependencias.
+- Dependencias externas solo con autorizacion explicita y justificacion formal en ADR.
+- Secretos en variables de entorno ignoradas (`.env`); jamas commitear credenciales reales.
