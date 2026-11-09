@@ -1,0 +1,98 @@
+name: CI
+
+# Fuente unica de verdad: cada job ejecuta exactamente la misma tarea que se corre en local.
+# Local y CI no pueden divergir: si `deno task ci` pasa en local, pasa aqui.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  convenciones:
+    name: Convenciones de commit y pruebas de scripts
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: read
+    steps:
+      - name: Checkout del codigo
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Instalar Deno
+        uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.9.7
+
+      - name: deno task test:scripts
+        run: deno task test:scripts
+
+      - name: Validar nombre de rama en PR
+        if: github.event_name == 'pull_request'
+        run: deno run --allow-read scripts/hooks/validar-rama.ts "${{ github.head_ref }}"
+
+      - name: Validar mensajes de commit en PR
+        if: github.event_name == 'pull_request'
+        run: git log --no-merges --format=%B%x00 origin/${{ github.base_ref }}..HEAD | deno run --allow-read scripts/hooks/validar-commit.ts --stdin-mensajes
+
+      - name: Verificar inmutabilidad de migraciones en PR
+        if: github.event_name == 'pull_request'
+        run: deno run --allow-read --allow-run scripts/ci/verificar-migraciones.ts origin/${{ github.base_ref }}...HEAD
+
+      - name: Deteccion de secretos con Gitleaks en PR
+        if: github.event_name == 'pull_request'
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  backend:
+    name: Backend (estatico, unitarias, integracion, cobertura)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout del codigo
+        uses: actions/checkout@v4
+
+      - name: Instalar Deno
+        uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.9.7
+
+      - name: deno task ci (back)
+        run: deno task --cwd back ci
+
+  frontend:
+    name: Frontend (estatico, pruebas, cobertura, build)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout del codigo
+        uses: actions/checkout@v4
+
+      - name: Instalar Deno
+        uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.9.7
+
+      - name: deno task ci (front)
+        run: deno task --cwd front ci
+
+  documentacion:
+    name: Gobernanza documental (doc-linter)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout del codigo
+        uses: actions/checkout@v4
+
+      - name: Instalar Deno
+        uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.9.7
+
+      - name: deno task lint:docs
+        run: deno task lint:docs

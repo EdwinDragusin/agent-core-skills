@@ -1,0 +1,55 @@
+#!/bin/sh
+# Hook de pre-push de Git
+# Valida:
+# 1. Prohibicion total de push directo a rama main.
+# 2. Formato institucional de nombres de rama (tipo/kebab-case).
+# 3. Rechazo estricto de pushes no fast-forward (--force prohibido).
+# 4. Verificacion estatica rapida (deno task ci:rapido).
+
+z40="0000000000000000000000000000000000000000"
+leyo_stdin=0
+
+while read -r local_ref local_sha remote_ref remote_sha
+do
+  local_ref=$(printf '%s' "$local_ref" | tr -d '\r')
+  local_sha=$(printf '%s' "$local_sha" | tr -d '\r')
+  remote_ref=$(printf '%s' "$remote_ref" | tr -d '\r')
+  remote_sha=$(printf '%s' "$remote_sha" | tr -d '\r')
+
+  [ -z "$local_ref" ] && continue
+  leyo_stdin=1
+
+  # 1. Prohibir push directo a main
+  if [ "$remote_ref" = "refs/heads/main" ] || [ "$local_ref" = "refs/heads/main" ] || [ "$remote_ref" = "main" ]; then
+    echo "[ERROR PRE-PUSH]: Prohibido push directo a main. Todo cambio debe integrarse mediante Pull Request." >&2
+    exit 1
+  fi
+
+  # 2. Validar nombre de rama local (si no es eliminacion)
+  if [ "$local_sha" != "$z40" ] && [ -n "$local_ref" ]; then
+    rama="${local_ref#refs/heads/}"
+    deno run --allow-read scripts/hooks/validar-rama.ts "$rama" || exit 1
+  fi
+
+  # 3. Rechazar push no fast-forward (--force)
+  if [ "$remote_sha" != "$z40" ] && [ -n "$remote_sha" ] && [ "$local_sha" != "$z40" ] && [ -n "$local_sha" ]; then
+    if ! git merge-base --is-ancestor "$remote_sha" "$local_sha" 2>/dev/null; then
+      echo "[ERROR PRE-PUSH]: Push no fast-forward rechazado (--force esta estrictamente prohibido)." >&2
+      exit 1
+    fi
+  fi
+done
+
+if [ "$leyo_stdin" -eq 0 ]; then
+  # Verificacion de rama local actual si no hubo lineas en stdin
+  rama_actual=$(git branch --show-current 2>/dev/null | tr -d '\r')
+  if [ "$rama_actual" = "main" ]; then
+    echo "[ERROR PRE-PUSH]: Prohibido push directo a main. Todo cambio debe integrarse mediante Pull Request." >&2
+    exit 1
+  fi
+  if [ -n "$rama_actual" ]; then
+    deno run --allow-read scripts/hooks/validar-rama.ts "$rama_actual" || exit 1
+  fi
+fi
+
+exec deno task ci:rapido
