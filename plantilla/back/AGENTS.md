@@ -1,4 +1,4 @@
-# Backend Operational Manifest - Examen de Ingreso API
+# Backend Operational Manifest - {{NOMBRE_PROYECTO}} API
 
 Manifiesto operacional prescriptivo y determinista para agentes de Inteligencia Artificial que
 operan, compilan, refactorizan o auditan el codigo fuente del backend (`back/`).

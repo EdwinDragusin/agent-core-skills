@@ -45,28 +45,106 @@ export interface ArchivoEstandar {
     | "personalizada";
 }
 
-export const REGEX_TERMINO_DOMINIO = /\b(aspirante|gestion|examen_app|curp)\b/i;
-export const REGEX_ALIAS_DOMINIO = /@examen\b/i;
+export const TERMINOS_DOMINIO_PROHIBIDOS = [
+  "aspirante",
+  "gestion",
+  "examen_app",
+  "curp",
+  "hidalgo",
+  "gubernamental",
+  "postulacion",
+  "vacante",
+] as const;
+
+export const ALIAS_DOMINIO_PROHIBIDO = "@examen";
+
+/**
+ * Palabras del espanol generico que contienen incidentalmente la subcadena
+ * de un termino de dominio (ej. 'gestionar', 'congestion' frente a 'gestion')
+ * pero que no constituyen terminologia de dominio de negocio pericial.
+ */
+export const PALABRAS_EXENTAS_GENERICAS = new Set([
+  "gestionar",
+  "gestiona",
+  "gestionan",
+  "gestionando",
+  "gestiones",
+  "gestione",
+  "gestionen",
+  "gestionado",
+  "gestionada",
+  "gestionados",
+  "gestionadas",
+  "congestion",
+]);
+
+function extraerPalabraCircundante(
+  linea: string,
+  indice: number,
+  longitud: number,
+): string {
+  let inicio = indice;
+  while (
+    inicio > 0 &&
+    /[\w\u00e1\u00e9\u00ed\u00f3\u00fa\u00f1\u00c1\u00c9\u00cd\u00d3\u00da\u00d1]/
+      .test(
+        linea[inicio - 1],
+      )
+  ) {
+    inicio--;
+  }
+  let fin = indice + longitud;
+  while (
+    fin < linea.length &&
+    /[\w\u00e1\u00e9\u00ed\u00f3\u00fa\u00f1\u00c1\u00c9\u00cd\u00d3\u00da\u00d1]/
+      .test(
+        linea[fin],
+      )
+  ) {
+    fin++;
+  }
+  return linea.slice(inicio, fin);
+}
 
 export function contieneTerminoDominio(texto: string): boolean {
-  return REGEX_TERMINO_DOMINIO.test(texto) || REGEX_ALIAS_DOMINIO.test(texto);
+  return detectarTerminosDominio(texto).length > 0;
 }
 
 export function detectarTerminosDominio(texto: string): string[] {
   const hallazgos: string[] = [];
   const lineas = texto.split(/\r?\n/);
-  const regexGlobal = new RegExp(REGEX_TERMINO_DOMINIO.source, "gi");
-  const aliasGlobal = new RegExp(REGEX_ALIAS_DOMINIO.source, "gi");
+  const regexAlias = new RegExp(ALIAS_DOMINIO_PROHIBIDO, "gi");
 
   for (let i = 0; i < lineas.length; i++) {
     const l = lineas[i];
-    const matchesTerm = Array.from(l.matchAll(regexGlobal));
-    for (const m of matchesTerm) {
-      hallazgos.push(`L${i + 1}: termino '${m[0]}' en '${l.trim()}'`);
-    }
-    const matchesAlias = Array.from(l.matchAll(aliasGlobal));
+
+    // Chequeo de alias
+    const matchesAlias = Array.from(l.matchAll(regexAlias));
     for (const m of matchesAlias) {
       hallazgos.push(`L${i + 1}: alias '${m[0]}' en '${l.trim()}'`);
+    }
+
+    // Chequeo por subcadena de terminos prohibidos
+    for (const termino of TERMINOS_DOMINIO_PROHIBIDOS) {
+      const regexTerm = new RegExp(termino, "gi");
+      const matchesTerm = Array.from(l.matchAll(regexTerm));
+      for (const m of matchesTerm) {
+        if (m.index === undefined) continue;
+
+        // Si el termino es 'gestion', verificar si es falso positivo legitimo en espanol generico
+        if (termino === "gestion") {
+          const palabra = extraerPalabraCircundante(
+            l,
+            m.index,
+            m[0].length,
+          ).toLowerCase();
+          if (PALABRAS_EXENTAS_GENERICAS.has(palabra)) {
+            continue;
+          }
+        }
+
+        hallazgos.push(`L${i + 1}: termino '${m[0]}' en '${l.trim()}'`);
+      }
     }
   }
   return hallazgos;
@@ -163,6 +241,12 @@ export function convertirAAsciiPuro(texto: string): string {
 export function filtrarBloquesPs1Proyecto(contenido: string): string {
   let c = contenido;
 
+  // Limpiar cabecera institucional
+  c = c.replace(
+    /#\s*Sistema de Examenes de Ingreso\s*-\s*Gobierno del Estado de Hidalgo\r?\n/gi,
+    "",
+  );
+
   // 1. Bloque 1: Register-Check inline de casos de uso de proyecto
   c = c.replace(
     /^\s*#\s*\[PROYECTO\]\s*Piso minimo[^\r\n]*\r?\n\s*Register-Check[^\r\n]*\r?\n/gm,
@@ -173,6 +257,12 @@ export function filtrarBloquesPs1Proyecto(contenido: string): string {
   c = c.replace(
     /#\s*\[PROYECTO\]\s*Regla RN-C01 saneada.*?(?=#\s*-{5,}\r?\n#\s*4\.\s*ARC42)/gs,
     "",
+  );
+
+  // Limpiar variables residuales de arc42 de proyecto que ya no se usan en estandar
+  c = c.replace(
+    /\$cap2Path = Join-Path \$DocsPath "arquitectura\/capitulo-02-restricciones\.md"\r?\n\s*\$cap3Path = Join-Path \$DocsPath "arquitectura\/capitulo-03-contexto-y-alcance\.md"\r?\n\s*\$cap9Path = Join-Path \$DocsPath "arquitectura\/capitulo-09-decisiones\.md"\r?\n\s*\$pb001Path = Join-Path \$DocsPath "arquitectura\/procesos\/PB-001-configuracion-de-examenes\.md"/g,
+    '$cap9Path = Join-Path $DocsPath "arquitectura/capitulo-09-decisiones.md"',
   );
 
   // 3. Bloque 4+5: Sincronizacion de infraestructura y PB-001 hasta Recoleccion dinamica
@@ -223,13 +313,50 @@ export function filtrarBloquesPs1Proyecto(contenido: string): string {
 
 export const TRANSFORMACIONES_DECLARADAS: TransformacionDeclarada[] = [
   {
-    archivo: "front/tests/arquitectura/front-dependencias.test.ts",
-    marcadorOPlaceholder: "{{APP_1}}, {{APP_2}}, @{{PROYECTO}}",
+    archivo: ".agents/AGENTS.md",
+    marcadorOPlaceholder: "{{NOMBRE_PROYECTO}}, {{DESCRIPCION_PROYECTO}}",
     valorOriginal:
-      "portal publico, portal administrativo, alias de paquete monorepo",
-    valorSustituto: "{{APP_1}}, {{APP_2}}, @{{PROYECTO}}",
+      "preambulo de aplicacion REST original y marco institucional de referencia",
+    valorSustituto: "{{NOMBRE_PROYECTO}} / {{DESCRIPCION_PROYECTO}}",
     descripcion:
-      "Parametriza nombres de aplicaciones front y alias de paquete monorepo en pruebas de arquitectura FSD.",
+      "Parametriza nombre del proyecto y sustituye preambulo especifico por descripcion configurable.",
+  },
+  {
+    archivo: "back/AGENTS.md",
+    marcadorOPlaceholder: "{{NOMBRE_PROYECTO}}, identificadores personales",
+    valorOriginal: "nombre de aplicacion API original / identificador personal",
+    valorSustituto: "{{NOMBRE_PROYECTO}} API / identificadores personales",
+    descripcion:
+      "Parametriza encabezado y generaliza ejemplo de PII en directiva de observabilidad.",
+  },
+  {
+    archivo: "front/AGENTS.md",
+    marcadorOPlaceholder: "{{NOMBRE_PROYECTO}}, {{APP_1}}, {{APP_2}}",
+    valorOriginal:
+      "nombre de aplicacion Web Client original / nombres de portales originales",
+    valorSustituto: "{{NOMBRE_PROYECTO}} Web Client / {{APP_1}}, {{APP_2}}",
+    descripcion:
+      "Parametriza encabezado y directivas del modelo de capas por portal.",
+  },
+  {
+    archivo: "docs/AGENTS.md",
+    marcadorOPlaceholder: "{{SLUG_PROYECTO}}, flujos de negocio",
+    valorOriginal:
+      "identificador de vault de referencia / flujos de evaluacion originales",
+    valorSustituto: "{{SLUG_PROYECTO}}-docs / flujos de negocio",
+    descripcion:
+      "Parametriza identificador de vault Obsidian y generaliza directivas de reglas de negocio.",
+  },
+  {
+    archivo: "front/tests/arquitectura/front-dependencias.test.ts",
+    marcadorOPlaceholder:
+      "{{APP_1}}, {{APP_2}}, @{{PROYECTO}}, moduloA, LayoutPrincipal",
+    valorOriginal:
+      "portal publico, portal administrativo, alias de paquete monorepo, modulos especificos, layout especifico",
+    valorSustituto:
+      "{{APP_1}}, {{APP_2}}, @{{PROYECTO}}, moduloA, LayoutPrincipal",
+    descripcion:
+      "Parametriza aplicaciones front, alias de monorepo y generaliza entidades/layouts en tests FSD.",
   },
   {
     archivo: "front/tests/higiene/entorno.test.ts",
@@ -241,27 +368,20 @@ export const TRANSFORMACIONES_DECLARADAS: TransformacionDeclarada[] = [
   },
   {
     archivo: "front/tests/higiene/storage.test.ts",
-    marcadorOPlaceholder: "{{APP_EFIMERA}}",
-    valorOriginal: "nombre de aplicacion efimera",
-    valorSustituto: "{{APP_EFIMERA}}",
+    marcadorOPlaceholder: "{{APP_EFIMERA}}, rutaAppEfimeraSrc",
+    valorOriginal:
+      "nombre de aplicacion efimera y variable de recoleccion original",
+    valorSustituto: "{{APP_EFIMERA}} / rutaAppEfimeraSrc",
     descripcion:
-      "Parametriza portal que requiere almacenamiento exclusivamente efimero en sessionStorage.",
+      "Parametriza portal y recolector de codigo con requerimiento de sesion efimera en sessionStorage.",
   },
   {
-    archivo: "front/AGENTS.md",
-    marcadorOPlaceholder: "{{APP_1}}, {{APP_2}}",
-    valorOriginal: "nombres de aplicaciones en modelo de capas",
-    valorSustituto: "{{APP_1}}, {{APP_2}}",
+    archivo: "back/tests/arquitectura/entidades.test.ts",
+    marcadorOPlaceholder: "Item, Pedido",
+    valorOriginal: "Seccion de examen, Examen",
+    valorSustituto: "Item de pedido, Pedido",
     descripcion:
-      "Parametriza encabezado y directivas del modelo de capas por portal.",
-  },
-  {
-    archivo: "back/AGENTS.md",
-    marcadorOPlaceholder: "identificadores personales",
-    valorOriginal: "identificador tributario o de ciudadania",
-    valorSustituto: "identificadores personales",
-    descripcion:
-      "Generaliza ejemplo de campo sensible PII en directiva de observabilidad.",
+      "Sustituye fixtures de dominio de examen por entidades genericas de pedidos.",
   },
   {
     archivo: "back/tests/arquitectura/logger.test.ts",
@@ -288,27 +408,29 @@ export const TRANSFORMACIONES_DECLARADAS: TransformacionDeclarada[] = [
   },
   {
     archivo: "docs/_plantillas/PLANTILLA-CU.md",
-    marcadorOPlaceholder: "usuario / registrar-usuario",
-    valorOriginal: "ejemplo de caso de uso de secciones",
-    valorSustituto: "CU-001-registrar-usuario.md / Usuario",
+    marcadorOPlaceholder: "usuario / registrar-usuario / Facturacion",
+    valorOriginal: "ejemplo de caso de uso de secciones y examen",
+    valorSustituto: "CU-001-registrar-usuario.md / Facturacion",
     descripcion:
-      "Sustituye ejemplo de caso de uso por caso generico de registro.",
+      "Sustituye ejemplos de caso de uso y modulo por conceptos genericos.",
   },
   {
     archivo: "docs/_plantillas/PLANTILLA-DS-CU.md",
-    marcadorOPlaceholder: "registrar-usuario",
-    valorOriginal: "ejemplo de diagrama de secciones",
-    valorSustituto: "DS-CU-001-registrar-usuario.md",
+    marcadorOPlaceholder: "registrar-usuario / Facturacion",
+    valorOriginal: "ejemplo de diagrama de secciones y examen",
+    valorSustituto: "DS-CU-001-registrar-usuario.md / Facturacion",
     descripcion:
-      "Sustituye ejemplo de diagrama de secuencia por caso generico.",
+      "Sustituye ejemplos de diagrama de secuencia y modulo por conceptos genericos.",
   },
   {
     archivo: "docs/_plantillas/PLANTILLA-PB.md",
-    marcadorOPlaceholder: "Autenticacion, Facturacion, Notificaciones",
-    valorOriginal: "modulos de evaluacion y candidatos",
-    valorSustituto: "Autenticacion, Facturacion, Notificaciones",
+    marcadorOPlaceholder:
+      "Autenticacion, Facturacion, Notificaciones / proceso-base",
+    valorOriginal:
+      "modulos de evaluacion y candidatos / configuracion-de-examenes",
+    valorSustituto: "Autenticacion, Facturacion, Notificaciones / proceso-base",
     descripcion:
-      "Sustituye modulos de ejemplo de proceso de negocio por modulos genericos.",
+      "Sustituye modulos y rutas de ejemplo de proceso de negocio por modulos genericos.",
   },
   {
     archivo: "back/Dockerfile",
@@ -358,6 +480,54 @@ export function transformarContenido(
   let c = contenido;
 
   switch (rutaRelativa) {
+    case ".agents/AGENTS.md":
+      c = c.replace(
+        /# Project Rules\s*([-\u2014\u2013])\s*Sistema de Examenes de Ingreso/g,
+        "# Project Rules - {{NOMBRE_PROYECTO}}",
+      );
+      c = c.replace(
+        /API REST gubernamental \(Gobierno de Hidalgo\) para postulacion de aspirantes a puestos publicos\./g,
+        "{{DESCRIPCION_PROYECTO}}",
+      );
+      c = c.replace(
+        /ejecutar desde `examen\/back\/`:/g,
+        "ejecutar desde `back/`:",
+      );
+      break;
+
+    case "back/AGENTS.md":
+      c = c.replace(
+        /# Backend Operational Manifest\s*([-\u2014\u2013])\s*Examen de Ingreso API/g,
+        "# Backend Operational Manifest - {{NOMBRE_PROYECTO}} API",
+      );
+      c = c.replace(/,\s*CURP,/g, ", identificadores personales,");
+      break;
+
+    case "front/AGENTS.md":
+      c = c.replace(
+        /# Frontend Operational Manifest\s*([-\u2014\u2013])\s*Examen de Ingreso Web Client/g,
+        "# Frontend Operational Manifest - {{NOMBRE_PROYECTO}} Web Client",
+      );
+      c = c.replace(
+        /`aspirante\/`, `gestion\/`/g,
+        "`{{APP_1}}/`, `{{APP_2}}/`",
+      );
+      c = c.replace(/\(aspirante\/, gestion\/\)/g, "({{APP_1}}/, {{APP_2}}/)");
+      c = c.replace(/exclusivo de gestion/g, "exclusivo de {{APP_2}}");
+      c = c.replace(/bundle de\s+aspirante/g, "bundle de {{APP_1}}");
+      break;
+
+    case "docs/AGENTS.md":
+      c = c.replace(
+        /Obsidian vault \(`examen-docs`\):/g,
+        "Obsidian vault (`{{SLUG_PROYECTO}}-docs`):",
+      );
+      c = c.replace(
+        /flujos de postulacion y examen/g,
+        "flujos de negocio",
+      );
+      break;
+
     case "front/tests/arquitectura/front-dependencias.test.ts":
       c = c.replace(
         /type AppFront = "aspirante" \| "gestion" \| "shared";/g,
@@ -371,6 +541,22 @@ export function transformarContenido(
       c = c.replace(/@examen/g, "@{{PROYECTO}}");
       c = c.replace(/aspirante/g, "{{APP_1}}");
       c = c.replace(/gestion/g, "{{APP_2}}");
+      c = c.replace(
+        /entities\/postulacion\//g,
+        "entities/moduloA/",
+      );
+      c = c.replace(
+        /LayoutGestion\.tsx/g,
+        "LayoutPrincipal.tsx",
+      );
+      c = c.replace(
+        /postulacionesApi\.ts/g,
+        "moduloAApi.ts",
+      );
+      c = c.replace(
+        /features\/examen-runner\/pages\/PaginaExamen\.tsx/g,
+        "features/runner/pages/PaginaDetalle.tsx",
+      );
       break;
 
     case "front/tests/higiene/entorno.test.ts":
@@ -385,23 +571,34 @@ export function transformarContenido(
         /recolectarArchivosAspiranteSrc/g,
         "recolectarArchivosAppEfimeraSrc",
       );
+      c = c.replace(
+        /rutaAspiranteSrc/g,
+        "rutaAppEfimeraSrc",
+      );
       c = c.replace(/\/aspirante\/src/g, "/{{APP_EFIMERA}}/src");
       c = c.replace(/front\/aspirante\/src/g, "front/{{APP_EFIMERA}}/src");
       c = c.replace(/en aspirante/g, "en {{APP_EFIMERA}}");
       break;
 
-    case "front/AGENTS.md":
+    case "back/tests/arquitectura/entidades.test.ts":
+      c = c.replace(/Seccion de examen/g, "Item de pedido");
       c = c.replace(
-        /`aspirante\/`, `gestion\/`/g,
-        "`{{APP_1}}/`, `{{APP_2}}/`",
+        /src\/dominio\/examen\/Seccion\.ts/g,
+        "src/dominio/pedidos/Item.ts",
       );
-      c = c.replace(/\(aspirante\/, gestion\/\)/g, "({{APP_1}}/, {{APP_2}}/)");
-      c = c.replace(/exclusivo de gestion/g, "exclusivo de {{APP_2}}");
-      c = c.replace(/bundle de\s+aspirante/g, "bundle de {{APP_1}}");
-      break;
-
-    case "back/AGENTS.md":
-      c = c.replace(/,\s*CURP,/g, ", identificadores personales,");
+      c = c.replace(
+        /class Seccion extends Entidad/g,
+        "class Item extends Entidad",
+      );
+      c = c.replace(/Agregado: Examen/g, "Agregado: Pedido");
+      c = c.replace(
+        /src\/dominio\/examen\/Examen\.ts/g,
+        "src/dominio/pedidos/Pedido.ts",
+      );
+      c = c.replace(
+        /class Examen extends AgregadoRaiz/g,
+        "class Pedido extends AgregadoRaiz",
+      );
       break;
 
     case "back/tests/arquitectura/logger.test.ts":
@@ -447,12 +644,20 @@ export function transformarContenido(
         /ej\. Administrador, Enlace, Aspirante/g,
         "ej. Administrador, Operador, Usuario",
       );
+      c = c.replace(
+        /Modulo \(ej\. Creacion de Examen\)/g,
+        "Modulo (ej. Facturacion)",
+      );
       break;
 
     case "docs/_plantillas/PLANTILLA-DS-CU.md":
       c = c.replace(
         /DS-CU-011-gestionar-secciones\.md/g,
         "DS-CU-001-registrar-usuario.md",
+      );
+      c = c.replace(
+        /Modulo \(ej\. Creacion de Examen\)/g,
+        "Modulo (ej. Facturacion)",
       );
       break;
 
@@ -464,6 +669,10 @@ export function transformarContenido(
       c = c.replace(
         /ej\. Creacion de Examen, Postulacion de Aspirantes, Aplicacion y Calificacion/g,
         "ej. Autenticacion, Facturacion, Notificaciones",
+      );
+      c = c.replace(
+        /arquitectura\/procesos\/PB-001-configuracion-de-examenes\.md/g,
+        "arquitectura/procesos/PB-001-proceso-base.md",
       );
       break;
 
@@ -800,9 +1009,10 @@ export const ARCHIVOS_ESTANDAR: ArchivoEstandar[] = [
     destino: ".agents/AGENTS.md",
     categoria: "manifiestos",
     regla: "Manifiesto raiz de reglas del estandar (.agents/AGENTS.md)",
-    requiereAdaptacion: false,
+    requiereAdaptacion: true,
     guiaAdaptacion:
-      "Filtradas secciones de proyecto. Mantiene reglas con etiquetas verifica:.",
+      "Sustituir {{NOMBRE_PROYECTO}} y {{DESCRIPCION_PROYECTO}} por el titulo y proposito del sistema adoptante.",
+    marcadores: ["{{NOMBRE_PROYECTO}}", "{{DESCRIPCION_PROYECTO}}"],
     tipoTransformacion: "filtro-md-estandar",
   },
   {
@@ -810,9 +1020,10 @@ export const ARCHIVOS_ESTANDAR: ArchivoEstandar[] = [
     destino: "back/AGENTS.md",
     categoria: "manifiestos",
     regla: "Manifiesto operacional backend (back/AGENTS.md)",
-    requiereAdaptacion: false,
+    requiereAdaptacion: true,
     guiaAdaptacion:
-      "Filtradas secciones de proyecto. Mantiene limites arquitectonicos y comandos CI.",
+      "Sustituir {{NOMBRE_PROYECTO}} por el nombre de la API en el encabezado.",
+    marcadores: ["{{NOMBRE_PROYECTO}}"],
     tipoTransformacion: "filtro-md-estandar",
   },
   {
@@ -822,8 +1033,8 @@ export const ARCHIVOS_ESTANDAR: ArchivoEstandar[] = [
     regla: "Manifiesto operacional frontend (front/AGENTS.md)",
     requiereAdaptacion: true,
     guiaAdaptacion:
-      "Sustituir marcadores {{APP_1}} y {{APP_2}} por los nombres de las aplicaciones front.",
-    marcadores: ["{{APP_1}}", "{{APP_2}}"],
+      "Sustituir marcadores {{NOMBRE_PROYECTO}}, {{APP_1}} y {{APP_2}} por los nombres de las aplicaciones front.",
+    marcadores: ["{{NOMBRE_PROYECTO}}", "{{APP_1}}", "{{APP_2}}"],
     tipoTransformacion: "filtro-md-estandar",
   },
   {
@@ -831,10 +1042,11 @@ export const ARCHIVOS_ESTANDAR: ArchivoEstandar[] = [
     destino: "docs/AGENTS.md",
     categoria: "manifiestos",
     regla: "Manifiesto operacional de documentacion (docs/AGENTS.md)",
-    requiereAdaptacion: false,
+    requiereAdaptacion: true,
     guiaAdaptacion:
-      "Copiar directo. Contiene 100% directivas estandar bimodal.",
-    tipoTransformacion: "copia-directa",
+      "Sustituir {{SLUG_PROYECTO}} por el nombre del vault de documentacion.",
+    marcadores: ["{{SLUG_PROYECTO}}"],
+    tipoTransformacion: "personalizada",
   },
 
   // 7. Entorno Docker y Configuracion Deno
@@ -990,6 +1202,9 @@ export function generarManifiestoMd(
     "",
     "| Marcador | Proposito | Archivos Afectados | Rol Original en Referencia |",
     "|---|---|---|---|",
+    "| `{{NOMBRE_PROYECTO}}` | Nombre del sistema o proyecto adoptante | `.agents/AGENTS.md`, `back/AGENTS.md`, `front/AGENTS.md` | Nombre institucional del proyecto |",
+    "| `{{DESCRIPCION_PROYECTO}}` | Resumen institucional de proposito y alcance del proyecto | `.agents/AGENTS.md` | Descripcion institucional original de referencia |",
+    "| `{{SLUG_PROYECTO}}` | Identificador en kebab-case del vault de documentacion | `docs/AGENTS.md` | Nombre del vault Obsidian |",
     "| `{{APP_1}}` | Nombre de la primera SPA del portal web | `front/tests/arquitectura/front-dependencias.test.ts`, `front/tests/higiene/entorno.test.ts`, `front/deno.json`, `front/AGENTS.md` | Portal de autoservicio publico |",
     "| `{{APP_2}}` | Nombre de la segunda SPA del portal web | `front/tests/arquitectura/front-dependencias.test.ts`, `front/tests/higiene/entorno.test.ts`, `front/deno.json`, `front/AGENTS.md` | Portal administrativo y operativo |",
     "| `@{{PROYECTO}}` | Prefijo de importacion de paquetes monorepo | `front/tests/arquitectura/front-dependencias.test.ts` | Prefijo de paquete institucional |",

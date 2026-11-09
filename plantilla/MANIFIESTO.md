@@ -18,6 +18,9 @@ sustituir los siguientes marcadores de acuerdo con su arquitectura especifica:
 
 | Marcador | Proposito | Archivos Afectados | Rol Original en Referencia |
 |---|---|---|---|
+| `{{NOMBRE_PROYECTO}}` | Nombre del sistema o proyecto adoptante | `.agents/AGENTS.md`, `back/AGENTS.md`, `front/AGENTS.md` | Nombre institucional del proyecto |
+| `{{DESCRIPCION_PROYECTO}}` | Resumen institucional de proposito y alcance del proyecto | `.agents/AGENTS.md` | Descripcion institucional original de referencia |
+| `{{SLUG_PROYECTO}}` | Identificador en kebab-case del vault de documentacion | `docs/AGENTS.md` | Nombre del vault Obsidian |
 | `{{APP_1}}` | Nombre de la primera SPA del portal web | `front/tests/arquitectura/front-dependencias.test.ts`, `front/tests/higiene/entorno.test.ts`, `front/deno.json`, `front/AGENTS.md` | Portal de autoservicio publico |
 | `{{APP_2}}` | Nombre de la segunda SPA del portal web | `front/tests/arquitectura/front-dependencias.test.ts`, `front/tests/higiene/entorno.test.ts`, `front/deno.json`, `front/AGENTS.md` | Portal administrativo y operativo |
 | `@{{PROYECTO}}` | Prefijo de importacion de paquetes monorepo | `front/tests/arquitectura/front-dependencias.test.ts` | Prefijo de paquete institucional |
@@ -53,10 +56,10 @@ sustituir los siguientes marcadores de acuerdo con su arquitectura especifica:
 | `front/tests/arquitectura/front-dependencias.test.ts` | arquitectura-front | Reglas RN-F01, RN-F02, RN-F03 y capas FSD (front/AGENTS.md) | **SI** | `{{APP_1}}`, `{{APP_2}}`, `@{{PROYECTO}}` | Sustituir marcadores {{APP_1}} y {{APP_2}} por los nombres de las aplicaciones del proyecto. |
 | `front/tests/higiene/entorno.test.ts` | higiene-front | Restriccion de variables de entorno frontend (front/AGENTS.md) | **SI** | `{{APP_1}}`, `{{APP_2}}` | Sustituir marcadores {{APP_1}} y {{APP_2}} en mensaje de asercion si aplica. |
 | `front/tests/higiene/storage.test.ts` | higiene-front | Prohibicion de localStorage en portales efimeros (front/AGENTS.md) | **SI** | `{{APP_EFIMERA}}` | Sustituir marcador {{APP_EFIMERA}} por la aplicacion con sesion efimera requerida. |
-| `.agents/AGENTS.md` | manifiestos | Manifiesto raiz de reglas del estandar (.agents/AGENTS.md) | No | Ninguno | Filtradas secciones de proyecto. Mantiene reglas con etiquetas verifica:. |
-| `back/AGENTS.md` | manifiestos | Manifiesto operacional backend (back/AGENTS.md) | No | Ninguno | Filtradas secciones de proyecto. Mantiene limites arquitectonicos y comandos CI. |
-| `front/AGENTS.md` | manifiestos | Manifiesto operacional frontend (front/AGENTS.md) | **SI** | `{{APP_1}}`, `{{APP_2}}` | Sustituir marcadores {{APP_1}} y {{APP_2}} por los nombres de las aplicaciones front. |
-| `docs/AGENTS.md` | manifiestos | Manifiesto operacional de documentacion (docs/AGENTS.md) | No | Ninguno | Copiar directo. Contiene 100% directivas estandar bimodal. |
+| `.agents/AGENTS.md` | manifiestos | Manifiesto raiz de reglas del estandar (.agents/AGENTS.md) | **SI** | `{{NOMBRE_PROYECTO}}`, `{{DESCRIPCION_PROYECTO}}` | Sustituir {{NOMBRE_PROYECTO}} y {{DESCRIPCION_PROYECTO}} por el titulo y proposito del sistema adoptante. |
+| `back/AGENTS.md` | manifiestos | Manifiesto operacional backend (back/AGENTS.md) | **SI** | `{{NOMBRE_PROYECTO}}` | Sustituir {{NOMBRE_PROYECTO}} por el nombre de la API en el encabezado. |
+| `front/AGENTS.md` | manifiestos | Manifiesto operacional frontend (front/AGENTS.md) | **SI** | `{{NOMBRE_PROYECTO}}`, `{{APP_1}}`, `{{APP_2}}` | Sustituir marcadores {{NOMBRE_PROYECTO}}, {{APP_1}} y {{APP_2}} por los nombres de las aplicaciones front. |
+| `docs/AGENTS.md` | manifiestos | Manifiesto operacional de documentacion (docs/AGENTS.md) | **SI** | `{{SLUG_PROYECTO}}` | Sustituir {{SLUG_PROYECTO}} por el nombre del vault de documentacion. |
 | `back/Dockerfile` | config | Runtime estandar Deno 2.x en backend (back/AGENTS.md) | No | Ninguno | Dockerfile oficial Deno 2.9.7 Alpine para backend con pre-chequeo estricto. |
 | `deno.json` | config | Comandos deterministas de monorepo (.agents/AGENTS.md) | No | Ninguno | Plantilla con tareas estandar ci, check, fmt, lint, test, coverage, hooks. |
 | `back/deno.json` | config | Configuracion estricta y tareas de backend (back/AGENTS.md) | **SI** | Ninguno | Ajustar umbrales de cobertura (coverage.thresholds) segun linea base del proyecto. |
@@ -77,17 +80,20 @@ sustituir los siguientes marcadores de acuerdo con su arquitectura especifica:
 
 | Archivo | Marcador / Placeholder | Valor Original en Examen | Sustituto en Plantilla | Proposito |
 |---|---|---|---|---|
-| `front/tests/arquitectura/front-dependencias.test.ts` | `{{APP_1}}, {{APP_2}}, @{{PROYECTO}}` | `portal publico, portal administrativo, alias de paquete monorepo` | `{{APP_1}}, {{APP_2}}, @{{PROYECTO}}` | Parametriza nombres de aplicaciones front y alias de paquete monorepo en pruebas de arquitectura FSD. |
+| `.agents/AGENTS.md` | `{{NOMBRE_PROYECTO}}, {{DESCRIPCION_PROYECTO}}` | `preambulo de aplicacion REST original y marco institucional de referencia` | `{{NOMBRE_PROYECTO}} / {{DESCRIPCION_PROYECTO}}` | Parametriza nombre del proyecto y sustituye preambulo especifico por descripcion configurable. |
+| `back/AGENTS.md` | `{{NOMBRE_PROYECTO}}, identificadores personales` | `nombre de aplicacion API original / identificador personal` | `{{NOMBRE_PROYECTO}} API / identificadores personales` | Parametriza encabezado y generaliza ejemplo de PII en directiva de observabilidad. |
+| `front/AGENTS.md` | `{{NOMBRE_PROYECTO}}, {{APP_1}}, {{APP_2}}` | `nombre de aplicacion Web Client original / nombres de portales originales` | `{{NOMBRE_PROYECTO}} Web Client / {{APP_1}}, {{APP_2}}` | Parametriza encabezado y directivas del modelo de capas por portal. |
+| `docs/AGENTS.md` | `{{SLUG_PROYECTO}}, flujos de negocio` | `identificador de vault de referencia / flujos de evaluacion originales` | `{{SLUG_PROYECTO}}-docs / flujos de negocio` | Parametriza identificador de vault Obsidian y generaliza directivas de reglas de negocio. |
+| `front/tests/arquitectura/front-dependencias.test.ts` | `{{APP_1}}, {{APP_2}}, @{{PROYECTO}}, moduloA, LayoutPrincipal` | `portal publico, portal administrativo, alias de paquete monorepo, modulos especificos, layout especifico` | `{{APP_1}}, {{APP_2}}, @{{PROYECTO}}, moduloA, LayoutPrincipal` | Parametriza aplicaciones front, alias de monorepo y generaliza entidades/layouts en tests FSD. |
 | `front/tests/higiene/entorno.test.ts` | `{{APP_1}}, {{APP_2}}` | `directorios de portales especificos en mensaje de error` | `({{APP_1}}/src y {{APP_2}}/src)` | Generaliza mensaje de error de asercion de cantidad minima de portales. |
-| `front/tests/higiene/storage.test.ts` | `{{APP_EFIMERA}}` | `nombre de aplicacion efimera` | `{{APP_EFIMERA}}` | Parametriza portal que requiere almacenamiento exclusivamente efimero en sessionStorage. |
-| `front/AGENTS.md` | `{{APP_1}}, {{APP_2}}` | `nombres de aplicaciones en modelo de capas` | `{{APP_1}}, {{APP_2}}` | Parametriza encabezado y directivas del modelo de capas por portal. |
-| `back/AGENTS.md` | `identificadores personales` | `identificador tributario o de ciudadania` | `identificadores personales` | Generaliza ejemplo de campo sensible PII en directiva de observabilidad. |
+| `front/tests/higiene/storage.test.ts` | `{{APP_EFIMERA}}, rutaAppEfimeraSrc` | `nombre de aplicacion efimera y variable de recoleccion original` | `{{APP_EFIMERA}} / rutaAppEfimeraSrc` | Parametriza portal y recolector de codigo con requerimiento de sesion efimera en sessionStorage. |
+| `back/tests/arquitectura/entidades.test.ts` | `Item, Pedido` | `Seccion de examen, Examen` | `Item de pedido, Pedido` | Sustituye fixtures de dominio de examen por entidades genericas de pedidos. |
 | `back/tests/arquitectura/logger.test.ts` | `identificador` | `campo tributario en comentario JSDoc` | `identificador.valor` | Sustituye ejemplo en comentario JSDoc por identificador agnostico. |
 | `scripts/ci/verificar-migraciones.test.ts` | `usuario` | `ruta de entidad de candidato en fixture` | `back/src/dominio/usuario/Usuario.ts` | Sustituye ruta ficticia de fixture de migraciones por entidad generica. |
 | `docs/_plantillas/PLANTILLA-Actor.md` | `usuario` | `ejemplo de actor en plantilla` | `usuario.md / Usuario` | Sustituye ejemplo de actor de dominio por actor generico. |
-| `docs/_plantillas/PLANTILLA-CU.md` | `usuario / registrar-usuario` | `ejemplo de caso de uso de secciones` | `CU-001-registrar-usuario.md / Usuario` | Sustituye ejemplo de caso de uso por caso generico de registro. |
-| `docs/_plantillas/PLANTILLA-DS-CU.md` | `registrar-usuario` | `ejemplo de diagrama de secciones` | `DS-CU-001-registrar-usuario.md` | Sustituye ejemplo de diagrama de secuencia por caso generico. |
-| `docs/_plantillas/PLANTILLA-PB.md` | `Autenticacion, Facturacion, Notificaciones` | `modulos de evaluacion y candidatos` | `Autenticacion, Facturacion, Notificaciones` | Sustituye modulos de ejemplo de proceso de negocio por modulos genericos. |
+| `docs/_plantillas/PLANTILLA-CU.md` | `usuario / registrar-usuario / Facturacion` | `ejemplo de caso de uso de secciones y examen` | `CU-001-registrar-usuario.md / Facturacion` | Sustituye ejemplos de caso de uso y modulo por conceptos genericos. |
+| `docs/_plantillas/PLANTILLA-DS-CU.md` | `registrar-usuario / Facturacion` | `ejemplo de diagrama de secciones y examen` | `DS-CU-001-registrar-usuario.md / Facturacion` | Sustituye ejemplos de diagrama de secuencia y modulo por conceptos genericos. |
+| `docs/_plantillas/PLANTILLA-PB.md` | `Autenticacion, Facturacion, Notificaciones / proceso-base` | `modulos de evaluacion y candidatos / configuracion-de-examenes` | `Autenticacion, Facturacion, Notificaciones / proceso-base` | Sustituye modulos y rutas de ejemplo de proceso de negocio por modulos genericos. |
 | `back/Dockerfile` | `N/A (cabecera)` | `titulo institucional del gobierno` | `Backend API REST y Background Worker` | Sanitiza cabecera del Dockerfile oficial manteniendo runtime util. |
 | `.github/pull_request_template.md` | `N/A (reglas)` | `reglas de dictamen y prueba pericial` | `reglas operativas estandar` | Elimina directivas especificas de dictamen y evaluacion del template de PR. |
 | `deno.json` | `N/A (tareas)` | `tareas docker y semillas de base de datos` | `tareas estandar de calidad y CI` | Filtra tareas de base de datos especificas preservando pipeline CI estandar. |
@@ -99,6 +105,6 @@ sustituir los siguientes marcadores de acuerdo con su arquitectura especifica:
 ## Verificacion de Integridad y Cobertura
 
 - Total de archivos estandar exportados: 41
-- Total de transformaciones declaradas: 16
+- Total de transformaciones declaradas: 19
 - Ausencia total de secciones de proyecto garantizada por extractor.
 - Ausencia total de terminos de dominio y alias institucionales garantizada.
