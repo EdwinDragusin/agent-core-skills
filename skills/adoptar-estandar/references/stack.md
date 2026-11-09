@@ -14,12 +14,12 @@ Durante la Fase 1 (Auditoria de Solo Lectura), el adoptante evalua los archivos 
 |---|---|---|
 | `deno.json` o `deno.jsonc` | Deno 2.x | Runtime soportado directamente |
 | `src/infraestructura/persistencia/esquema.ts` con Drizzle | Drizzle ORM + PostgreSQL | Persistencia soportada directamente |
-| `front/vite.config.ts`, `package.json` con React | React + Vite (FSD) | Frontend soportado directamente |
+| `front/vite.config.ts`, `package.json` con React | React + Vite (FSD single-SPA o multi-SPA) | Frontend soportado directamente |
 | `package.json` con Node/Bun, `pyproject.toml`, `Cargo.toml`, `go.mod` | Stack Heterogeneo | Modo agnostico universal |
 
 ### Modos de Operacion
 - **Modo Homogeneo (Deno + Hono + Drizzle + React FSD):**
-  Aplica el 100% de los archivos de `RAIZ_PLUGIN/plantilla/` (backend Clean Architecture, frontend FSD con marcadores `{{APP_1}}`, `{{APP_2}}`, `@{{PROYECTO}}`, `{{APP_EFIMERA}}`, tests Deno y linters).
+  Aplica el 100% de los archivos de `RAIZ_PLUGIN/plantilla/` (backend Clean Architecture, frontend FSD con configuracion centralizada de topologia en `estandar.config.ts` soportando una sola SPA o multiples SPAs con capa shared opcional, tests Deno y linters).
 - **Modo Heterogeneo / Stack Alternativo:**
   Emite advertencia en la Fase 1. Se restringe la adopcion a los mecanismos agnosticos universales, absteniendose de transferir tests de capas acoplados al runtime de Deno a menos que se traduzcan al runner nativo del proyecto.
 
