@@ -31,14 +31,16 @@ Plugin de gobernanza de ingenieria de software, reglas de arquitectura y catalog
 
 ### En Antigravity (2 pasos)
 
-1. Instalar Superpowers desde su marketplace oficial o directorio local:
+1. Clonar e instalar Superpowers localmente:
 ```bash
-agy plugin install superpowers@superpowers-marketplace
+git clone https://github.com/obra/superpowers.git .superpowers
+agy plugin install .superpowers
 ```
 
 2. Instalar el nucleo de Agent Core Skills:
 ```bash
-agy plugin install agent-core-skills@agent-core-skills-marketplace
+agy plugin install .
+# o desde marketplace registrado: agy plugin install agent-core-skills@agent-core-skills-marketplace
 ```
 
 ### En Claude Code (1 paso)
@@ -46,6 +48,12 @@ agy plugin install agent-core-skills@agent-core-skills-marketplace
 Claude Code resuelve dependencias de marketplace automaticamente a traves de `.claude-plugin/plugin.json`:
 ```bash
 claude plugin install agent-core-skills
+```
+
+Tambien puede instalarse manualmente desde el marketplace oficial:
+```bash
+/plugin marketplace add obra/superpowers-marketplace
+/plugin install superpowers@superpowers-marketplace
 ```
 
 ## Uso

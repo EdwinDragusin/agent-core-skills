@@ -13,7 +13,7 @@
 El proceso de desarrollo se delega en las skills de Superpowers:
 - Diseno y descomposicion: `brainstorming`, `writing-plans` y `subagent-driven-development`.
 - Ejecucion y calidad: TDD (`test-driven-development`), `systematic-debugging` y `verification-before-completion`.
-- Si las skills de Superpowers no estan instaladas: avisar al usuario una sola vez con comando de instalacion (`agy plugin install superpowers@superpowers-marketplace` en Antigravity, o via marketplace en Claude Code).
+- Si las skills de Superpowers no estan instaladas: avisar al usuario una sola vez con instrucciones de instalacion: en Antigravity clonar `git clone https://github.com/obra/superpowers.git <dir>` y ejecutar `agy plugin install <dir>`; en Claude Code se instala automaticamente como dependencia o con `/plugin marketplace add obra/superpowers-marketplace` y `/plugin install superpowers@superpowers-marketplace`.
 - Si el repositorio carece de pipeline de CI unificada, hooks o estructura del estandar: sugerir la skill `adoptar-estandar`.
 
 ## 3. Reglas de Instruccion del Estandar de Ingenieria
