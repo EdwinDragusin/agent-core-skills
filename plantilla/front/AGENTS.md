@@ -54,70 +54,84 @@ Ejecutar desde la raiz del frontend (`front/`):
 > ejecutar `deno task ci` y verificar que concluya con codigo de salida 0.
 > <!-- verifica: instruccion -->
 
-## 3. Reglas Inviolables de Arquitectura Feature-Sliced (FSD)
+---
+
+## 3. Manifiestos por Aplicacion y Capa Compartida
 <!-- [ESTANDAR] -->
 
-### Modelo de Capas por Aplicacion (`{{APP_1}}/`, `{{APP_2}}/`)
+Para reglas especificas de negocio, flujos y almacenamiento por portal, consultar sus manifiestos dedicados:
+
+- [`{{APP_1}}/AGENTS.md`]({{APP_1}}/AGENTS.md): Reglas del flujo interactivo en vivo, persistencia inmediata, sesiones efimeras y aislamiento mobile-first.
+- [`{{APP_2}}/AGENTS.md`]({{APP_2}}/AGENTS.md): Procesos administrativos, operaciones de backoffice y entorno desktop-first.
+- [`shared/AGENTS.md`](shared/AGENTS.md): Componentes UI primitivos, utilidades transversales, tokens de diseno y aislamiento de efectos (RN-F02).
+
+---
+
+## 4. Reglas Cardinales de Arquitectura FSD
 <!-- [ESTANDAR] -->
 
-| Capa                | Ruta                                                               | Puede importar de                                                            |
-| ------------------- | ------------------------------------------------------------------ | ---------------------------------------------------------------------------- |
-| app                 | `src/App.tsx`, `src/main.tsx`, `src/queryClient.ts`, `src/styles/` | cualquier capa de su propia app, `@shared/`                                  |
-| components (layout) | `src/components/**`                                                | `entities/*` (via `index.ts`), `src/api/`, `@shared/`                        |
-| features            | `src/features/<f>/**`                                              | su propia `<f>`, `entities/*` (via `index.ts`), `src/api/`, `@shared/`       |
-| entities            | `src/entities/<e>/**`                                              | su propia `<e>`, otra entidad solo via su `index.ts`, `src/api/`, `@shared/` |
-| api                 | `src/api/**`                                                       | `@shared/`                                                                   |
-| shared              | `front/shared/**`                                                  | solo `front/shared/**`                                                       |
-
-Criterio para promover codigo compartido:
-
-- Lo usan dos o mas features **de la misma app** -> `src/entities/<entidad>/` de esa app (expuesto por
-  `index.ts`).
-  <!-- verifica: front/tests/arquitectura/front-dependencias.test.ts -->
-- Lo usan **las dos apps** -> `front/shared/`.
-  <!-- verifica: front/tests/arquitectura/front-dependencias.test.ts -->
-- Nunca mover a `front/shared/` algo exclusivo de {{APP_2}}, porque terminaria en el bundle de {{APP_1}} (RN-F03).
-  <!-- verifica: front/tests/arquitectura/front-dependencias.test.ts -->
-
-> [!NOTE]
-> RN-F01, RN-F02, RN-F03 y capas verificadas por `tests/arquitectura/front-dependencias.test.ts`.
-
-### Reglas Cardinales de Dependencia y Codificacion
+### Jerarquia de Capas y Aislamiento
 <!-- [ESTANDAR] -->
 
 1. **RN-F01 - Prohibicion de Imports Cruzados entre Features**:
    <!-- verifica: front/tests/arquitectura/front-dependencias.test.ts -->
    - Cada carpeta en `features/nombre-feature/` es un modulo cerrado (incluidos sus tests).
      <!-- verifica: front/tests/arquitectura/front-dependencias.test.ts -->
-   - Jamas importar de una feature vecina: promover a `src/entities/` si es de una sola app; a
-     `front/shared/` si lo usan ambas.
+   - Jamas importar de una feature vecina: promover a `entities/` si es de una sola app; a
+     `shared/` si lo usan ambas.
      <!-- verifica: front/tests/arquitectura/front-dependencias.test.ts -->
 2. **RN-F02 - Aislamiento de Efectos de Red en Presentacionales**:
    <!-- verifica: front/tests/arquitectura/front-dependencias.test.ts -->
-   - Los componentes en `components/` y `front/shared/ui/` son presentacionales puros: reciben
-     `props` y emiten eventos/callbacks.
+   - Los componentes en `components/` y `shared/ui/` son presentacionales puros: reciben
+     `props` y emiten callbacks.
      <!-- verifica: front/tests/arquitectura/front-dependencias.test.ts -->
    - Prohibido llamar `fetch`, `axios` o invocar mutaciones directamente dentro de componentes
      visuales.
      <!-- verifica: front/tests/arquitectura/front-dependencias.test.ts -->
-   - Todo efecto secundario de red vive en `hooks/` utilizando TanStack Query.
+   - Todo efecto secundario de red vive en `hooks/` o `api/` utilizando TanStack Query.
      <!-- verifica: front/tests/arquitectura/front-dependencias.test.ts -->
-
-## 4. Estrategia de Pruebas de Componentes
-<!-- [ESTANDAR] -->
-
-- No se utiliza Storybook (ADR-F001).
-  <!-- verifica: front/deno.json -->
-- El aislamiento de componentes se prueba directamente con `@testing-library/react` y fixtures
-  tipados de `front/shared/testing/`.
-  <!-- verifica: front/tests/arquitectura/front-dependencias.test.ts -->
-- Validar siempre accesibilidad (roles ARIA), renderizado condicional de estados (`cargando`,
-  `vacio`, `error`) y emision correcta de callbacks.
-  <!-- verifica: instruccion -->
 
 ---
 
-## 5. Reglas Operativas y de Seguridad
+## 5. Recetas Estandar de Desarrollo
+<!-- [ESTANDAR] -->
+
+### Receta: Nueva Feature Slice
+<!-- [ESTANDAR] -->
+
+1. Crear carpeta `src/features/<nombre-feature>/` con subdirectorios `api/`, `components/`, `hooks/`, `types/` y `__tests__/`.
+2. Definir contratos y esquemas Zod en `types/`.
+3. Implementar llamadas cliente HTTP en `api/` y encapsular en `hooks/` con `useQuery` o `useMutation`.
+4. Construir componentes de la feature en `components/` consumiendo exclusivamente los hooks de la propia slice.
+5. Exportar la interfaz publica de la feature unicamente desde su `index.ts`.
+
+### Receta: Hook de Datos con TanStack Query
+<!-- [ESTANDAR] -->
+
+1. Declarar funciones de peticion en `api/` retornando datos tipados.
+2. Crear hook en `hooks/` encapsulando `useQuery` o `useMutation`.
+3. Manejar estados de carga, error y reintentos sin exponer detalles tecnicos a la vista.
+4. Centralizar claves de consulta (`queryKeys`) para invalidacion determinista tras mutaciones.
+
+### Receta: Componente Presentacional
+<!-- [ESTANDAR] -->
+
+1. Ubicar en `components/` de la feature, en layout o en `shared/ui/`.
+2. Declarar `Props` tipadas explictamente con datos primitivos y manejadores de evento.
+3. Asegurar atributos de accesibilidad WCAG (roles ARIA, `aria-expanded`, etiquetas accesibles).
+4. Cero logica de red o acceso a storage dentro del renderizado visual.
+
+### Receta: Test de Componente
+<!-- [ESTANDAR] -->
+
+1. Ubicar la prueba junto al componente o en `__tests__/`.
+2. Utilizar `@testing-library/react` renderizando con providers de contexto cuando sea necesario.
+3. Probar renderizado condicional de estados (`cargando`, `vacio`, `error`).
+4. Disparar eventos de usuario y verificar emision correcta de callbacks con `expect()`.
+
+---
+
+## 6. Reglas Operativas y de Seguridad
 <!-- [ESTANDAR] -->
 
 ### Reglas Generales de Higiene y Entorno

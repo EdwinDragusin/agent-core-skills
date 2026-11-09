@@ -7,8 +7,10 @@ import {
 import {
   contieneTerminoDominio,
   detectarTerminosDominio,
+  extraerRutasDeConfig,
   filtrarBloquesPs1Proyecto,
   filtrarSeccionesMdProyecto,
+  RUTA_SHARED_AGENTS,
   TRANSFORMACIONES_DECLARADAS,
   transformarContenido,
   validarSintaxisPowerShell,
@@ -252,9 +254,14 @@ Deno.test("Preambulos limpios - preambulo con Gobierno de Hidalgo no llega a la 
   const raizPlantilla = new URL("../plantilla", import.meta.url).pathname
     .replace(/^\/([A-Za-z]:)/, "$1");
   const manifiestos = [
-    ".agents/AGENTS.md",
+    "AGENTS.md",
     "back/AGENTS.md",
+    "back/src/dominio/AGENTS.md",
+    "back/src/aplicacion/AGENTS.md",
+    "back/src/infraestructura/AGENTS.md",
+    "back/src/interfaz/AGENTS.md",
     "front/AGENTS.md",
+    RUTA_SHARED_AGENTS,
     "docs/AGENTS.md",
   ];
 
@@ -335,9 +342,14 @@ Deno.test("Verificacion de integridad - cada ruta verifica: en AGENTS.md existe 
   const raizPlantilla = new URL("../plantilla", import.meta.url).pathname
     .replace(/^\/([A-Za-z]:)/, "$1");
   const manifiestos = [
-    ".agents/AGENTS.md",
+    "AGENTS.md",
     "back/AGENTS.md",
+    "back/src/dominio/AGENTS.md",
+    "back/src/aplicacion/AGENTS.md",
+    "back/src/infraestructura/AGENTS.md",
+    "back/src/interfaz/AGENTS.md",
     "front/AGENTS.md",
+    RUTA_SHARED_AGENTS,
     "docs/AGENTS.md",
   ];
 
@@ -388,4 +400,23 @@ Deno.test("Validacion sintactica PowerShell - doc-linter.ps1 compila con 0 error
     [],
     `Errores de sintaxis PowerShell en doc-linter.ps1:\n${errores.join("\n")}`,
   );
+});
+
+Deno.test("Resolucion dinamica de shared desde front.raiz en estandar.config.ts", () => {
+  const rutasDefecto = extraerRutasDeConfig();
+  assertEquals(rutasDefecto.frontRaiz, "front");
+  assertEquals(rutasDefecto.rutaShared, "front/shared");
+
+  const configPersonalizada = `
+  export const estandarConfig = {
+    back: { raiz: "servidor" },
+    front: {
+      raiz: "clientes/web",
+      capaCompartida: { nombre: "comun", ruta: "comun" },
+    },
+  };`;
+  const rutasCustom = extraerRutasDeConfig(configPersonalizada);
+  assertEquals(rutasCustom.backRaiz, "servidor");
+  assertEquals(rutasCustom.frontRaiz, "clientes/web");
+  assertEquals(rutasCustom.rutaShared, "clientes/web/comun");
 });

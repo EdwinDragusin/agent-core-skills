@@ -189,3 +189,29 @@ Bases de ruta unificadas:
 
 Al clonar o adaptar la plantilla a otro proyecto con distribucion distinta (por ejemplo, una unica SPA en `src/` o migraciones en `src/infraestructura/database/migrations`), basta con actualizar `estandar.config.ts` sin necesidad de alterar los tests de arquitectura ni los scripts de verificacion.
 
+---
+
+## 9. Jerarquia y Revelacion Progresiva de Manifiestos (`AGENTS.md`)
+<!-- [ESTANDAR] -->
+
+Para minimizar la sobrecarga de contexto y ofrecer guardrails estrictos y especificos, el repositorio implementa una topologia jerarquica de manifiestos operacionales `AGENTS.md`:
+
+1. **Manifiesto Raiz (`AGENTS.md`)**:
+   Gobierna el monorepo en su conjunto: directrices transversales de Git, convenciones de commit, politica de cero emojis y pipeline unificado.
+2. **Manifiestos por Area (`back/AGENTS.md`, `front/AGENTS.md`, `docs/AGENTS.md`)**:
+   Establecen la base tecnologica del subsistema, comandos deterministas de CI y desarrollo local, e indices hacia sus modulos internos.
+3. **Manifiestos por Capa del Backend (`back/src/<capa>/AGENTS.md`)**:
+   Especializados por cada nivel de Clean Architecture:
+   - `dominio/AGENTS.md`: Entidades, Agregados Raiz, Value Objects inmutables con factory `crear()` y recetas de logica pura.
+   - `aplicacion/AGENTS.md`: Casos de uso con metodo `ejecutar()`, contratos en `ports/`, DTOs y transaccionalidad.
+   - `infraestructura/AGENTS.md`: Repositorios Drizzle, adaptadores externos, observabilidad OTel y migraciones inmutables.
+   - `interfaz/AGENTS.md`: Controladores HTTP, composicion manual en `crearApp.ts`/`main.ts` y jobs en segundo plano.
+4. **Manifiestos por Aplicacion y Capa Compartida en el Frontend (`front/<app>/AGENTS.md`, `front/shared/AGENTS.md`)**:
+   Especializados por portal web:
+   - `{{APP_1}}/AGENTS.md`: Reglas del flujo interactivo en vivo, persistencia inmediata, sesion efimera en `sessionStorage` y mobile-first.
+   - `{{APP_2}}/AGENTS.md`: Flujos de administracion, operaciones de backoffice y entorno desktop-first.
+   - `shared/AGENTS.md`: Componentes presentacionales puros, tokens de diseno y utilidades comunes sin dominio.
+
+> [!NOTE]
+> Claude Code y los asistentes agenticos descubren y cargan automaticamente el manifiesto `AGENTS.md` de la subcarpeta correspondiente al leer o editar un archivo ubicado en ella, garantizando que el agente opere con las reglas especificas de la capa o portal sin saturar la ventana de contexto.
+
