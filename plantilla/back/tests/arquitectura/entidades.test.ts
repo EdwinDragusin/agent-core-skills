@@ -1,5 +1,5 @@
 import { assert, assertEquals } from "@std/assert";
-import { estandarConfig, resolverRutaBack } from "../../../estandar.config.ts";
+import { estandarConfig, filtrarConListaBase, resolverRutaBack } from "../../../estandar.config.ts";
 
 export interface ViolacionEntidad {
   archivo: string;
@@ -197,13 +197,18 @@ Deno.test("Arquitectura - Toda entidad o sub-entidad en src/dominio debe extende
     todasLasViolaciones.push(...violaciones);
   }
 
-  const detalle = todasLasViolaciones
+  const violacionesNoEnListaBase = filtrarConListaBase(
+    "back/entidades",
+    todasLasViolaciones.map((v) => ({ ...v, ruta: v.archivo })),
+  );
+
+  const detalle = violacionesNoEnListaBase
     .map((v) => `${v.archivo}: ${v.motivo}`)
     .join("\n");
 
   assertEquals(
-    todasLasViolaciones,
+    violacionesNoEnListaBase,
     [],
-    `Se encontraron ${todasLasViolaciones.length} entidades sin herencia de Entidad/AgregadoRaiz:\n${detalle}`,
+    `Se encontraron ${violacionesNoEnListaBase.length} entidades sin herencia de Entidad/AgregadoRaiz:\n${detalle}`,
   );
 });

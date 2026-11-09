@@ -17,6 +17,6 @@
     "lint:docs": "deno run --allow-run --allow-read scripts/lint-docs.ts",
     "hooks:install": "git config core.hooksPath .githooks",
     "ci:rapido": "deno task --cwd back fmt:check && deno task --cwd back lint && deno task --cwd front fmt:check && deno task --cwd front lint",
-    "test:scripts": "deno test --allow-read scripts/"
+    "test:scripts": "deno test --allow-read --allow-run scripts/"
   }
 }

@@ -1,5 +1,5 @@
 import { assert, assertEquals } from "@std/assert";
-import { resolverRutaBack } from "../../../estandar.config.ts";
+import { filtrarConListaBase, resolverRutaBack } from "../../../estandar.config.ts";
 /**
  * Recorre recursivamente un directorio y retorna las rutas de todos los archivos .ts
  */
@@ -59,7 +59,7 @@ Deno.test("Arquitectura - Capa de Dominio no debe tener dependencias externas ni
     archivosDominio.length > 0,
     `Guarda anti-vacuidad: no se encontraron archivos en '${dirDominio}'. Verifique la configuracion en estandar.config.ts`,
   );
-  const violaciones: string[] = [];
+  const violaciones: { ruta: string; mensaje: string }[] = [];
   for (const archivo of archivosDominio) {
     const imports = obtenerImportsDeArchivo(archivo);
 
@@ -77,14 +77,20 @@ Deno.test("Arquitectura - Capa de Dominio no debe tener dependencias externas ni
         imp.includes("drizzle") ||
         imp.includes("postgres");
       if (esCapaProhibida || esLibreriaExternaProhibida) {
-        violaciones.push(`Archivo '${archivo}' importa ilegalmente '${imp}'`);
+        violaciones.push({
+          ruta: archivo,
+          mensaje: `Archivo '${archivo}' importa ilegalmente '${imp}'`,
+        });
       }
     }
   }
+  const filtradas = filtrarConListaBase("back/dependencias-dominio", violaciones).map((v) =>
+    v.mensaje
+  );
   assertEquals(
-    violaciones,
+    filtradas,
     [],
-    `Violaciones de Clean Architecture en la Capa de Dominio:\n${violaciones.join("\n")}`,
+    `Violaciones de Clean Architecture en la Capa de Dominio:\n${filtradas.join("\n")}`,
   );
 });
 Deno.test("Arquitectura - Capa de Aplicacion solo debe importar de Dominio y Aplicacion", () => {
@@ -94,7 +100,7 @@ Deno.test("Arquitectura - Capa de Aplicacion solo debe importar de Dominio y Apl
     archivosAplicacion.length > 0,
     `Guarda anti-vacuidad: no se encontraron archivos en '${dirAplicacion}'. Verifique la configuracion en estandar.config.ts`,
   );
-  const violaciones: string[] = [];
+  const violaciones: { ruta: string; mensaje: string }[] = [];
   for (const archivo of archivosAplicacion) {
     const imports = obtenerImportsDeArchivo(archivo);
     for (const imp of imports) {
@@ -110,14 +116,20 @@ Deno.test("Arquitectura - Capa de Aplicacion solo debe importar de Dominio y Apl
         imp.includes("drizzle") ||
         imp.includes("postgres");
       if (esCapaProhibida || esLibreriaExternaProhibida) {
-        violaciones.push(`Archivo '${archivo}' importa ilegalmente '${imp}'`);
+        violaciones.push({
+          ruta: archivo,
+          mensaje: `Archivo '${archivo}' importa ilegalmente '${imp}'`,
+        });
       }
     }
   }
+  const filtradas = filtrarConListaBase("back/dependencias-aplicacion", violaciones).map((v) =>
+    v.mensaje
+  );
   assertEquals(
-    violaciones,
+    filtradas,
     [],
-    `Violaciones de Clean Architecture en la Capa de Aplicacion:\n${violaciones.join("\n")}`,
+    `Violaciones de Clean Architecture en la Capa de Aplicacion:\n${filtradas.join("\n")}`,
   );
 });
 
@@ -128,7 +140,7 @@ Deno.test("Arquitectura - Capa de Infraestructura no debe importar de Interfaz",
     archivosInfraestructura.length > 0,
     `Guarda anti-vacuidad: no se encontraron archivos en '${dirInfra}'. Verifique la configuracion en estandar.config.ts`,
   );
-  const violaciones: string[] = [];
+  const violaciones: { ruta: string; mensaje: string }[] = [];
   for (const archivo of archivosInfraestructura) {
     const imports = obtenerImportsDeArchivo(archivo);
     for (const imp of imports) {
@@ -137,14 +149,20 @@ Deno.test("Arquitectura - Capa de Infraestructura no debe importar de Interfaz",
       // justamente donde viven los adaptadores concretos de esos ports.
       const esCapaProhibida = imp.includes("@interfaz") || imp.includes("/interfaz/");
       if (esCapaProhibida) {
-        violaciones.push(`Archivo '${archivo}' importa ilegalmente '${imp}'`);
+        violaciones.push({
+          ruta: archivo,
+          mensaje: `Archivo '${archivo}' importa ilegalmente '${imp}'`,
+        });
       }
     }
   }
+  const filtradas = filtrarConListaBase("back/dependencias-infraestructura", violaciones).map((v) =>
+    v.mensaje
+  );
   assertEquals(
-    violaciones,
+    filtradas,
     [],
-    `Violaciones de Clean Architecture en la Capa de Infraestructura:\n${violaciones.join("\n")}`,
+    `Violaciones de Clean Architecture en la Capa de Infraestructura:\n${filtradas.join("\n")}`,
   );
 });
 
@@ -155,7 +173,7 @@ Deno.test("Arquitectura - Tests de Aplicacion no deben importar de Interfaz", ()
     archivosTestsAplicacion.length > 0,
     `Guarda anti-vacuidad: no se encontraron archivos en '${dirTestsApp}'. Verifique la configuracion en estandar.config.ts`,
   );
-  const violaciones: string[] = [];
+  const violaciones: { ruta: string; mensaje: string }[] = [];
   for (const archivo of archivosTestsAplicacion) {
     const imports = obtenerImportsDeArchivo(archivo);
     for (const imp of imports) {
@@ -163,14 +181,20 @@ Deno.test("Arquitectura - Tests de Aplicacion no deben importar de Interfaz", ()
         imp.includes("/interfaz/") ||
         imp.includes("../interfaz");
       if (esCapaProhibida) {
-        violaciones.push(`Archivo '${archivo}' importa ilegalmente '${imp}'`);
+        violaciones.push({
+          ruta: archivo,
+          mensaje: `Archivo '${archivo}' importa ilegalmente '${imp}'`,
+        });
       }
     }
   }
+  const filtradas = filtrarConListaBase("back/dependencias-tests-aplicacion", violaciones).map(
+    (v) => v.mensaje,
+  );
   assertEquals(
-    violaciones,
+    filtradas,
     [],
-    `Violaciones de Clean Architecture en Tests de Aplicacion:\n${violaciones.join("\n")}`,
+    `Violaciones de Clean Architecture en Tests de Aplicacion:\n${filtradas.join("\n")}`,
   );
 });
 

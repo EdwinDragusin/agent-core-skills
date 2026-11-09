@@ -1,5 +1,5 @@
 import { assert, assertEquals } from "@std/assert";
-import { estandarConfig, resolverRutaBack } from "../../../estandar.config.ts";
+import { estandarConfig, filtrarConListaBase, resolverRutaBack } from "../../../estandar.config.ts";
 
 export interface ViolacionValueObject {
   archivo: string;
@@ -166,13 +166,18 @@ Deno.test("Arquitectura - Cada Value Object en dominio debe extender ValueObject
     todasLasViolaciones.push(...violaciones);
   }
 
-  const detalle = todasLasViolaciones
+  const violacionesNoEnListaBase = filtrarConListaBase(
+    "back/valueObjects",
+    todasLasViolaciones.map((v) => ({ ...v, ruta: v.archivo })),
+  );
+
+  const detalle = violacionesNoEnListaBase
     .map((v) => `${v.archivo}: ${v.motivo}`)
     .join("\n");
 
   assertEquals(
-    todasLasViolaciones,
+    violacionesNoEnListaBase,
     [],
-    `Se encontraron ${todasLasViolaciones.length} Value Objects que no cumplen las reglas:\n${detalle}`,
+    `Se encontraron ${violacionesNoEnListaBase.length} Value Objects que no cumplen las reglas:\n${detalle}`,
   );
 });

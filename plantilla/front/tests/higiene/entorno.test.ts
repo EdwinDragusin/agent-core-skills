@@ -1,6 +1,6 @@
 /// <reference lib="deno.ns" />
 import { assert, assertEquals } from "jsr:@std/assert@^1.0.0";
-import { estandarConfig } from "../../../estandar.config.ts";
+import { estandarConfig, filtrarConListaBase } from "../../../estandar.config.ts";
 
 export interface ViolacionEntorno {
   archivo: string;
@@ -249,13 +249,18 @@ Deno.test("Higiene Entorno - Todo import.meta.env en front usa VITE_* o MODE|DEV
     }
   }
 
-  if (todasLasViolaciones.length > 0) {
-    const detalle = todasLasViolaciones
+  const violacionesNoEnListaBase = filtrarConListaBase(
+    "front/entorno",
+    todasLasViolaciones.map((v) => ({ ...v, ruta: v.archivo })),
+  );
+
+  if (violacionesNoEnListaBase.length > 0) {
+    const detalle = violacionesNoEnListaBase
       .map((v) => `${v.archivo}:${v.linea} -> variable '${v.variable}'`)
       .join("\n");
     assert(
       false,
-      `Se encontraron ${todasLasViolaciones.length} accesos a variables de entorno no permitidas:\n${detalle}`,
+      `Se encontraron ${violacionesNoEnListaBase.length} accesos a variables de entorno no permitidas:\n${detalle}`,
     );
   }
 });

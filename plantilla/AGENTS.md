@@ -198,6 +198,8 @@ Las siguientes reglas de ramas, commits, verificacion y Pull Requests aplican de
   <!-- verifica: instruccion -->
 - Toda migracion ya aplicada en `back/src/infraestructura/persistencia/migraciones/` (registrada en `meta/_journal.json`) es inmutable; los cambios van en una migracion nueva.
   <!-- verifica: scripts/ci/verificar-migraciones.ts, .github/workflows/ci.yml#convenciones -->
+- Todo archivo `.ts` y `.tsx` versionado en el repositorio DEBE pertenecer a una ruta cubierta declarada en `estandar.config.ts` (o registrarse temporalmente en `listasBase["cobertura/config"]` con `tope` y `todo` obligatorios); quedan prohibidos los archivos de codigo huerfanos fuera del alcance de las pruebas de arquitectura e higiene.
+  <!-- verifica: scripts/estandar/cobertura-config.test.ts -->
 - Devolver 500 generico para errores no controlados. Solo exponer `ExcepcionDominio.message`.
   <!-- verifica: instruccion -->
 - Secretos en `.env` (gitignored). Jamas commitear credenciales reales.

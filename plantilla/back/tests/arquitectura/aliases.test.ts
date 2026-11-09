@@ -1,7 +1,27 @@
 import { assert, assertEquals } from "@std/assert";
 import { dirname, join, normalize } from "@std/path/posix";
-import { resolverRutaBack } from "../../../estandar.config.ts";
-import { extraerImportsDeCodigo } from "./dependencias.test.ts";
+import { filtrarConListaBase, resolverRutaBack } from "../../../estandar.config.ts";
+
+/**
+ * Extrae todas las rutas y paquetes importados o reexportados en codigo TypeScript.
+ */
+function extraerImportsDeCodigo(contenido: string): string[] {
+  const patrones = [
+    /(?:^|[\s;])(?:import|export)\s+(?:type\s+)?[\s\S]*?\s+from\s+['"]([^'"]+)['"]/gm,
+    /(?:^|[\s;])import\s+['"]([^'"]+)['"]/gm,
+    /\bimport\s*\(\s*['"]([^'"]+)['"]\s*\)/g,
+  ];
+  const imports: string[] = [];
+
+  for (const patron of patrones) {
+    let match: RegExpExecArray | null;
+    while ((match = patron.exec(contenido)) !== null) {
+      imports.push(match[1]);
+    }
+  }
+
+  return Array.from(new Set(imports));
+}
 
 const CAPAS = ["dominio", "aplicacion", "infraestructura", "interfaz"] as const;
 type Capa = (typeof CAPAS)[number];
@@ -139,13 +159,18 @@ Deno.test("Arquitectura - Todo import en src/ debe usar aliases @capa en lugar d
     todasLasViolaciones.push(...violaciones);
   }
 
-  const detalle = todasLasViolaciones
+  const violacionesNoEnListaBase = filtrarConListaBase(
+    "back/aliases",
+    todasLasViolaciones.map((v) => ({ ...v, ruta: v.archivo })),
+  );
+
+  const detalle = violacionesNoEnListaBase
     .map((v) => `${v.archivo}: importa '${v.importacion}' -> usar '${v.sugerencia}' (${v.motivo})`)
     .join("\n");
 
   assertEquals(
-    todasLasViolaciones,
+    violacionesNoEnListaBase,
     [],
-    `Se encontraron ${todasLasViolaciones.length} imports que no usan aliases @capa en src/:\n${detalle}`,
+    `Se encontraron ${violacionesNoEnListaBase.length} imports que no usan aliases @capa en src/:\n${detalle}`,
   );
 });

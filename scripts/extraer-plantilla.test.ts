@@ -7,6 +7,7 @@ import {
 import {
   contieneTerminoDominio,
   detectarTerminosDominio,
+  extraerPlantilla,
   extraerRutasDeConfig,
   filtrarBloquesPs1Proyecto,
   filtrarSeccionesMdProyecto,
@@ -184,6 +185,25 @@ export const estandarConfig = {
   assertNotMatch(transformado, /\baspirante\b/i);
   assertNotMatch(transformado, /\bgestion\b/i);
   assertEquals(contieneTerminoDominio(transformado), false);
+
+  const conCoberturaYListas = `
+export const estandarConfig = {
+  cobertura: {
+    rutasAdicionales: [
+      "front/aspirante/vite.config.ts",
+      "front/gestion/vite.config.ts",
+    ],
+  },
+  listasBase: {
+    "back/aliases": { tope: 1, entradas: [{ ruta: "a.ts", todo: "TODO" }] },
+  },
+};
+`;
+  const transCob = transformarContenido("estandar.config.ts", conCoberturaYListas);
+  assert(transCob.includes('"front/{{APP_1}}/vite.config.ts"'));
+  assert(transCob.includes('"front/{{APP_2}}/vite.config.ts"'));
+  assert(transCob.includes("listasBase: {}"));
+  assertEquals(contieneTerminoDominio(transCob), false);
 });
 
 Deno.test("Deteccion de terminos de dominio - subcadena insensible a mayusculas con excepciones genericas", () => {
@@ -263,6 +283,10 @@ Deno.test("Preambulos limpios - preambulo con Gobierno de Hidalgo no llega a la 
     "front/AGENTS.md",
     RUTA_SHARED_AGENTS,
     "docs/AGENTS.md",
+    "docs/adr/AGENTS.md",
+    "docs/arquitectura/AGENTS.md",
+    "docs/guia/AGENTS.md",
+    "docs/auditorias/AGENTS.md",
   ];
 
   for (const man of manifiestos) {
@@ -351,6 +375,10 @@ Deno.test("Verificacion de integridad - cada ruta verifica: en AGENTS.md existe 
     "front/AGENTS.md",
     RUTA_SHARED_AGENTS,
     "docs/AGENTS.md",
+    "docs/adr/AGENTS.md",
+    "docs/arquitectura/AGENTS.md",
+    "docs/guia/AGENTS.md",
+    "docs/auditorias/AGENTS.md",
   ];
 
   const rutasFaltantes: string[] = [];
@@ -419,4 +447,58 @@ Deno.test("Resolucion dinamica de shared desde front.raiz en estandar.config.ts"
   assertEquals(rutasCustom.backRaiz, "servidor");
   assertEquals(rutasCustom.frontRaiz, "clientes/web");
   assertEquals(rutasCustom.rutaShared, "clientes/web/comun");
+});
+
+Deno.test("Preservacion de esqueleto/ - extraerPlantilla no borra ni sobrescribe plantilla/esqueleto/ y verificarPlantillaCli la escanea", async () => {
+  const raizPlantilla = new URL("../plantilla", import.meta.url).pathname
+    .replace(/^\/([A-Za-z]:)/, "$1");
+  const tmpDestino = await Deno.makeTempDir({ prefix: "plantilla-test-" });
+
+  try {
+    // 1. Preparar en tmpDestino una carpeta esqueleto/ con archivo que debe sobrevivir
+    // y un archivo obsoleto fuera de esqueleto/ que si debe limpiarse
+    const dirEsqueleto = `${tmpDestino}/esqueleto/docs`;
+    await Deno.mkdir(dirEsqueleto, { recursive: true });
+    const archivoTestigo = `${dirEsqueleto}/testigo.md`;
+    await Deno.writeTextFile(archivoTestigo, "# Testigo de esqueleto limpio\n");
+
+    const archivoObsoleto = `${tmpDestino}/archivo-obsoleto.txt`;
+    await Deno.writeTextFile(archivoObsoleto, "obsoleto");
+
+    // 2. Ejecutar extraccion usando raizPlantilla como fuente compatible de archivos
+    const { extraidos, errores } = await extraerPlantilla(
+      raizPlantilla,
+      tmpDestino,
+    );
+    assertEquals(errores, []);
+    assert(extraidos > 0);
+
+    // 3. Verificar que esqueleto/ sobrevivio intacto
+    const contenidoTestigo = await Deno.readTextFile(archivoTestigo);
+    assertEquals(contenidoTestigo, "# Testigo de esqueleto limpio\n");
+
+    // 4. Verificar que archivos obsoletos fuera de esqueleto/ fueron limpiados
+    let existeObsoleto = true;
+    try {
+      await Deno.stat(archivoObsoleto);
+    } catch {
+      existeObsoleto = false;
+    }
+    assertEquals(existeObsoleto, false);
+
+    // 5. Verificar que MANIFIESTO.md no lista esqueleto/
+    const manifiesto = await Deno.readTextFile(`${tmpDestino}/MANIFIESTO.md`);
+    assertNotMatch(manifiesto, /esqueleto\//i);
+
+    // 6. Verificar que --verificar pasa con esqueleto limpio y falla si esqueleto tiene termino de dominio
+    assertEquals(await verificarPlantillaCli(tmpDestino), 0);
+
+    await Deno.writeTextFile(
+      archivoTestigo,
+      "Fuga de termino prohibido: Gobierno de Hidalgo y aspirante\n",
+    );
+    assertEquals(await verificarPlantillaCli(tmpDestino), 1);
+  } finally {
+    await Deno.remove(tmpDestino, { recursive: true });
+  }
 });

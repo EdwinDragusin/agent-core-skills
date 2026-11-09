@@ -43,7 +43,7 @@ sustituir los siguientes marcadores de acuerdo con su arquitectura especifica:
 
 | Archivo en Plantilla | Categoria | Regla que hace cumplir | Requiere Adaptacion | Marcadores | Guia de Adaptacion |
 |---|---|---|---|---|---|
-| `estandar.config.ts` | config | Configuracion centralizada de rutas y topologia de mecanismos (estandar.config.ts) | **SI** | `{{APP_1}}`, `{{APP_2}}` | PRIMER paso de adaptacion: configurar raiz de backend, aplicaciones frontend y capa compartida. |
+| `estandar.config.ts` | config | Configuracion centralizada de rutas, cobertura y listas base con trinquete (`verifica: scripts/estandar/cobertura-config.test.ts, back/tests/arquitectura/listasBase.test.ts`) | **SI** | `{{APP_1}}`, `{{APP_2}}` | PRIMER paso de adaptacion: configurar raiz de backend, aplicaciones frontend, capa compartida, cobertura.rutasAdicionales y listasBase ({} por defecto). |
 | `.github/workflows/ci.yml` | ci | Pipeline completo CI (AGENTS.md) | No | Ninguno | Copiar directo. Utiliza Deno 2.x, PostgreSQL en testcontainers y jobs paralelos. |
 | `.github/pull_request_template.md` | ci | Workflow de Pull Requests (AGENTS.md) | No | Ninguno | Copiar directo. Incluye lista de verificacion de reglas de instruccion. |
 | `.githooks/commit-msg` | hooks | Conventional Commits (AGENTS.md) | No | Ninguno | Copiar directo. Ejecutable bash multiplataforma. |
@@ -54,13 +54,15 @@ sustituir los siguientes marcadores de acuerdo con su arquitectura especifica:
 | `scripts/hooks/validar-rama.test.ts` | scripts | Pruebas de validacion de ramas (AGENTS.md) | No | Ninguno | Copiar directo. |
 | `scripts/ci/verificar-migraciones.ts` | scripts | Inmutabilidad de migraciones de base de datos (back/AGENTS.md) | Solo via estandar.config.ts | Ninguno | Configurado via estandar.config.ts (back.directorioMigraciones). |
 | `scripts/ci/verificar-migraciones.test.ts` | scripts | Pruebas de verificacion de migraciones (back/AGENTS.md) | No | Ninguno | Copiar directo con fixture sintetico generico. |
+| `scripts/estandar/cobertura-config.test.ts` | scripts | Cobertura total de archivos .ts/.tsx en estandar.config.ts (`verifica: scripts/estandar/cobertura-config.test.ts`, AGENTS.md) | Solo via estandar.config.ts | `{{APP_1}}`, `{{APP_2}}` | Configurado via estandar.config.ts (back, front, cobertura.rutasAdicionales, listasBase['cobertura/config']). |
 | `scripts/higiene/sin-emojis.test.ts` | scripts | Politica de cero emojis (AGENTS.md) | No | Ninguno | Copiar directo. Escanea directorios de back, front y scripts. |
 | `scripts/lint-docs.ts` | scripts | Ejecucion de linter documental (AGENTS.md) | No | Ninguno | Copiar directo. Lanzador multiplataforma de doc-linter.ps1. |
-| `scripts/doc-linter.ps1` | scripts | Gobernanza documental bimodal y etiquetas verifica: (docs/AGENTS.md) | No | Ninguno | Filtrados bloques de proyecto. Mantiene validacion estandar bimodal y seccion 8. |
+| `scripts/doc-linter.ps1` | scripts | Gobernanza documental bimodal, estructura del vault (`verifica: scripts/doc-linter.ps1#Estructura`) y etiquetas verifica: (docs/AGENTS.md) | No | Ninguno | Filtrados bloques de proyecto. Mantiene validacion de Estructura (Seccion 0), bimodalidad, ADRs, Onboarding/Glosario/TODO, Mermaid, Manifiestos y Plantillas. |
 | `back/tests/arquitectura/aliases.test.ts` | arquitectura-back | Uso de aliases @dominio/, @aplicacion/, etc. (back/AGENTS.md) | Solo via estandar.config.ts | Ninguno | Configurado via estandar.config.ts (back.raiz). |
 | `back/tests/arquitectura/dependencias.test.ts` | arquitectura-back | Reglas inviolables de Clean Architecture (back/AGENTS.md) | Solo via estandar.config.ts | Ninguno | Configurado via estandar.config.ts (back.raiz). |
 | `back/tests/arquitectura/diManual.test.ts` | arquitectura-back | Composicion via DI manual sin framework (back/AGENTS.md) | Solo via estandar.config.ts | Ninguno | Configurado via estandar.config.ts (back.archivosComposicionDIManual). |
 | `back/tests/arquitectura/entidades.test.ts` | arquitectura-back | Patron Entidad y AgregadoRaiz en dominio (back/AGENTS.md) | Solo via estandar.config.ts | Ninguno | Configurado via estandar.config.ts (back.clasesBaseEntidad). |
+| `back/tests/arquitectura/listasBase.test.ts` | arquitectura-back | Trinquete de listas base de violaciones arquitectonicas (`verifica: back/tests/arquitectura/listasBase.test.ts`, back/AGENTS.md) | Solo via estandar.config.ts | Ninguno | Configurado via estandar.config.ts (listasBase). Audita tope, todo obligatorio y entradas muertas. |
 | `back/tests/arquitectura/logger.test.ts` | arquitectura-back | Observabilidad estructurada OpenTelemetry (back/AGENTS.md) | Solo via estandar.config.ts | Ninguno | Configurado via estandar.config.ts (back.adaptadorLogger, directoriosExcluidosLogger). |
 | `back/tests/arquitectura/usecases.test.ts` | arquitectura-back | Patron UseCase con metodo ejecutar() (back/AGENTS.md) | Solo via estandar.config.ts | Ninguno | Configurado via estandar.config.ts (back.directorioUseCases). |
 | `back/tests/arquitectura/uuid.test.ts` | arquitectura-back | Generacion de UUIDv7 en capa de dominio (back/AGENTS.md) | Solo via estandar.config.ts | Ninguno | Configurado via estandar.config.ts (back.generadorUuid). |
@@ -77,6 +79,10 @@ sustituir los siguientes marcadores de acuerdo con su arquitectura especifica:
 | `front/AGENTS.md` | manifiestos | Manifiesto operacional frontend (front/AGENTS.md) | **SI** | `{{NOMBRE_PROYECTO}}`, `{{APP_1}}`, `{{APP_2}}` | Sustituir marcadores {{NOMBRE_PROYECTO}}, {{APP_1}} y {{APP_2}} por los nombres de las aplicaciones front. |
 | `front/shared/AGENTS.md` | manifiestos | Manifiesto operacional de capa compartida frontend (front/shared/AGENTS.md) | **SI** | `{{APP_1}}`, `{{APP_2}}` | Sustituir marcadores {{APP_1}} y {{APP_2}} en la regla de aislamiento de portales. |
 | `docs/AGENTS.md` | manifiestos | Manifiesto operacional de documentacion (docs/AGENTS.md) | **SI** | `{{SLUG_PROYECTO}}` | Sustituir {{SLUG_PROYECTO}} por el nombre del vault de documentacion. |
+| `docs/adr/AGENTS.md` | manifiestos | Manifiesto de area para decisiones de arquitectura ADR (docs/AGENTS.md) | No | Ninguno | Copiar directo. Reglas de numeracion, indexacion en Cap 9 y reemplazo de ADRs. |
+| `docs/arquitectura/AGENTS.md` | manifiestos | Manifiesto de area para capitulos arc42, RN-* y DS-CU-* (docs/AGENTS.md) | No | Ninguno | Copiar directo. Filtradas secciones de proyecto. Reglas de estructura arc42 y trazabilidad. |
+| `docs/guia/AGENTS.md` | manifiestos | Manifiesto de area para marco Diataxis y casos de uso bimodales (docs/AGENTS.md) | No | Ninguno | Copiar directo. Filtradas secciones de proyecto. Reglas bimodales de CU-* e historias de usuario. |
+| `docs/auditorias/AGENTS.md` | manifiestos | Manifiesto de area para reportes de auditoria AUDIT-NNN (docs/AGENTS.md) | No | Ninguno | Copiar directo. Reglas de formato, evidencia, TODOs e inmutabilidad de auditorias. |
 | `back/Dockerfile` | config | Runtime estandar Deno 2.x en backend (back/AGENTS.md) | **SI** | Ninguno | Ajustar punto de entrada en CMD (ej. src/interfaz/http/main.ts) y directorios a copiar segun la estructura del proyecto destino. |
 | `deno.json` | config | Comandos deterministas de monorepo (AGENTS.md) | No | Ninguno | Plantilla con tareas estandar ci, check, fmt, lint, test, coverage, hooks. |
 | `back/deno.json` | config | Configuracion estricta y tareas de backend (back/AGENTS.md) | **SI** | Ninguno | Ajustar umbrales de cobertura (coverage.thresholds) segun linea base del proyecto. |
@@ -97,12 +103,13 @@ sustituir los siguientes marcadores de acuerdo con su arquitectura especifica:
 
 | Archivo | Marcador / Placeholder | Valor Original en Referencia | Sustituto en Plantilla | Proposito |
 |---|---|---|---|---|
-| `estandar.config.ts` | `{{APP_1}}, {{APP_2}}` | `nombres y rutas de aplicaciones front de referencia` | `{{APP_1}}, {{APP_2}}` | Parametriza nombres y rutas fuente de aplicaciones frontend en la configuracion centralizada. |
+| `estandar.config.ts` | `{{APP_1}}, {{APP_2}}, listasBase: {}` | `nombres y rutas de aplicaciones front, rutasAdicionales de cobertura y listasBase` | `{{APP_1}}, {{APP_2}}, listasBase: {}` | Parametriza aplicaciones frontend y rutasAdicionales de cobertura (`scripts/estandar/cobertura-config.test.ts`), y deja `listasBase` vacio (`{}`) para el trinquete (`back/tests/arquitectura/listasBase.test.ts`). |
 | `AGENTS.md` | `{{NOMBRE_PROYECTO}}, {{DESCRIPCION_PROYECTO}}` | `preambulo de aplicacion REST original y marco institucional de referencia` | `{{NOMBRE_PROYECTO}} / {{DESCRIPCION_PROYECTO}}` | Parametriza nombre del proyecto y sustituye preambulo especifico por descripcion configurable. |
 | `back/AGENTS.md` | `{{NOMBRE_PROYECTO}}, control de migraciones` | `nombre de aplicacion API original / termino reservado en indice de capa` | `{{NOMBRE_PROYECTO}} API / control de migraciones` | Parametriza encabezado y neutraliza terminologia en el indice de manifiestos por capa. |
 | `front/AGENTS.md` | `{{NOMBRE_PROYECTO}}, {{APP_1}}, {{APP_2}}` | `nombre de aplicacion Web Client original / nombres y flujos de portales originales` | `{{NOMBRE_PROYECTO}} Web Client / {{APP_1}}, {{APP_2}}` | Parametriza encabezado e indice de manifiestos de aplicaciones por portal. |
 | `front/shared/AGENTS.md` | `{{APP_1}}, {{APP_2}}` | `nombres de portales especificos en regla de aislamiento` | `({{APP_1}}/, {{APP_2}}/)` | Parametriza nombres de portales en la regla de aislamiento absoluto de la capa compartida. |
-| `docs/AGENTS.md` | `{{SLUG_PROYECTO}}, flujos de negocio` | `identificador de vault de referencia / flujos de evaluacion originales` | `{{SLUG_PROYECTO}}-docs / flujos de negocio` | Parametriza identificador de vault Obsidian y generaliza directivas de reglas de negocio. |
+| `scripts/estandar/cobertura-config.test.ts` | `{{APP_1}}, {{APP_2}}` | `nombres y rutas de aplicaciones frontend en autoverificacion sintetica` | `{{APP_1}}, {{APP_2}}` | Parametriza nombres y rutas de aplicaciones frontend en el test de cobertura de estandar.config.ts. |
+| `docs/AGENTS.md` | `{{SLUG_PROYECTO}}` | `identificador de vault de referencia` | `{{SLUG_PROYECTO}}-docs` | Parametriza identificador de vault Obsidian en el manifiesto documental raiz. |
 | `front/tests/arquitectura/front-dependencias.test.ts` | `{{APP_1}}, {{APP_2}}, @{{PROYECTO}}, moduloA, LayoutPrincipal` | `portal publico, portal administrativo, alias de paquete monorepo, modulos especificos, layout especifico` | `{{APP_1}}, {{APP_2}}, @{{PROYECTO}}, moduloA, LayoutPrincipal` | Parametriza aplicaciones front, alias de monorepo y generaliza entidades/layouts en tests FSD. |
 | `front/tests/higiene/entorno.test.ts` | `{{APP_1}}, {{APP_2}}` | `directorios de portales especificos en mensaje de error` | `({{APP_1}}/src y {{APP_2}}/src)` | Generaliza mensaje de error de asercion de cantidad minima de portales. |
 | `front/tests/higiene/storage.test.ts` | `{{APP_EFIMERA}}, rutaAppEfimeraSrc` | `nombre de aplicacion efimera y variable de recoleccion original` | `{{APP_EFIMERA}} / rutaAppEfimeraSrc` | Parametriza portal y recolector de codigo con requerimiento de sesion efimera en sessionStorage. |
@@ -113,10 +120,12 @@ sustituir los siguientes marcadores de acuerdo con su arquitectura especifica:
 | `docs/_plantillas/PLANTILLA-CU.md` | `usuario / registrar-usuario / Facturacion` | `ejemplo de caso de uso de secciones y entidad de referencia` | `CU-001-registrar-usuario.md / Facturacion` | Sustituye ejemplos de caso de uso y modulo por conceptos genericos. |
 | `docs/_plantillas/PLANTILLA-DS-CU.md` | `registrar-usuario / Facturacion` | `ejemplo de diagrama de secciones y entidad de referencia` | `DS-CU-001-registrar-usuario.md / Facturacion` | Sustituye ejemplos de diagrama de secuencia y modulo por conceptos genericos. |
 | `docs/_plantillas/PLANTILLA-PB.md` | `Autenticacion, Facturacion, Notificaciones / proceso-base` | `modulos de evaluacion y candidatos / configuracion-de-procesos` | `Autenticacion, Facturacion, Notificaciones / proceso-base` | Sustituye modulos y rutas de ejemplo de proceso de negocio por modulos genericos. |
+| `docs/guia/AGENTS.md` | `verifica: instruccion` | `verifica: scripts/doc-linter.ps1#HistoriasDeUsuario` | `verifica: instruccion` | Ajusta etiqueta verifica de historias de usuario bimodales tras filtrar el bloque de proyecto de Seccion 2 en doc-linter.ps1. |
 | `docs/guia/how-to/flujo-multiagente.md` | `{{APP_1}}, {{APP_2}}, web/src` | `ejemplos de rutas y manifiestos de portales originales` | `{{APP_1}}/AGENTS.md, {{APP_2}}/AGENTS.md, web/src` | Parametriza referencias a manifiestos de aplicaciones y rutas de ejemplo en guia multiagente. |
 | `back/Dockerfile` | `CMD / COPY` | `rutas de scripts y main.ts de referencia` | `parametrizable segun proyecto destino` | Requiere adaptar punto de entrada en CMD y directorios a copiar segun topologia real. |
 | `.github/pull_request_template.md` | `N/A (reglas)` | `reglas de dictamen y prueba pericial` | `reglas operativas estandar` | Elimina directivas especificas de dictamen y evaluacion del template de PR. |
-| `deno.json` | `N/A (tareas)` | `tareas docker y semillas de base de datos` | `tareas estandar de calidad y CI` | Filtra tareas de base de datos especificas preservando pipeline CI estandar. |
+| `scripts/doc-linter.ps1` | `N/A (bloques [ESTANDAR])` | `bloques de proyecto (piso CU, HU, directrices, reglas y tiempos de referencia)` | `secciones estandar (Estructura del vault, CU, ADRs, Onboarding/Glosario/TODO, Higiene, Mermaid, Manifiestos, Plantillas)` | Filtra bloques especificos de proyecto preservando la verificacion de estructura (`scripts/doc-linter.ps1#Estructura`) y gobernanza bimodal estandar. |
+| `deno.json` | `N/A (tareas)` | `tareas docker y semillas de base de datos` | `tareas estandar de calidad y CI (--allow-read --allow-run en test:scripts)` | Filtra tareas de base de datos especificas preservando pipeline CI estandar y permisos de `test:scripts` (`scripts/estandar/cobertura-config.test.ts`). |
 | `back/deno.json` | `N/A (tareas)` | `tareas de reset, rol de app y semillas` | `tareas estandar de compilacion, migraciones y test` | Filtra tareas y scripts de negocio manteniendo suites de arquitectura y CI. |
 | `front/deno.json` | `{{APP_1}}, {{APP_2}}` | `nombres de aplicaciones en workspace` | `{{APP_1}}, {{APP_2}}` | Parametriza portales en workspace y tareas dev/build/test. |
 
@@ -124,7 +133,7 @@ sustituir los siguientes marcadores de acuerdo con su arquitectura especifica:
 
 ## Verificacion de Integridad y Cobertura
 
-- Total de archivos estandar exportados: 47
-- Total de transformaciones declaradas: 22
+- Total de archivos estandar exportados: 53
+- Total de transformaciones declaradas: 25
 - Ausencia total de secciones de proyecto garantizada por extractor.
 - Ausencia total de terminos de dominio y alias institucionales garantizada.
