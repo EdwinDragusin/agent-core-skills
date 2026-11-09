@@ -82,7 +82,7 @@ Para cada ola aprobada:
 2. **Blindaje de rama principal:**
    - El blindaje altera la configuracion del repositorio en GitHub. Ejecutar con cwd en la raiz del proyecto destino.
    - Ejecutar primero con `-DryRun` y mostrar el resultado al usuario:
-     `pwsh RAIZ_PLUGIN/scripts/protect-main-branch.ps1 [-Repo <owner/name>] -Checks <nombres de los jobs de CI separados por comas> -DryRun`
+     `pwsh RAIZ_PLUGIN/scripts/protect-main-branch.ps1 [-Repo <owner/name>] -Checks <nombres de los jobs de CI separados por punto y coma> -DryRun`
    - Los checks requeridos corresponden a los nombres reales de los jobs del `ci.yml` adoptado (propiedad `name:` de cada job en el workflow).
    - Aplicar sin `-DryRun` unicamente tras aprobacion explicita del usuario.
    - Confirmar bloqueo de commits y pushes directos a `main`, y ruleset exigiendo PR y checks verdes.

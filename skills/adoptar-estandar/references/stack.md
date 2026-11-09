@@ -48,10 +48,10 @@ Los siguientes mecanismos no dependen del lenguaje de programacion ni del framew
 - **Procedimiento:** Ejecutar con cwd en la raiz del proyecto destino. Primero simular con `-DryRun` y, solo con aprobacion explicita del usuario, aplicar la configuracion:
   ```powershell
   # Paso 1: Simulacion obligatoria
-  pwsh RAIZ_PLUGIN/scripts/protect-main-branch.ps1 [-Repo <owner/name>] -Checks <nombres de los jobs de CI separados por comas> -DryRun
+  pwsh RAIZ_PLUGIN/scripts/protect-main-branch.ps1 [-Repo <owner/name>] -Checks <nombres de los jobs de CI separados por punto y coma> -DryRun
 
   # Paso 2: Aplicacion definitiva tras aprobacion humana
-  pwsh RAIZ_PLUGIN/scripts/protect-main-branch.ps1 [-Repo <owner/name>] -Checks <nombres de los jobs de CI separados por comas>
+  pwsh RAIZ_PLUGIN/scripts/protect-main-branch.ps1 [-Repo <owner/name>] -Checks <nombres de los jobs de CI separados por punto y coma>
   ```
   Los checks requeridos deben corresponder a los nombres reales de los jobs del `ci.yml` adoptado (propiedad `name:` de cada job).
 
