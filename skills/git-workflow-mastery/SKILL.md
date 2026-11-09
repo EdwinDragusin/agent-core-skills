@@ -130,11 +130,11 @@ flowchart TD
 
 ---
 
-## 4. Gobernanza de Committer Diferido y Modo Teamwork (Fases 3A, 3B y 5)
+## 4. Gobernanza de Committer Diferido y Modo Teamwork
 
-Cuando multiples subagentes trabajan en paralelo (`dispatching-parallel-agents`) dentro de un mismo worktree:
+Cuando multiples subagentes trabajan en paralelo (`superpowers:dispatching-parallel-agents`) dentro de un mismo worktree:
 1. **Prohibicion de Commits Concurrentes:** Los subagentes implementadores individuales **no** ejecutan `git add` ni `git commit` mientras desarrollan sus tareas atomicas para evitar bloqueos de `.git/index.lock` e historial fragmentado.
 2. **Ejecucion Secuencial por el Committer de Fase:**
-   - Una vez que el 100% de las tareas de la fase (3A Backend o 3B Frontend) estan en verde y la documentacion Docs-as-Code fue sincronizada en Obsidian, entra en accion el **Committer Diferido**.
-   - El committer agrupa los archivos segun la **Matriz de Conventional Commits** disenada en la Fase 2, verificando con `git diff --cached --shortstat` que cada commit respete la ventana de atomicidad (**100 a 400 LOC**, techo de 500 LOC) y el formato comprimido de alta senal (`caveman-commit`, cero emojis).
-   - Inmediatamente tras aplicar la secuencia de commits, dispara `index_repository` en `codebase-memory-mcp`.
+   - Una vez que el 100% de las tareas de la iteracion estan en verde y la documentacion Docs-as-Code fue sincronizada, entra en accion el **Committer Diferido**.
+   - El committer agrupa los archivos segun la matriz de cambios planificada, verificando con `git diff --cached --shortstat` que cada commit respete la ventana de atomicidad (**100 a 400 LOC**, techo de 500 LOC) y el formato comprimido de alta senal (`caveman-commit`, cero emojis).
+   - Si `codebase-memory-mcp` esta disponible en el entorno, dispara `index_repository`.

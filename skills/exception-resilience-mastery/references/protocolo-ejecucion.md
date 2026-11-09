@@ -40,7 +40,7 @@ Al ejecutar la auditoria de excepciones y resiliencia en un proyecto, seguir est
 ### Fase 6: Generacion y Persistencia del Reporte
 1. Determinar el siguiente correlativo numerico en `docs/auditorias/` (ej. `AUDIT-010-manejo-excepciones-resiliencia.md`).
 2. Redactar el reporte estructurado con frontmatter completo, resumen ejecutivo, tabla consolidada de hallazgos con citas exactas de fuentes primarias y plan de remediacion.
-3. Persistir la nota a traves de las herramientas MCP de Obsidian.
+3. Persistir la nota directamente o mediante herramientas de documentacion si estan disponibles.
 
 ## 6. Definition of Done (DoD)
 

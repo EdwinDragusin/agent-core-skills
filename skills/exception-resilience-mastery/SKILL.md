@@ -29,7 +29,7 @@ Leer solo cuando se ejecute esta fase: [references/protocolo-ejecucion.md](./ref
 3. Observabilidad y redaccion de PII (`traceparent`, `[REDACTED]`).
 4. Integraciones y red: backoff con jitter, timeouts, Circuit Breakers.
 5. Presentacion de errores en frontend (`invalid_params`, `aria-invalid`, Error Boundaries, Trace ID copiable).
-6. Reporte `AUDIT-NNN-manejo-excepciones-resiliencia.md` en `docs/auditorias/` via MCP Obsidian ([plantilla](./references/plantilla-reporte.md)) y DoD.
+6. Reporte `AUDIT-NNN-manejo-excepciones-resiliencia.md` en `docs/auditorias/` ([plantilla](./references/plantilla-reporte.md)) y DoD.
 
 ## Indice de references
 
