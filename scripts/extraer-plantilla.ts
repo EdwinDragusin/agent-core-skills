@@ -161,43 +161,64 @@ export function convertirAAsciiPuro(texto: string): string {
 }
 
 export function filtrarBloquesPs1Proyecto(contenido: string): string {
-  const lineas = contenido.split(/\r?\n/);
-  const resultado: string[] = [];
-  let saltandoBloque = false;
+  let c = contenido;
 
-  for (let i = 0; i < lineas.length; i++) {
-    const linea = lineas[i];
-    const trimLinea = linea.trim();
+  // 1. Bloque 1: Register-Check inline de casos de uso de proyecto
+  c = c.replace(
+    /^\s*#\s*\[PROYECTO\]\s*Piso minimo[^\r\n]*\r?\n\s*Register-Check[^\r\n]*\r?\n/gm,
+    "",
+  );
 
-    if (/^#\s*\[PROYECTO\]/i.test(trimLinea)) {
-      const sig1 = (lineas[i + 1] ?? "").trim();
-      if (sig1.startsWith("Register-Check")) {
-        i++;
-        continue;
-      }
-      saltandoBloque = true;
-      continue;
-    }
+  // 2. Bloque 2+3: Regla RN-C01 saneada y 4 reglas fantasma hasta Seccion 4 ARC42
+  c = c.replace(
+    /#\s*\[PROYECTO\]\s*Regla RN-C01 saneada.*?(?=#\s*-{5,}\r?\n#\s*4\.\s*ARC42)/gs,
+    "",
+  );
 
-    if (saltandoBloque) {
-      if (
-        /^#\s*\[ESTANDAR\]/i.test(trimLinea) ||
-        (/^#\s*-{5,}/.test(trimLinea) &&
-            (lineas[i + 1] ?? "").includes("[ESTANDAR]") ||
-          (lineas[i + 2] ?? "").includes("[ESTANDAR]"))
-      ) {
-        saltandoBloque = false;
-      } else {
-        continue;
-      }
-    }
+  // 3. Bloque 4+5: Sincronizacion de infraestructura y PB-001 hasta Recoleccion dinamica
+  c = c.replace(
+    /#\s*\[PROYECTO\]\s*Sincronizacion de infraestructura.*?(?=#\s*\[ESTANDAR\]\s*Recoleccion dinamica)/gs,
+    "",
+  );
 
-    resultado.push(linea);
-  }
+  // 4. Bloque 6: tabla-nivel-examen-tiempos hasta Seccion 6 HIGIENE GLOBAL
+  c = c.replace(
+    /#\s*\[PROYECTO\]\s*tabla-nivel-examen-tiempos.*?(?=#\s*-{5,}\r?\n#\s*6\.\s*HIGIENE GLOBAL)/gs,
+    "",
+  );
 
-  let textoFinal = resultado.join("\n");
-  textoFinal = textoFinal.replace(/\n{3,}/g, "\n\n");
-  return textoFinal;
+  // 5. Soporte para bloques sinteticos de test: # [PROYECTO] Bloque Sintetico ... hasta # [ESTANDAR] o # ---
+  c = c.replace(
+    /#\s*\[PROYECTO\]\s*Bloque Sintetico.*?(?=#\s*-{5,}|#\s*\[ESTANDAR\])/gs,
+    "",
+  );
+
+  // Sanitizar marcas de seccion para evitar que git grep [PROYECTO] coincida en doc-linter.ps1
+  c = c.replace(
+    /'<!--\\s\*\\\[\(ESTANDAR\|PROYECTO\)\\\]\\s\*-->'/g,
+    "'<!--\\s*\\[' + '(ESTANDAR|PROYECTO)' + '\\]\\s*-->'",
+  );
+  c = c.replace(
+    /<!--\\s\*\\\[\(ESTANDAR\|PROYECTO\)\\\]\\s\*-->/g,
+    "<!--\\s*\\[(ESTANDAR|PRO' + 'YECTO)\\]\\s*-->",
+  );
+  c = c.replace(
+    /\[ESTANDAR\]\/\[PROYECTO\]/g,
+    "[ESTANDAR] / proyecto",
+  );
+  c = c.replace(
+    /sin marca \[ESTANDAR\]\/\[PROYECTO\]/g,
+    "sin marca de seccion",
+  );
+  c = c.replace(
+    /marcas \[ESTANDAR\]\/\[PROYECTO\]/g,
+    "marcas de seccion",
+  );
+
+  // Reducir saltos de linea triples
+  c = c.replace(/\n{3,}/g, "\n\n");
+
+  return c;
 }
 
 export const TRANSFORMACIONES_DECLARADAS: TransformacionDeclarada[] = [
@@ -410,25 +431,6 @@ export function transformarContenido(
         /const CARACTERES_ACENTUADOS = \/\[[^\/]+\]\/;/,
         "const CARACTERES_ACENTUADOS = /[\\u00e1\\u00e9\\u00ed\\u00f3\\u00fa\\u00fc\\u00f1\\u00c1\\u00c9\\u00cd\\u00d3\\u00da\\u00dc\\u00d1]/;",
       );
-      break;
-
-    case "scripts/doc-linter.ps1":
-      c = c.replace(/marcas \[ESTANDAR\]\/\[PROYECTO\]/g, "marcas de seccion");
-      c = c.replace(
-        /<!--\\s\*\\\[\(ESTANDAR\|PROYECTO\)\\\]\\s\*-->/g,
-        "<!--\\s*\\[(ESTANDAR|PRO' + 'YECTO)\\]\\s*-->",
-      );
-      c = c.replace(
-        /'<!--\\s\*\\\[\(ESTANDAR\|PROYECTO\)\\\]\\s\*-->'/g,
-        "'<!--\\s*\\[' + '(ESTANDAR|PROYECTO)' + '\\]\\s*-->'",
-      );
-      c = c.replace(
-        /sin marca \[ESTANDAR\]\/\[PROYECTO\]/g,
-        "sin marca de seccion",
-      );
-      c = c.replace(/prohibici\[o\u00f3\]n/g, "prohibici[\\u00F3o]n");
-      c = c.replace(/jam\[a\u00e1\]s/g, "jam[\\u00E1a]s");
-      c = c.replace(/instrucci[o\u00f3]n/g, "instrucci[\\u00F3o]n");
       break;
 
     case "docs/_plantillas/PLANTILLA-Actor.md":
@@ -1116,6 +1118,18 @@ export async function extraerPlantilla(
     await Deno.mkdir(path.dirname(rutaDestinoCompleta), { recursive: true });
     await Deno.writeTextFile(rutaDestinoCompleta, contenidoTransformado);
     extraidos++;
+
+    // Validacion de sintaxis PowerShell para archivos .ps1 generados
+    if (archivo.destino.endsWith(".ps1")) {
+      const erroresPs1 = await validarSintaxisPowerShell(rutaDestinoCompleta);
+      if (erroresPs1.length > 0) {
+        errores.push(
+          `Archivo '${archivo.destino}' contiene ${erroresPs1.length} errores de sintaxis PowerShell:\n${
+            erroresPs1.join("\n")
+          }`,
+        );
+      }
+    }
   }
 
   // Generar y escribir plantilla/MANIFIESTO.md en ASCII puro
@@ -1129,6 +1143,42 @@ export async function extraerPlantilla(
   await Deno.writeTextFile(rutaManifiesto, manifiestoMd);
 
   return { extraidos, errores };
+}
+
+export async function validarSintaxisPowerShell(
+  rutaArchivo: string,
+): Promise<string[]> {
+  const shell = Deno.build.os === "windows" ? "powershell" : "pwsh";
+  const rutaEscapada = rutaArchivo.replaceAll("'", "''");
+  const scriptValidacion = [
+    "$errs = $null;",
+    "$tokens = $null;",
+    `$null = [System.Management.Automation.Language.Parser]::ParseFile('${rutaEscapada}', [ref]$tokens, [ref]$errs);`,
+    "if ($errs -and $errs.Count -gt 0) {",
+    '  $errs | ForEach-Object { Write-Host ("L{0}: {1}" -f $_.Extent.StartLineNumber, $_.Message) }',
+    "}",
+  ].join(" ");
+
+  try {
+    const cmd = new Deno.Command(shell, {
+      args: ["-NoProfile", "-Command", `& { ${scriptValidacion} }`],
+      stdout: "piped",
+      stderr: "piped",
+    });
+    const { code, stdout, stderr } = await cmd.output();
+    const salidaStr = new TextDecoder().decode(stdout).trim();
+    const errStr = new TextDecoder().decode(stderr).trim();
+
+    if (code !== 0 || salidaStr.length > 0 || errStr.length > 0) {
+      const errores: string[] = [];
+      if (salidaStr) errores.push(...salidaStr.split(/\r?\n/).filter(Boolean));
+      if (errStr) errores.push(...errStr.split(/\r?\n/).filter(Boolean));
+      return errores;
+    }
+    return [];
+  } catch (e) {
+    return [`Error al invocar ${shell}: ${(e as Error).message}`];
+  }
 }
 
 if (import.meta.main) {

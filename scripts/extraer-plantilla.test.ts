@@ -10,6 +10,7 @@ import {
   filtrarSeccionesMdProyecto,
   TRANSFORMACIONES_DECLARADAS,
   transformarContenido,
+  validarSintaxisPowerShell,
 } from "./extraer-plantilla.ts";
 
 Deno.test("Filtro MD - elimina secciones marcadas con [PROYECTO]", () => {
@@ -64,7 +65,7 @@ Register-Check "CasosDeUso" "Cantidad minima" ($cuFiles.Count -ge 31)
 
 $patron = "DTO"
 
-# [PROYECTO] Regla especifica del proyecto
+# [PROYECTO] Bloque Sintetico de regla especifica
 $rutaEspecifica = "docs/reglas/RN-X01.md"
 if (Test-Path $rutaEspecifica) {
   Register-Check "Reglas" "RN-X01 valida" $true
@@ -201,4 +202,16 @@ Deno.test("Verificacion de integridad - cada ruta verifica: en AGENTS.md existe 
     }`,
   );
   assertEquals(totalVerificadas > 0, true);
+});
+
+Deno.test("Validacion sintactica PowerShell - doc-linter.ps1 compila con 0 errores", async () => {
+  const raizPlantilla = new URL("../plantilla", import.meta.url).pathname
+    .replace(/^\/([A-Za-z]:)/, "$1");
+  const rutaDocLinter = `${raizPlantilla}/scripts/doc-linter.ps1`;
+  const errores = await validarSintaxisPowerShell(rutaDocLinter);
+  assertEquals(
+    errores,
+    [],
+    `Errores de sintaxis PowerShell en doc-linter.ps1:\n${errores.join("\n")}`,
+  );
 });

@@ -72,8 +72,7 @@ function Register-Warn([string]$Category, [string]$Item, [string]$Details = "") 
 Write-Host "`n--- 1. Verificacion de Casos de Uso (Bimodal Estricto) ---"
 $cuDir = Join-Path $DocsPath "guia/referencia/casos-de-uso"
 if (Test-Path $cuDir) {
-  $cuFiles = Get-ChildItem -Path $cuDir -Filter "CU-*.md" | Sort-Object Name
-
+  $cuFiles = Get-ChildItem -Path $cuDir -Filter "CU-*.md" | Sort-Object Name
   $technicalPattern = '\b(DTO|JSONB|SQL|SELECT|UPDATE|INSERT|UPSERT|200 OK|201 Created|400 Bad Request|401 Unauthorized|403 Forbidden|404 Not Found|409 Conflict|500 Internal Server Error)\b'
   $httpPattern = '\bHTTP\s+[1-5]\d\d\b'
 
@@ -200,8 +199,6 @@ $cap2Path = Join-Path $DocsPath "arquitectura/capitulo-02-restricciones.md"
 $cap3Path = Join-Path $DocsPath "arquitectura/capitulo-03-contexto-y-alcance.md"
 $cap9Path = Join-Path $DocsPath "arquitectura/capitulo-09-decisiones.md"
 $pb001Path = Join-Path $DocsPath "arquitectura/procesos/PB-001-configuracion-de-examenes.md"
-
-}
 
 # [ESTANDAR] Recoleccion dinamica, indice del Capitulo 9, nomenclatura y resumen ejecutivo
 # Recoleccion de archivos ADR (backend y frontend)
@@ -496,9 +493,9 @@ function Test-AgentsManifestContent {
   $lines = $content -split "`r?`n"
   $errors = [System.Collections.Generic.List[string]]::new()
   $rutaCount = 0
-  $instrucci[\u00F3o]nCount = 0
+  $instruccionCount = 0
 
-  # Conteo de encabezados vs marcas de seccion
+  # Conteo de encabezados vs marcas [ESTANDAR] / proyecto
   $headingCount = 0
   $markCount = 0
   $inCode = $false
@@ -514,18 +511,18 @@ function Test-AgentsManifestContent {
     if ($line -match '^#{2,3}\s+') {
       $headingCount++
     }
-    if ($line -match '<!--\s*\[(ESTANDAR|PRO' + 'YECTO)\]\s*-->') {
+    if ($line -match '<!--\s*\[' + '(ESTANDAR|PROYECTO)' + '\]\s*-->') {
       $markCount++
     }
   }
 
   $headingsOk = ($headingCount -eq $markCount)
   if (-not $headingsOk) {
-    $errors.Add( ("Desbalance de encabezados ({0}) y marcas de seccion ({1})" -f $headingCount, $markCount) )
+    $errors.Add( ("Desbalance de encabezados ({0}) y marcas [ESTANDAR] / proyecto ({1})" -f $headingCount, $markCount) )
   }
 
   # Deteccion de reglas prescriptivas y etiqueta verifica:
-  $kwPattern = '(?i)\b(prohibid[oa]s?|prohibici[\u00F3o]n|obligatori[oa]s?|debe[sn]?|nunca|jam[\u00E1a]s|siempre|inviolable[s]?|inmutable[s]?)\b'
+  $kwPattern = '(?i)\b(prohibid[oa]s?|prohibici[oo]n|obligatori[oa]s?|debe[sn]?|nunca|jam[aa]s|siempre|inviolable[s]?|inmutable[s]?)\b'
   $inCode = $false
 
   for ($i = 0; $i -lt $lines.Length; $i++) {
@@ -605,8 +602,8 @@ function Test-AgentsManifestContent {
       foreach ($rawT in $targets) {
         $t = $rawT.Trim()
         if (-not $t) { continue }
-        if ($t -eq 'instrucci[\u00F3o]n' -or $t -eq 'instrucci[\u00F3o]n') {
-          $instrucci[\u00F3o]nCount++
+        if ($t -eq 'instruccion' -or $t -eq 'instruccion') {
+          $instruccionCount++
         } else {
           $rutaCount++
           $cleanPath = ($t -split '#')[0].Trim()
@@ -629,7 +626,7 @@ function Test-AgentsManifestContent {
     Errors = $errors
     Passed = ($errors.Count -eq 0)
     RutaCount = $rutaCount
-    InstruccionCount = $instrucci[\u00F3o]nCount
+    InstruccionCount = $instruccionCount
   }
 }
 
@@ -654,12 +651,12 @@ $synthValid = @"
 <!-- [ESTANDAR] -->
 
 - Esta regla esta estrictamente prohibida sin excepcion.
-  <!-- verifica: instrucci[\u00F3o]n -->
+  <!-- verifica: instruccion -->
 "@
 $resSynthValid = Test-AgentsManifestContent "synth-valid.md" $synthValid ""
 if (-not $resSynthValid.Passed) {
   $synthTestsPassed = $false
-  $synthDetails.Add("Falso positivo en regla valida con etiqueta instrucci[\u00F3o]n")
+  $synthDetails.Add("Falso positivo en regla valida con etiqueta instruccion")
 }
 
 $synthBadMark = @"
@@ -669,7 +666,7 @@ $synthBadMark = @"
 $resSynthBadMark = Test-AgentsManifestContent "synth-bad-mark.md" $synthBadMark ""
 if ($resSynthBadMark.HeadingsOk) {
   $synthTestsPassed = $false
-  $synthDetails.Add("Fallo deteccion de encabezado sin marca de seccion")
+  $synthDetails.Add("Fallo deteccion de encabezado sin marca [ESTANDAR] / proyecto")
 }
 
 $synthBadPath = @"
@@ -705,11 +702,11 @@ foreach ($relPath in $manifestList) {
     $content = [System.IO.File]::ReadAllText($fullPath, [System.Text.Encoding]::UTF8)
     $res = Test-AgentsManifestContent $relPath $content $repoRoot
 
-    Register-Check "Manifiestos" "$relPath - Conteo de marcas de seccion coincide con encabezados" $res.HeadingsOk ("Encabezados: {0}, Marcas: {1}" -f $res.HeadingCount, $res.MarkCount)
+    Register-Check "Manifiestos" "$relPath - Conteo de marcas [ESTANDAR] / proyecto coincide con encabezados" $res.HeadingsOk ("Encabezados: {0}, Marcas: {1}" -f $res.HeadingCount, $res.MarkCount)
 
     $rulesOk = ($res.Errors.Count -eq 0)
     $rulesDetail = if ($rulesOk) {
-      ("Etiquetas conformes: {0} rutas, {1} instrucci[\u00F3o]nes" -f $res.RutaCount, $res.InstruccionCount)
+      ("Etiquetas conformes: {0} rutas, {1} instrucciones" -f $res.RutaCount, $res.InstruccionCount)
     } else {
       $res.Errors -join "; "
     }
