@@ -98,11 +98,7 @@ jobs:
         run: |
           if [ -d "plantilla" ]; then
             echo "Verificando ausencia de marcas [PROYECTO] y terminos de dominio en plantilla/..."
-            if grep -rnEI "(\[PROYECTO\]|\b(aspirante|gestion|examen_app|curp)\b)" plantilla/; then
-              echo "::error::plantilla/ contiene marcas [PROYECTO] o terminos de dominio especificos"
-              exit 1
-            fi
-            echo "[OK] plantilla/ no contiene terminos de dominio ni marcas [PROYECTO]."
+            deno run --allow-read ./scripts/extraer-plantilla.ts --verificar ./plantilla
           else
             echo "plantilla/ no existe aun; omitiendo verificacion."
           fi

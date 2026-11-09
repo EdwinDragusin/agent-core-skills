@@ -1,8 +1,8 @@
 <%*
-// Requiere archivo ya nombrado en minusculas como el actor, ej. usuario.md
-const nombreActor = await tp.system.prompt("Nombre del actor (ej. Usuario)");
-const modulo = await tp.system.prompt("Modulo principal (ej. Aplicacion y Calificacion)");
-const rol = await tp.system.prompt("Rol (ej. Persona Candidata)");
+// Requiere archivo ya nombrado en minusculas como el actor, ej. operador.md
+const nombreActor = await tp.system.prompt("Nombre del actor (ej. Operador)");
+const modulo = await tp.system.prompt("Modulo principal (ej. Facturacion)");
+const rol = await tp.system.prompt("Rol (ej. Persona Usuaria)");
 const actorTag = nombreActor.toLowerCase();
 -%>
 ---

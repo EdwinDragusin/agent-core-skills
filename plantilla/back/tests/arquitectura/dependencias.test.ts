@@ -1,4 +1,5 @@
 import { assert, assertEquals } from "@std/assert";
+import { resolverRutaBack } from "../../../estandar.config.ts";
 /**
  * Recorre recursivamente un directorio y retorna las rutas de todos los archivos .ts
  */
@@ -52,10 +53,11 @@ function obtenerImportsDeArchivo(filePath: string): string[] {
 }
 
 Deno.test("Arquitectura - Capa de Dominio no debe tener dependencias externas ni de capas superiores", () => {
-  const archivosDominio = obtenerArchivosTypeScript("src/dominio");
+  const dirDominio = resolverRutaBack("src/dominio");
+  const archivosDominio = obtenerArchivosTypeScript(dirDominio);
   assert(
     archivosDominio.length > 0,
-    "Guarda anti-vacuidad: no se encontraron archivos en 'src/dominio'. Verifique la configuracion en estandar.config.ts",
+    `Guarda anti-vacuidad: no se encontraron archivos en '${dirDominio}'. Verifique la configuracion en estandar.config.ts`,
   );
   const violaciones: string[] = [];
   for (const archivo of archivosDominio) {
@@ -86,10 +88,11 @@ Deno.test("Arquitectura - Capa de Dominio no debe tener dependencias externas ni
   );
 });
 Deno.test("Arquitectura - Capa de Aplicacion solo debe importar de Dominio y Aplicacion", () => {
-  const archivosAplicacion = obtenerArchivosTypeScript("src/aplicacion");
+  const dirAplicacion = resolverRutaBack("src/aplicacion");
+  const archivosAplicacion = obtenerArchivosTypeScript(dirAplicacion);
   assert(
     archivosAplicacion.length > 0,
-    "Guarda anti-vacuidad: no se encontraron archivos en 'src/aplicacion'. Verifique la configuracion en estandar.config.ts",
+    `Guarda anti-vacuidad: no se encontraron archivos en '${dirAplicacion}'. Verifique la configuracion en estandar.config.ts`,
   );
   const violaciones: string[] = [];
   for (const archivo of archivosAplicacion) {
@@ -119,10 +122,11 @@ Deno.test("Arquitectura - Capa de Aplicacion solo debe importar de Dominio y Apl
 });
 
 Deno.test("Arquitectura - Capa de Infraestructura no debe importar de Interfaz", () => {
-  const archivosInfraestructura = obtenerArchivosTypeScript("src/infraestructura");
+  const dirInfra = resolverRutaBack("src/infraestructura");
+  const archivosInfraestructura = obtenerArchivosTypeScript(dirInfra);
   assert(
     archivosInfraestructura.length > 0,
-    "Guarda anti-vacuidad: no se encontraron archivos en 'src/infraestructura'. Verifique la configuracion en estandar.config.ts",
+    `Guarda anti-vacuidad: no se encontraron archivos en '${dirInfra}'. Verifique la configuracion en estandar.config.ts`,
   );
   const violaciones: string[] = [];
   for (const archivo of archivosInfraestructura) {
@@ -145,10 +149,11 @@ Deno.test("Arquitectura - Capa de Infraestructura no debe importar de Interfaz",
 });
 
 Deno.test("Arquitectura - Tests de Aplicacion no deben importar de Interfaz", () => {
-  const archivosTestsAplicacion = obtenerArchivosTypeScript("tests/aplicacion");
+  const dirTestsApp = resolverRutaBack("tests/aplicacion");
+  const archivosTestsAplicacion = obtenerArchivosTypeScript(dirTestsApp);
   assert(
     archivosTestsAplicacion.length > 0,
-    "Guarda anti-vacuidad: no se encontraron archivos en 'tests/aplicacion'. Verifique la configuracion en estandar.config.ts",
+    `Guarda anti-vacuidad: no se encontraron archivos en '${dirTestsApp}'. Verifique la configuracion en estandar.config.ts`,
   );
   const violaciones: string[] = [];
   for (const archivo of archivosTestsAplicacion) {

@@ -20,6 +20,9 @@ tags:
 
 # <% id %>: <% tituloLegible %>
 
+## Resumen Ejecutivo de Negocio
+Sintesis en lenguaje de negocio accesible que describe el impacto funcional, las garantias operativas y el valor que aporta esta decision arquitectonica para la organizacion y usuarios finales, libre de jerga innecesaria.
+
 ## Estado
 Propuesto
 

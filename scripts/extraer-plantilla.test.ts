@@ -12,6 +12,7 @@ import {
   TRANSFORMACIONES_DECLARADAS,
   transformarContenido,
   validarSintaxisPowerShell,
+  verificarPlantillaCli,
 } from "./extraer-plantilla.ts";
 
 Deno.test("Filtro MD - elimina secciones marcadas con [PROYECTO]", () => {
@@ -184,7 +185,7 @@ export const estandarConfig = {
 });
 
 Deno.test("Deteccion de terminos de dominio - subcadena insensible a mayusculas con excepciones genericas", () => {
-  // Coincidencias que deben ser detectadas (prohibidas por subcadena insensible)
+  // Coincidencias que deben ser detectadas (prohibidas por palabra o actor)
   assertEquals(contieneTerminoDominio("El aspirante debe registrarse"), true);
   assertEquals(
     contieneTerminoDominio("Los aspirantes deben registrarse"),
@@ -198,20 +199,53 @@ Deno.test("Deteccion de terminos de dominio - subcadena insensible a mayusculas 
   assertEquals(contieneTerminoDominio("Proceso de postulacion formal"), true);
   assertEquals(contieneTerminoDominio("Plaza o vacante pericial"), true);
   assertEquals(contieneTerminoDominio("Importar desde @examen/shared"), true);
+  assertEquals(contieneTerminoDominio("Creacion de Examen en modulo"), true);
+  assertEquals(contieneTerminoDominio("Banco de examenes aleatorios"), true);
+  assertEquals(contieneTerminoDominio("Reactivo de opcion multiple"), true);
+  assertEquals(
+    contieneTerminoDominio("Calificacion final del candidato"),
+    true,
+  );
+  assertEquals(
+    contieneTerminoDominio("Actor principal (ej. Enlace, Administrador)"),
+    true,
+  );
+  assertEquals(contieneTerminoDominio("Tag #actor/enlace asignado"), true);
+  assertEquals(
+    contieneTerminoDominio("- **Enlace**: persona encargada"),
+    true,
+  );
 
-  // Palabras del espanol generico con excepciones legitimas
+  // Palabras del espanol generico con excepciones legitimas (hipervinculos y verbos)
   assertEquals(
     contieneTerminoDominio("Se debe gestionar el ciclo de vida"),
     false,
   );
   assertEquals(contieneTerminoDominio("Evitar la congestion de red"), false);
   assertEquals(contieneTerminoDominio("Codigo perfectamente agnostico"), false);
+  assertEquals(
+    contieneTerminoDominio("[enlace a la documentacion](https://example.com)"),
+    false,
+  );
+  assertEquals(
+    contieneTerminoDominio("un enlace simbolico en el directorio"),
+    false,
+  );
+  assertEquals(
+    contieneTerminoDominio("se debe examinar el contenido de la solicitud"),
+    false,
+  );
 
   // Lista de hallazgos
   const hallazgos = detectarTerminosDominio(
-    "aspirantes con CURP en postulacion gubernamental de Hidalgo",
+    "aspirantes con CURP en postulacion gubernamental de Hidalgo con examen, reactivos y calificacion",
   );
-  assertEquals(hallazgos.length >= 5, true);
+  assertEquals(hallazgos.length >= 7, true);
+});
+
+Deno.test("Verificacion CLI de plantilla - retorna 0 en plantilla limpia", async () => {
+  const codigo = await verificarPlantillaCli("plantilla");
+  assertEquals(codigo, 0);
 });
 
 Deno.test("Preambulos limpios - preambulo con Gobierno de Hidalgo no llega a la salida", () => {

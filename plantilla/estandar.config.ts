@@ -70,6 +70,39 @@ export interface EstandarConfig {
   front: EstandarConfigFront;
 }
 
+function urlARutaPosix(url: URL): string {
+  const decodificada = decodeURIComponent(url.pathname);
+  const sinSlashWindows = /^\/[A-Za-z]:\//.test(decodificada)
+    ? decodificada.slice(1)
+    : decodificada;
+  return sinSlashWindows.replaceAll("\\", "/").replace(/\/+$/, "");
+}
+
+/** Ruta absoluta en formato POSIX hacia la raiz del repositorio */
+export const RAIZ_REPO = urlARutaPosix(new URL(".", import.meta.url));
+
+/**
+ * Resuelve una ruta del subsistema backend de forma absoluta contra la raiz del repositorio.
+ * Permite ejecutar tests desde cualquier working directory.
+ */
+export function resolverRutaBack(subruta: string = ""): string {
+  const base = `${RAIZ_REPO}/${estandarConfig.back.raiz}`;
+  if (!subruta || subruta === ".") return base;
+  const limpia = subruta.replaceAll("\\", "/").replace(/^\/+/, "");
+  return `${base}/${limpia}`;
+}
+
+/**
+ * Resuelve una ruta del subsistema frontend de forma absoluta contra la raiz del repositorio.
+ * Permite ejecutar tests desde cualquier working directory.
+ */
+export function resolverRutaFront(subruta: string = ""): string {
+  const base = `${RAIZ_REPO}/${estandarConfig.front.raiz}`;
+  if (!subruta || subruta === ".") return base;
+  const limpia = subruta.replaceAll("\\", "/").replace(/^\/+/, "");
+  return `${base}/${limpia}`;
+}
+
 export const estandarConfig: EstandarConfig = {
   back: {
     raiz: "back",

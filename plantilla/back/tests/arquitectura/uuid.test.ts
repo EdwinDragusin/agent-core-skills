@@ -1,5 +1,5 @@
 import { assert, assertEquals } from "@std/assert";
-import { estandarConfig } from "../../../estandar.config.ts";
+import { estandarConfig, resolverRutaBack } from "../../../estandar.config.ts";
 import { extraerImportsDeCodigo } from "./dependencias.test.ts";
 
 export interface ViolacionUuid {
@@ -102,7 +102,7 @@ Deno.test("Arquitectura - Autoverificacion sintetica de reglas de generacion de 
 });
 
 Deno.test("Arquitectura - En back/src nadie usa crypto.randomUUID ni paquetes uuid salvo generarUuid", () => {
-  const archivosSrc = obtenerArchivosTypeScript("src");
+  const archivosSrc = obtenerArchivosTypeScript(resolverRutaBack("src"));
   assert(
     archivosSrc.length > 0,
     "Guarda anti-vacuidad: no se encontraron archivos en 'src'. Verifique la configuracion en estandar.config.ts",

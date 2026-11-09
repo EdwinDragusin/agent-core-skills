@@ -1,5 +1,5 @@
 import { assert, assertEquals } from "@std/assert";
-import { estandarConfig } from "../../../estandar.config.ts";
+import { estandarConfig, resolverRutaBack } from "../../../estandar.config.ts";
 
 export interface ViolacionLogger {
   archivo: string;
@@ -144,7 +144,7 @@ Deno.test("Arquitectura - Autoverificacion sintetica de reglas de Logger sin con
 });
 
 Deno.test("Arquitectura - En back/src no debe haber llamadas a console.* salvo LoggerConsola y semillas CLI", () => {
-  const archivosSrc = obtenerArchivosTypeScript("src");
+  const archivosSrc = obtenerArchivosTypeScript(resolverRutaBack("src"));
   assert(
     archivosSrc.length > 0,
     "Guarda anti-vacuidad: no se encontraron archivos en 'src'. Verifique la configuracion en estandar.config.ts",

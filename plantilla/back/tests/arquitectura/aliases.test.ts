@@ -1,5 +1,6 @@
 import { assert, assertEquals } from "@std/assert";
 import { dirname, join, normalize } from "@std/path/posix";
+import { resolverRutaBack } from "../../../estandar.config.ts";
 import { extraerImportsDeCodigo } from "./dependencias.test.ts";
 
 const CAPAS = ["dominio", "aplicacion", "infraestructura", "interfaz"] as const;
@@ -123,10 +124,11 @@ Deno.test("Arquitectura - Autoverificacion sintetica de deteccion de aliases ent
 });
 
 Deno.test("Arquitectura - Todo import en src/ debe usar aliases @capa en lugar de rutas ascendentes ../", () => {
-  const archivosSrc = obtenerArchivosTypeScript("src");
+  const dirSrc = resolverRutaBack("src");
+  const archivosSrc = obtenerArchivosTypeScript(dirSrc);
   assert(
     archivosSrc.length > 0,
-    "Guarda anti-vacuidad: no se encontraron archivos en 'src'. Verifique la configuracion en estandar.config.ts",
+    `Guarda anti-vacuidad: no se encontraron archivos en '${dirSrc}'. Verifique la configuracion en estandar.config.ts`,
   );
 
   const todasLasViolaciones: ViolacionAlias[] = [];

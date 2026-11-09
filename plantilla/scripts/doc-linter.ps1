@@ -594,6 +594,81 @@ foreach ($relPath in $manifestList) {
 }
 
 # -----------------------------------------------------------------
+# 9. PLANTILLAS OFICIALES (docs/_plantillas)
+# [ESTANDAR]
+# -----------------------------------------------------------------
+Write-Host "`n--- 9. Verificacion de Plantillas Oficiales (docs/_plantillas) ---"
+$plantillasDir = Join-Path $DocsPath "_plantillas"
+
+if (Test-Path $plantillasDir) {
+  # 1. PLANTILLA-CU.md
+  $cuTemplatePath = Join-Path $plantillasDir "PLANTILLA-CU.md"
+  if (Test-Path $cuTemplatePath) {
+    $cuTpl = [System.IO.File]::ReadAllText($cuTemplatePath, [System.Text.Encoding]::UTF8)
+    $hasCuSec6 = $cuTpl -match '## 6\.\s+Contrato T.{1,2}cnico de Ingenier.{1,2}a'
+    $has61 = $cuTpl -match '###?\s+6\.1'
+    $has62 = $cuTpl -match '###?\s+6\.2'
+    $has63 = $cuTpl -match '###?\s+6\.3'
+    $has64 = $cuTpl -match '###?\s+6\.4'
+    $cuTplOk = $hasCuSec6 -and $has61 -and $has62 -and $has63 -and $has64
+    Register-Check "Plantillas" "PLANTILLA-CU.md cuenta con Seccion 6 y subsecciones 6.1 a 6.4" $cuTplOk "Sec6:$hasCuSec6 6.1:$has61 6.2:$has62 6.3:$has63 6.4:$has64"
+  }
+
+  # 2. PLANTILLA-ADR.md
+  $adrTemplatePath = Join-Path $plantillasDir "PLANTILLA-ADR.md"
+  if (Test-Path $adrTemplatePath) {
+    $adrTpl = [System.IO.File]::ReadAllText($adrTemplatePath, [System.Text.Encoding]::UTF8)
+    $hasAdrSummary = $adrTpl -match '## Resumen Ejecutivo de Negocio'
+    $hasAdrEstado = $adrTpl -match '## Estado'
+    $hasAdrContexto = $adrTpl -match '## Contexto'
+    $hasAdrDecision = $adrTpl -match '## Decisi[oo]n'
+    $hasAdrConsecuencias = $adrTpl -match '## Consecuencias'
+    $adrTplOk = $hasAdrSummary -and $hasAdrEstado -and $hasAdrContexto -and $hasAdrDecision -and $hasAdrConsecuencias
+    Register-Check "Plantillas" "PLANTILLA-ADR.md cuenta con Resumen Ejecutivo de Negocio y secciones canonicas" $adrTplOk "Resumen:$hasAdrSummary Estado:$hasAdrEstado Contexto:$hasAdrContexto Decision:$hasAdrDecision Consecuencias:$hasAdrConsecuencias"
+  }
+
+  # 3. PLANTILLA-DS-CU.md
+  $dsTemplatePath = Join-Path $plantillasDir "PLANTILLA-DS-CU.md"
+  if (Test-Path $dsTemplatePath) {
+    $dsTpl = [System.IO.File]::ReadAllText($dsTemplatePath, [System.Text.Encoding]::UTF8)
+    $hasDsContrato = $dsTpl -match '## Resumen del Contrato T.{1,2}cnico'
+    $hasDsDiagrama = $dsTpl -match '## Diagramas de Secuencia'
+    $dsTplOk = $hasDsContrato -and $hasDsDiagrama
+    Register-Check "Plantillas" "PLANTILLA-DS-CU.md cuenta con contrato y diagramas de secuencia" $dsTplOk "Contrato:$hasDsContrato Diagramas:$hasDsDiagrama"
+  }
+
+  # 4. PLANTILLA-RN.md
+  $rnTemplatePath = Join-Path $plantillasDir "PLANTILLA-RN.md"
+  if (Test-Path $rnTemplatePath) {
+    $rnTpl = [System.IO.File]::ReadAllText($rnTemplatePath, [System.Text.Encoding]::UTF8)
+    $hasRnDef = $rnTpl -match '## Definici[oo]n y Alcance'
+    $hasRnCrit = $rnTpl -match '## Criterios de Aceptaci[oo]n'
+    $rnTplOk = $hasRnDef -and $hasRnCrit
+    Register-Check "Plantillas" "PLANTILLA-RN.md cuenta con definicion y criterios de aceptacion" $rnTplOk "Definicion:$hasRnDef Criterios:$hasRnCrit"
+  }
+
+  # 5. PLANTILLA-PB.md
+  $pbTemplatePath = Join-Path $plantillasDir "PLANTILLA-PB.md"
+  if (Test-Path $pbTemplatePath) {
+    $pbTpl = [System.IO.File]::ReadAllText($pbTemplatePath, [System.Text.Encoding]::UTF8)
+    $hasPbDesc = $pbTpl -match '## Descripci[oo]n'
+    $hasPbSec = $pbTpl -match '## Secuencia Narrativa del Proceso'
+    $pbTplOk = $hasPbDesc -and $hasPbSec
+    Register-Check "Plantillas" "PLANTILLA-PB.md cuenta con descripcion y secuencia narrativa" $pbTplOk "Descripcion:$hasPbDesc Secuencia:$hasPbSec"
+  }
+
+  # 6. PLANTILLA-Actor.md
+  $actorTemplatePath = Join-Path $plantillasDir "PLANTILLA-Actor.md"
+  if (Test-Path $actorTemplatePath) {
+    $actorTpl = [System.IO.File]::ReadAllText($actorTemplatePath, [System.Text.Encoding]::UTF8)
+    $hasActorObj = $actorTpl -match '## Objetivo'
+    $hasActorCap = $actorTpl -match '## Capacidades y Casos de Uso Documentados'
+    $actorTplOk = $hasActorObj -and $hasActorCap
+    Register-Check "Plantillas" "PLANTILLA-Actor.md cuenta con objetivo y capacidades documentadas" $actorTplOk "Objetivo:$hasActorObj Capacidades:$hasActorCap"
+  }
+}
+
+# -----------------------------------------------------------------
 # RESUMEN Y RESULTADO FINAL
 # [ESTANDAR]
 # -----------------------------------------------------------------

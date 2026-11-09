@@ -1,5 +1,5 @@
 import { assert, assertEquals } from "@std/assert";
-import { estandarConfig } from "../../../estandar.config.ts";
+import { estandarConfig, resolverRutaBack } from "../../../estandar.config.ts";
 
 export interface ViolacionUseCase {
   archivo: string;
@@ -118,7 +118,7 @@ Deno.test("Arquitectura - Autoverificacion sintetica de exposicion de metodo eje
 });
 
 Deno.test("Arquitectura - Cada clase en aplicacion/usecases/ debe exponer el metodo ejecutar(", () => {
-  const dirUseCases = estandarConfig.back.directorioUseCases;
+  const dirUseCases = resolverRutaBack(estandarConfig.back.directorioUseCases);
   const archivosUseCases = obtenerArchivosTypeScript(dirUseCases);
   assert(
     archivosUseCases.length > 0,
