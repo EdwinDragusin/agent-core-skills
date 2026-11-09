@@ -1,4 +1,5 @@
 import { assert, assertEquals } from "@std/assert";
+import { estandarConfig } from "../../../estandar.config.ts";
 
 export interface ViolacionDIManual {
   archivo: string;
@@ -7,11 +8,8 @@ export interface ViolacionDIManual {
   motivo: string;
 }
 
-const ARCHIVOS_COMPOSICION_AUTORIZADOS = [
-  "src/interfaz/http/main.ts",
-  "src/interfaz/http/crearApp.ts",
-  "src/infraestructura/persistencia/UnitOfWorkDrizzle.ts",
-];
+export const ARCHIVOS_COMPOSICION_AUTORIZADOS: readonly string[] =
+  estandarConfig.back.archivosComposicionDIManual;
 
 /**
  * Detecta instanciaciones directas de adaptadores o repositorios de infraestructura
@@ -21,11 +19,12 @@ export function detectarViolacionesDIManual(
   archivoRuta: string,
   contenido: string,
   _clasesInfraestructura: Set<string> = new Set(),
+  archivosAutorizados: readonly string[] = ARCHIVOS_COMPOSICION_AUTORIZADOS,
 ): ViolacionDIManual[] {
   const normalizada = archivoRuta.replaceAll("\\", "/");
 
   // Permitido en composition roots autorizados
-  if (ARCHIVOS_COMPOSICION_AUTORIZADOS.some((auth) => normalizada.endsWith(auth))) {
+  if (archivosAutorizados.some((auth) => normalizada.endsWith(auth))) {
     return [];
   }
 
@@ -184,7 +183,10 @@ Deno.test("Arquitectura - Instanciacion de adaptadores de infraestructura solo e
   }
 
   const archivosSrc = obtenerArchivosTypeScript("src");
-  assert(archivosSrc.length > 0, "Debe haber archivos en src");
+  assert(
+    archivosSrc.length > 0,
+    "Guarda anti-vacuidad: no se encontraron archivos en 'src'. Verifique la configuracion en estandar.config.ts",
+  );
 
   const todasLasViolaciones: ViolacionDIManual[] = [];
 

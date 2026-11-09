@@ -1,4 +1,5 @@
 import { assert, assertEquals } from "@std/assert";
+import { estandarConfig } from "../../../estandar.config.ts";
 
 export interface ViolacionUseCase {
   archivo: string;
@@ -117,10 +118,11 @@ Deno.test("Arquitectura - Autoverificacion sintetica de exposicion de metodo eje
 });
 
 Deno.test("Arquitectura - Cada clase en aplicacion/usecases/ debe exponer el metodo ejecutar(", () => {
-  const archivosUseCases = obtenerArchivosTypeScript("src/aplicacion/usecases");
+  const dirUseCases = estandarConfig.back.directorioUseCases;
+  const archivosUseCases = obtenerArchivosTypeScript(dirUseCases);
   assert(
     archivosUseCases.length > 0,
-    "Debe existir al menos un use case en src/aplicacion/usecases",
+    `Guarda anti-vacuidad: no se encontraron use cases en '${dirUseCases}'. Verifique la configuracion en estandar.config.ts`,
   );
 
   const todasLasViolaciones: ViolacionUseCase[] = [];

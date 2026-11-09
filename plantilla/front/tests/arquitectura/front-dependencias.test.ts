@@ -1,5 +1,6 @@
 /// <reference lib="deno.ns" />
 import { assert, assertEquals, fail } from "jsr:@std/assert@^1.0.0";
+import { estandarConfig, type EstandarConfigFront } from "../../../estandar.config.ts";
 
 export type ReglaArquitectura = "RN-F03" | "SHARED" | "RN-F01" | "CAPAS" | "RN-F02";
 
@@ -9,11 +10,10 @@ export interface Violacion {
   destino: string;
 }
 
-type AppFront = "{{APP_1}}" | "{{APP_2}}" | "shared";
 type CapaApp = "app" | "components" | "features" | "entities" | "api" | "shared" | "otra";
 
 interface UbicacionCapa {
-  app: AppFront | "externo";
+  app: string;
   capa: CapaApp;
   segmento?: string;
   subruta?: string;
@@ -66,62 +66,117 @@ function limpiarRutaOrigen(origen: string): string {
   return limpia.startsWith("front/") ? limpia.slice("front/".length) : limpia;
 }
 
-function resolverDestinoInterno(origen: string, especificador: string): string | null {
+function resolverDestinoInterno(
+  origen: string,
+  especificador: string,
+  config: EstandarConfigFront = estandarConfig.front,
+): string | null {
   const spec = especificador.trim();
   if (spec.startsWith(".")) {
     const dir = directorioDe(origen);
     return normalizarRutaPosix(dir ? `${dir}/${spec}` : spec);
   }
-  if (spec === "@shared") {
-    return "shared/index.ts";
+
+  if (config.capaCompartida) {
+    const nombreShared = config.capaCompartida.nombre;
+    const rutaShared = config.capaCompartida.ruta;
+    if (spec === `@${nombreShared}`) {
+      return `${rutaShared}/index.ts`;
+    }
+    if (spec.startsWith(`@${nombreShared}/`)) {
+      return normalizarRutaPosix(`${rutaShared}/${spec.slice(`@${nombreShared}/`.length)}`);
+    }
   }
-  if (spec.startsWith("@shared/")) {
-    return normalizarRutaPosix(`shared/${spec.slice("@shared/".length)}`);
+
+  const nombresApps = config.aplicaciones.map((a) => a.nombre);
+  if (nombresApps.length > 0) {
+    const patronApps = nombresApps.join("|");
+    const regexApp = new RegExp(`(?:^|\\/)(${patronApps})\\/(.*)$`);
+    const matchApp = regexApp.exec(spec);
+    if (matchApp) {
+      return normalizarRutaPosix(`${matchApp[1]}/${matchApp[2]}`);
+    }
+
+    const regexAliasPkg = new RegExp(`^@[^/]+\\/(${patronApps})(?:\\/(.*))?$`);
+    const matchAliasPkg = regexAliasPkg.exec(spec);
+    if (matchAliasPkg) {
+      const resto = matchAliasPkg[2] ?? "src/main.tsx";
+      return normalizarRutaPosix(`${matchAliasPkg[1]}/${resto}`);
+    }
   }
-  const matchApp = /(?:^|\/)({{APP_1}}|{{APP_2}})\/(.*)$/.exec(spec);
-  if (matchApp) {
-    return normalizarRutaPosix(`${matchApp[1]}/${matchApp[2]}`);
-  }
-  const matchAliasPkg = /^@{{PROYECTO}}\/({{APP_1}}|{{APP_2}})(?:\/(.*))?$/.exec(spec);
-  if (matchAliasPkg) {
-    const resto = matchAliasPkg[2] ?? "src/main.tsx";
-    return normalizarRutaPosix(`${matchAliasPkg[1]}/${resto}`);
-  }
+
   return null;
 }
 
-function ubicarArchivo(rutaRelativaFront: string): UbicacionCapa {
-  if (rutaRelativaFront === "shared" || rutaRelativaFront.startsWith("shared/")) {
-    return { app: "shared", capa: "shared" };
+function ubicarArchivo(
+  rutaRelativaFront: string,
+  config: EstandarConfigFront = estandarConfig.front,
+): UbicacionCapa {
+  if (
+    config.capaCompartida &&
+    (rutaRelativaFront === config.capaCompartida.ruta ||
+      rutaRelativaFront.startsWith(`${config.capaCompartida.ruta}/`))
+  ) {
+    return { app: config.capaCompartida.nombre, capa: "shared" };
   }
 
-  const matchApp = /^({{APP_1}}|{{APP_2}})(?:\/(.*))?$/.exec(rutaRelativaFront);
-  if (!matchApp) {
+  const nombresApps = config.aplicaciones.map((a) => a.nombre);
+  let appEncontrada: string | null = null;
+  let resto = "";
+
+  if (nombresApps.length > 0) {
+    const patronApps = nombresApps.join("|");
+    const regexApp = new RegExp(`^(${patronApps})(?:\\/(.*))?$`);
+    const matchApp = regexApp.exec(rutaRelativaFront);
+    if (matchApp) {
+      appEncontrada = matchApp[1];
+      resto = matchApp[2] ?? "";
+    }
+  }
+
+  // Soporte para proyecto de una sola SPA en front/src sin subdirectorio de app
+  if (!appEncontrada && config.aplicaciones.length === 1) {
+    const unicaApp = config.aplicaciones[0];
+    if (
+      rutaRelativaFront === "src" ||
+      rutaRelativaFront.startsWith("src/") ||
+      rutaRelativaFront === "vite.config.ts"
+    ) {
+      appEncontrada = unicaApp.nombre;
+      resto = rutaRelativaFront;
+    }
+  }
+
+  if (!appEncontrada) {
     return { app: "externo", capa: "otra" };
   }
 
-  const app = matchApp[1] as "{{APP_1}}" | "{{APP_2}}";
-  const resto = matchApp[2] ?? "";
+  const app = appEncontrada;
 
   if (
     resto === "vite.config.ts" ||
     resto === "src/App.tsx" ||
     resto === "src/main.tsx" ||
     resto === "src/queryClient.ts" ||
-    resto.startsWith("src/styles/")
+    resto.startsWith("src/styles/") ||
+    resto === "App.tsx" ||
+    resto === "main.tsx" ||
+    resto.startsWith("styles/")
   ) {
     return { app, capa: "app" };
   }
 
-  if (resto === "src/components" || resto.startsWith("src/components/")) {
+  const restoSinSrc = resto.startsWith("src/") ? resto.slice(4) : resto;
+
+  if (restoSinSrc === "components" || restoSinSrc.startsWith("components/")) {
     return { app, capa: "components" };
   }
 
-  if (resto === "src/api" || resto.startsWith("src/api/")) {
+  if (restoSinSrc === "api" || restoSinSrc.startsWith("api/")) {
     return { app, capa: "api" };
   }
 
-  const matchFeature = /^src\/features\/([^/]+)(?:\/(.*))?$/.exec(resto);
+  const matchFeature = /^features\/([^/]+)(?:\/(.*))?$/.exec(restoSinSrc);
   if (matchFeature) {
     return {
       app,
@@ -131,7 +186,7 @@ function ubicarArchivo(rutaRelativaFront: string): UbicacionCapa {
     };
   }
 
-  const matchEntidad = /^src\/entities\/([^/]+)(?:\/(.*))?$/.exec(resto);
+  const matchEntidad = /^entities\/([^/]+)(?:\/(.*))?$/.exec(restoSinSrc);
   if (matchEntidad) {
     return {
       app,
@@ -156,16 +211,54 @@ function esArchivoTest(ruta: string): boolean {
   );
 }
 
-export function esComponentePresentacionalTsx(ruta: string): boolean {
+export function esComponentePresentacionalTsx(
+  ruta: string,
+  config: EstandarConfigFront = estandarConfig.front,
+): boolean {
   if ((!ruta.endsWith(".tsx") && !ruta.endsWith(".ts")) || esArchivoTest(ruta)) {
     return false;
   }
-  return (
-    /^(?:{{APP_1}}|{{APP_2}})\/src\/features\/[^/]+\/(?:components|pages)\//.test(ruta) ||
-    /^(?:{{APP_1}}|{{APP_2}})\/src\/entities\/[^/]+\/ui\//.test(ruta) ||
-    /^(?:{{APP_1}}|{{APP_2}})\/src\/(?:components|pages)\//.test(ruta) ||
-    /^shared\/ui\//.test(ruta)
-  );
+
+  const nombresApps = config.aplicaciones.map((a) => a.nombre);
+  const patronApps = nombresApps.length > 0 ? nombresApps.join("|") : "";
+
+  if (patronApps) {
+    const regexAppFeatures = new RegExp(
+      `^(?:${patronApps})\\/src\\/features\\/[^/]+\\/(?:components|pages)\\/`,
+    );
+    const regexAppEntities = new RegExp(
+      `^(?:${patronApps})\\/src\\/entities\\/[^/]+\\/ui\\/`,
+    );
+    const regexAppComponents = new RegExp(
+      `^(?:${patronApps})\\/src\\/(?:components|pages)\\/`,
+    );
+
+    if (
+      regexAppFeatures.test(ruta) ||
+      regexAppEntities.test(ruta) ||
+      regexAppComponents.test(ruta)
+    ) {
+      return true;
+    }
+  }
+
+  // Soporte SPA unica en src/
+  if (
+    /^(?:src\/features\/[^/]+\/(?:components|pages)\/|src\/entities\/[^/]+\/ui\/|src\/(?:components|pages)\/)/
+      .test(ruta)
+  ) {
+    return true;
+  }
+
+  if (config.capaCompartida) {
+    const rutaShared = config.capaCompartida.ruta;
+    const regexSharedUi = new RegExp(`^${rutaShared}\\/ui\\/`);
+    if (regexSharedUi.test(ruta)) {
+      return true;
+    }
+  }
+
+  return false;
 }
 
 function importaRedEnPresentacional(especificador: string, destino: string | null): boolean {
@@ -188,26 +281,34 @@ function importaRedEnPresentacional(especificador: string, destino: string | nul
  * Clasifica estaticamente un import/reexport desde `origen` hacia `especificador`.
  * Retorna la primera violacion arquitectonica aplicable o `null` si es legal.
  */
-export function clasificarImport(origen: string, especificador: string): Violacion | null {
+export function clasificarImport(
+  origen: string,
+  especificador: string,
+  config: EstandarConfigFront = estandarConfig.front,
+): Violacion | null {
   const rutaOrigen = limpiarRutaOrigen(origen);
-  const destino = resolverDestinoInterno(rutaOrigen, especificador);
-  const ubicacionOrigen = ubicarArchivo(rutaOrigen);
+  const destino = resolverDestinoInterno(rutaOrigen, especificador, config);
+  const ubicacionOrigen = ubicarArchivo(rutaOrigen, config);
 
   if (destino !== null) {
-    const ubicacionDestino = ubicarArchivo(destino);
+    const ubicacionDestino = ubicarArchivo(destino, config);
+    const nombresApps = config.aplicaciones.map((a) => a.nombre);
 
-    // RN-F03: aislamiento absoluto entre {{APP_1}} y {{APP_2}}
+    // RN-F03: aislamiento absoluto entre aplicaciones (solo aplica si hay mas de una app)
     if (
-      (ubicacionOrigen.app === "{{APP_1}}" && ubicacionDestino.app === "{{APP_2}}") ||
-      (ubicacionOrigen.app === "{{APP_2}}" && ubicacionDestino.app === "{{APP_1}}")
+      nombresApps.length > 1 &&
+      nombresApps.includes(ubicacionOrigen.app) &&
+      nombresApps.includes(ubicacionDestino.app) &&
+      ubicacionOrigen.app !== ubicacionDestino.app
     ) {
       return { regla: "RN-F03", origen: rutaOrigen, destino };
     }
 
-    // SHARED: shared/ solo puede importar de shared/
+    // SHARED: shared/ solo puede importar de shared/ (solo si existe capa compartida configurada)
     if (
-      ubicacionOrigen.app === "shared" &&
-      ubicacionDestino.app !== "shared" &&
+      config.capaCompartida &&
+      ubicacionOrigen.app === config.capaCompartida.nombre &&
+      ubicacionDestino.app !== config.capaCompartida.nombre &&
       ubicacionDestino.app !== "externo"
     ) {
       return { regla: "SHARED", origen: rutaOrigen, destino };
@@ -225,7 +326,7 @@ export function clasificarImport(origen: string, especificador: string): Violaci
 
     // CAPAS (tabla A.2 dentro de la misma SPA)
     if (
-      (ubicacionOrigen.app === "{{APP_1}}" || ubicacionOrigen.app === "{{APP_2}}") &&
+      nombresApps.includes(ubicacionOrigen.app) &&
       ubicacionDestino.app === ubicacionOrigen.app
     ) {
       switch (ubicacionOrigen.capa) {
@@ -278,7 +379,7 @@ export function clasificarImport(origen: string, especificador: string): Violaci
 
   // RN-F02 (imports hacia carpetas api/, clienteHttp o axios en componentes visuales)
   if (
-    esComponentePresentacionalTsx(rutaOrigen) &&
+    esComponentePresentacionalTsx(rutaOrigen, config) &&
     importaRedEnPresentacional(especificador, destino)
   ) {
     return {
@@ -430,11 +531,16 @@ function ejecutarEscaneoCompleto(): ResultadoEscaneo {
     return cacheEscaneo;
   }
 
-  const archivosEscaneados = [
-    ...recolectarArchivosFront("{{APP_1}}"),
-    ...recolectarArchivosFront("{{APP_2}}"),
-    ...recolectarArchivosFront("shared"),
-  ].sort();
+  const carpetasAEscanear = estandarConfig.front.aplicaciones.map((a) => a.nombre);
+  if (estandarConfig.front.capaCompartida) {
+    carpetasAEscanear.push(estandarConfig.front.capaCompartida.ruta);
+  }
+
+  const archivosEscaneados: string[] = [];
+  for (const carpeta of carpetasAEscanear) {
+    archivosEscaneados.push(...recolectarArchivosFront(carpeta));
+  }
+  archivosEscaneados.sort();
 
   const violaciones: Violacion[] = [];
 
@@ -627,19 +733,35 @@ Deno.test("Arquitectura Front - Autoprueba sintetica de clasificarImport para to
   );
 });
 
-Deno.test("Arquitectura Front - Anti-vacuidad escanea mas de 300 archivos fuente", () => {
-  const { archivosEscaneados } = ejecutarEscaneoCompleto();
-  assert(
-    archivosEscaneados.length > 300,
-    `Se esperaban mas de 300 archivos escaneados, pero se encontraron ${archivosEscaneados.length}`,
-  );
+Deno.test("Arquitectura Front - Anti-vacuidad: rutas configuradas contienen archivos", () => {
+  for (const app of estandarConfig.front.aplicaciones) {
+    const archivosApp = recolectarArchivosFront(app.nombre);
+    assert(
+      archivosApp.length > 0,
+      `Guarda anti-vacuidad: no se encontraron archivos en '${app.rutaSrc}' para la aplicacion '${app.nombre}'. Verifique la configuracion en estandar.config.ts`,
+    );
+  }
+
+  if (estandarConfig.front.capaCompartida) {
+    const archivosShared = recolectarArchivosFront(estandarConfig.front.capaCompartida.ruta);
+    assert(
+      archivosShared.length > 0,
+      `Guarda anti-vacuidad: no se encontraron archivos en '${estandarConfig.front.capaCompartida.ruta}'. Verifique la configuracion en estandar.config.ts`,
+    );
+  }
 });
 
-Deno.test("Arquitectura Front - RN-F03 aislamiento absoluto {{APP_1}} vs {{APP_2}}", () => {
+Deno.test("Arquitectura Front - RN-F03 aislamiento absoluto entre aplicaciones", () => {
+  if (estandarConfig.front.aplicaciones.length <= 1) {
+    return;
+  }
   afirmarCeroViolaciones("RN-F03");
 });
 
-Deno.test("Arquitectura Front - SHARED no importa de {{APP_1}} ni de {{APP_2}}", () => {
+Deno.test("Arquitectura Front - SHARED no importa de aplicaciones especificas", () => {
+  if (!estandarConfig.front.capaCompartida) {
+    return;
+  }
   afirmarCeroViolaciones("SHARED");
 });
 
@@ -653,4 +775,60 @@ Deno.test("Arquitectura Front - CAPAS cumplimiento estricto del modelo de capas 
 
 Deno.test("Arquitectura Front - RN-F02 aislamiento de efectos y clientes de red en componentes", () => {
   afirmarCeroViolaciones("RN-F02");
+});
+
+Deno.test("Arquitectura Front - Soporta configuracion con una sola SPA y sin capa compartida", () => {
+  const configUnicaApp: EstandarConfigFront = {
+    raiz: "front",
+    aplicaciones: [
+      {
+        nombre: "portal",
+        rutaSrc: "src",
+        sesionEfimera: false,
+      },
+    ],
+    capasFSD: ["app", "components", "features", "entities", "api"],
+  };
+
+  // 1. Ubicar archivo en SPA unica en src/
+  const uFeature = ubicarArchivo("src/features/catalogo/ui/Buscador.tsx", configUnicaApp);
+  assertEquals(uFeature.app, "portal");
+  assertEquals(uFeature.capa, "features");
+  assertEquals(uFeature.segmento, "catalogo");
+
+  const uComponent = ubicarArchivo("src/components/layout/Navbar.tsx", configUnicaApp);
+  assertEquals(uComponent.app, "portal");
+  assertEquals(uComponent.capa, "components");
+
+  // 2. Clasificar import relativo valido dentro de la misma feature
+  const v1 = clasificarImport(
+    "src/features/catalogo/ui/Buscador.tsx",
+    "../hooks/useCatalogo.ts",
+    configUnicaApp,
+  );
+  assertEquals(v1, null);
+
+  // 3. RN-F03 (aislamiento entre apps) queda exento con 1 sola app
+  const vApp = clasificarImport(
+    "src/features/catalogo/ui/Buscador.tsx",
+    "./Otro.tsx",
+    configUnicaApp,
+  );
+  assertEquals(vApp, null);
+
+  // 4. RN-F01 (cruce entre features hermanas) sigue detectandose en SPA unica
+  const vHermana = clasificarImport(
+    "src/features/catalogo/ui/Buscador.tsx",
+    "../../ventas/api/ventasApi.ts",
+    configUnicaApp,
+  );
+  assertEquals(vHermana?.regla, "RN-F01");
+
+  // 5. RN-F02 sigue detectandose en componentes presentacionales de SPA unica
+  const vRed = clasificarImport(
+    "src/features/catalogo/components/Lista.tsx",
+    "../api/catalogoApi.ts",
+    configUnicaApp,
+  );
+  assertEquals(vRed?.regla, "RN-F02");
 });

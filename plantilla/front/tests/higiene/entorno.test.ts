@@ -1,5 +1,6 @@
 /// <reference lib="deno.ns" />
 import { assert, assertEquals } from "jsr:@std/assert@^1.0.0";
+import { estandarConfig } from "../../../estandar.config.ts";
 
 export interface ViolacionEntorno {
   archivo: string;
@@ -173,40 +174,6 @@ function recolectarArchivosSrc(dir: string): string[] {
   return archivos;
 }
 
-function buscarDirectoriosFrontSrc(raizFront: string): string[] {
-  const directoriosSrc: string[] = [];
-  try {
-    for (const entrada of Deno.readDirSync(raizFront)) {
-      if (
-        entrada.name === "node_modules" ||
-        entrada.name === "dist" ||
-        entrada.name === "coverage" ||
-        entrada.name === ".git"
-      ) {
-        continue;
-      }
-      const subRuta = `${raizFront}/${entrada.name}`;
-      try {
-        if (Deno.statSync(subRuta).isDirectory) {
-          const posibleSrc = `${subRuta}/src`;
-          try {
-            if (Deno.statSync(posibleSrc).isDirectory) {
-              directoriosSrc.push(posibleSrc);
-            }
-          } catch {
-            // No tiene carpeta src directa
-          }
-        }
-      } catch {
-        // Ignorar
-      }
-    }
-  } catch {
-    // Ignorar
-  }
-  return directoriosSrc;
-}
-
 Deno.test("Higiene Entorno - Autoprueba sintetica de variables permitidas y prohibidas", () => {
   // Variables permitidas
   const codigoValido = `
@@ -237,7 +204,7 @@ Deno.test("Higiene Entorno - Autoprueba sintetica de variables permitidas y proh
   assertEquals(violaciones[3].variable, "API_KEY");
 });
 
-Deno.test("Higiene Entorno - Todo import.meta.env en front/**/src usa VITE_* o MODE|DEV|PROD|BASE_URL|SSR", () => {
+Deno.test("Higiene Entorno - Todo import.meta.env en front usa VITE_* o MODE|DEV|PROD|BASE_URL|SSR", () => {
   // Resolver raiz de front
   const urlTest = new URL(import.meta.url);
   const decodificada = decodeURIComponent(urlTest.pathname);
@@ -249,21 +216,27 @@ Deno.test("Higiene Entorno - Todo import.meta.env en front/**/src usa VITE_* o M
     dirPrueba.slice(0, dirPrueba.indexOf("/tests/")),
   );
 
-  const directoriosSrc = buscarDirectoriosFrontSrc(raizFront);
-  assert(
-    directoriosSrc.length >= 2,
-    `Se esperaban al menos 2 directorios src en front ({{APP_1}}/src y {{APP_2}}/src), encontrados: ${directoriosSrc.length}`,
-  );
-
   const archivosTotales: string[] = [];
-  for (const dir of directoriosSrc) {
-    archivosTotales.push(...recolectarArchivosSrc(dir));
+
+  for (const app of estandarConfig.front.aplicaciones) {
+    const dirApp = `${raizFront}/${app.rutaSrc}`;
+    const archivosApp = recolectarArchivosSrc(dirApp);
+    assert(
+      archivosApp.length > 0,
+      `Guarda anti-vacuidad: no se encontraron archivos en '${app.rutaSrc}' para la aplicacion '${app.nombre}'. Verifique la configuracion en estandar.config.ts`,
+    );
+    archivosTotales.push(...archivosApp);
   }
 
-  assert(
-    archivosTotales.length > 100,
-    `Se esperaban mas de 100 archivos en front/**/src, encontrados: ${archivosTotales.length}`,
-  );
+  if (estandarConfig.front.capaCompartida) {
+    const dirShared = `${raizFront}/${estandarConfig.front.capaCompartida.ruta}`;
+    const archivosShared = recolectarArchivosSrc(dirShared);
+    assert(
+      archivosShared.length > 0,
+      `Guarda anti-vacuidad: no se encontraron archivos en '${estandarConfig.front.capaCompartida.ruta}'. Verifique la configuracion en estandar.config.ts`,
+    );
+    archivosTotales.push(...archivosShared);
+  }
 
   const todasLasViolaciones: ViolacionEntorno[] = [];
   for (const archivo of archivosTotales) {

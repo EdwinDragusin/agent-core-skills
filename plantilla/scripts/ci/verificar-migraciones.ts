@@ -5,6 +5,8 @@
  * En meta/_journal.json solo se permite agregar nuevas entradas al final de la lista.
  */
 
+import { type EstandarConfig, estandarConfig } from "../../estandar.config.ts";
+
 export interface CambioArchivo {
   estado: string;
   ruta: string;
@@ -24,31 +26,59 @@ export function normalizarRuta(ruta: string): string {
 }
 
 /**
+ * Compone una ruta dentro del subsistema backend relativa a la raiz del repositorio.
+ */
+export function componerRutaBack(raiz: string, subruta: string): string {
+  const r = normalizarRuta(raiz).replace(/\/+$/, "");
+  const s = normalizarRuta(subruta).replace(/^\/+/, "");
+  if (!r || r === ".") return s;
+  return `${r}/${s}`;
+}
+
+/**
  * Determina si una ruta corresponde a los archivos de migraciones del backend.
  */
-export function esArchivoMigracion(ruta: string): boolean {
+export function esArchivoMigracion(
+  ruta: string,
+  config: EstandarConfig = estandarConfig,
+): boolean {
   const norm = normalizarRuta(ruta);
-  return norm.includes("/persistencia/migraciones/") ||
-    norm.startsWith("migraciones/") ||
-    norm.includes("back/src/infraestructura/persistencia/migraciones/");
+  const dirMig = normalizarRuta(
+    componerRutaBack(config.back.raiz, config.back.directorioMigraciones),
+  );
+  const nombreDir = dirMig.split("/").pop() ?? "migraciones";
+  return norm.includes(dirMig) ||
+    norm.startsWith(`${nombreDir}/`) ||
+    norm.includes(`/${nombreDir}/`);
 }
 
 /**
  * Determina si la ruta es el archivo de catalogo de migraciones meta/_journal.json.
  */
-export function esJournalMigraciones(ruta: string): boolean {
+export function esJournalMigraciones(
+  ruta: string,
+  config: EstandarConfig = estandarConfig,
+): boolean {
   const norm = normalizarRuta(ruta);
-  return esArchivoMigracion(norm) && norm.endsWith("/meta/_journal.json");
+  return esArchivoMigracion(norm, config) &&
+    norm.endsWith("/meta/_journal.json");
 }
 
 /**
  * Determina si la ruta corresponde al archivo fuente del esquema Drizzle.
  */
-export function esArchivoEsquema(ruta: string): boolean {
+export function esArchivoEsquema(
+  ruta: string,
+  config: EstandarConfig = estandarConfig,
+): boolean {
   const norm = normalizarRuta(ruta);
-  return norm.endsWith("/persistencia/esquema.ts") ||
-    norm === "esquema.ts" ||
-    norm.endsWith("src/infraestructura/persistencia/esquema.ts");
+  const esquemaConfig = normalizarRuta(
+    componerRutaBack(config.back.raiz, config.back.archivoEsquema),
+  );
+  const nombreEsquema = esquemaConfig.split("/").pop() ?? "esquema.ts";
+  return norm.endsWith(esquemaConfig) ||
+    norm === nombreEsquema ||
+    norm.endsWith(`/${nombreEsquema}`);
 }
 
 /**
@@ -141,7 +171,8 @@ export function verificarEntradasJournal(
   if (!Array.isArray(headData.entries)) {
     return {
       valido: false,
-      error: "El _journal.json en HEAD no contiene un arreglo 'entries' valido.",
+      error:
+        "El _journal.json en HEAD no contiene un arreglo 'entries' valido.",
     };
   }
 
@@ -190,35 +221,46 @@ export function verificarEntradasJournal(
  */
 export async function verificarCambiosMigraciones(
   cambios: CambioArchivo[],
-  obtenerContenidoBase?: (ruta: string) => Promise<string | null> | string | null,
-  obtenerContenidoHead?: (ruta: string) => Promise<string | null> | string | null,
+  obtenerContenidoBase?: (
+    ruta: string,
+  ) => Promise<string | null> | string | null,
+  obtenerContenidoHead?: (
+    ruta: string,
+  ) => Promise<string | null> | string | null,
+  config: EstandarConfig = estandarConfig,
 ): Promise<ResultadoVerificacionMigraciones> {
   const errores: string[] = [];
 
   // Comprobar si el esquema fue modificado sin acompanarse de una nueva migracion
   const esquemaModificado = cambios.some(
-    (c) => esArchivoEsquema(c.ruta) && !c.estado.toUpperCase().startsWith("D"),
+    (c) =>
+      esArchivoEsquema(c.ruta, config) &&
+      !c.estado.toUpperCase().startsWith("D"),
   );
 
   if (esquemaModificado) {
     const tieneNuevaMigracion = cambios.some(
       (c) =>
         c.estado.toUpperCase().startsWith("A") &&
-        esArchivoMigracion(c.ruta) &&
+        esArchivoMigracion(c.ruta, config) &&
         c.ruta.endsWith(".sql"),
     );
 
     if (!tieneNuevaMigracion) {
+      const nombreEsquema = config.back.archivoEsquema.split("/").pop() ??
+        "esquema.ts";
+      const nombreDirMig = config.back.directorioMigraciones.split("/").pop() ??
+        "migraciones";
       errores.push(
-        "El esquema de persistencia (esquema.ts) fue modificado pero no se incluyo ninguna nueva migracion (.sql) en migraciones/.",
+        `El esquema de persistencia (${nombreEsquema}) fue modificado pero no se incluyo ninguna nueva migracion (.sql) en ${nombreDirMig}/.`,
       );
     }
   }
 
   for (const cambio of cambios) {
-    const esMigracionActual = esArchivoMigracion(cambio.ruta);
+    const esMigracionActual = esArchivoMigracion(cambio.ruta, config);
     const esMigracionAnterior = cambio.rutaAnterior
-      ? esArchivoMigracion(cambio.rutaAnterior)
+      ? esArchivoMigracion(cambio.rutaAnterior, config)
       : false;
 
     if (!esMigracionActual && !esMigracionAnterior) {
@@ -228,7 +270,7 @@ export async function verificarCambiosMigraciones(
     const estado = cambio.estado.toUpperCase();
 
     // Caso: meta/_journal.json
-    if (esJournalMigraciones(cambio.ruta)) {
+    if (esJournalMigraciones(cambio.ruta, config)) {
       if (estado.startsWith("D")) {
         errores.push(
           `El archivo de catalogo de migraciones "${cambio.ruta}" no puede ser eliminado.`,
@@ -260,11 +302,16 @@ export async function verificarCambiosMigraciones(
         }
 
         if (!headContent) {
-          errores.push(`No se pudo leer el contenido de "${cambio.ruta}" en HEAD.`);
+          errores.push(
+            `No se pudo leer el contenido de "${cambio.ruta}" en HEAD.`,
+          );
           continue;
         }
 
-        const validacionJournal = verificarEntradasJournal(baseContent, headContent);
+        const validacionJournal = verificarEntradasJournal(
+          baseContent,
+          headContent,
+        );
         if (!validacionJournal.valido && validacionJournal.error) {
           errores.push(validacionJournal.error);
         }
@@ -313,7 +360,10 @@ export async function verificarCambiosMigraciones(
 /**
  * Obtiene el contenido de un archivo en una referencia git especifica.
  */
-async function obtenerArchivoGit(ref: string, ruta: string): Promise<string | null> {
+async function obtenerArchivoGit(
+  ref: string,
+  ruta: string,
+): Promise<string | null> {
   try {
     const comando = new Deno.Command("git", {
       args: ["show", `${ref}:${ruta}`],
@@ -409,7 +459,9 @@ if (import.meta.main) {
   );
 
   if (!resultado.valido) {
-    console.error("[ERROR MIGRACIONES INMUTABLES]: Violacion de integridad de migraciones detectada:");
+    console.error(
+      "[ERROR MIGRACIONES INMUTABLES]: Violacion de integridad de migraciones detectada:",
+    );
     for (const err of resultado.errores) {
       console.error(`  - ${err}`);
     }

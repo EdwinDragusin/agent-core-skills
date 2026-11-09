@@ -1,4 +1,5 @@
 import { assert, assertEquals } from "@std/assert";
+import { estandarConfig } from "../../../estandar.config.ts";
 import { extraerImportsDeCodigo } from "./dependencias.test.ts";
 
 export interface ViolacionUuid {
@@ -7,7 +8,7 @@ export interface ViolacionUuid {
   evidencia: string;
 }
 
-const ARCHIVO_GENERADOR_AUTORIZADO = "src/dominio/compartido/generarUuid.ts";
+export const ARCHIVO_GENERADOR_AUTORIZADO = estandarConfig.back.generadorUuid;
 
 /**
  * Verifica que en `back/src` la generacion de identificadores se centralice
@@ -17,11 +18,12 @@ const ARCHIVO_GENERADOR_AUTORIZADO = "src/dominio/compartido/generarUuid.ts";
 export function detectarViolacionesUuid(
   archivoRuta: string,
   contenido: string,
+  archivoAutorizado: string = ARCHIVO_GENERADOR_AUTORIZADO,
 ): ViolacionUuid[] {
   const normalizada = archivoRuta.replaceAll("\\", "/");
   const violaciones: ViolacionUuid[] = [];
 
-  const esArchivoAutorizado = normalizada.endsWith(ARCHIVO_GENERADOR_AUTORIZADO);
+  const esArchivoAutorizado = normalizada.endsWith(archivoAutorizado);
 
   // 1. Prohibir importacion de paquetes uuid externos salvo en el archivo autorizado
   if (!esArchivoAutorizado) {
@@ -101,7 +103,10 @@ Deno.test("Arquitectura - Autoverificacion sintetica de reglas de generacion de 
 
 Deno.test("Arquitectura - En back/src nadie usa crypto.randomUUID ni paquetes uuid salvo generarUuid", () => {
   const archivosSrc = obtenerArchivosTypeScript("src");
-  assert(archivosSrc.length > 0, "Debe haber archivos en src");
+  assert(
+    archivosSrc.length > 0,
+    "Guarda anti-vacuidad: no se encontraron archivos en 'src'. Verifique la configuracion en estandar.config.ts",
+  );
 
   const todasLasViolaciones: ViolacionUuid[] = [];
 

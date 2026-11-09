@@ -1,10 +1,15 @@
 import { assert, assertEquals } from "@std/assert";
+import { estandarConfig } from "../../../estandar.config.ts";
 
 export interface ViolacionEntidad {
   archivo: string;
   clase: string;
   motivo: string;
 }
+
+export const CLASES_BASE_ENTIDAD_CONFIG: readonly string[] = estandarConfig.back.clasesBaseEntidad;
+
+export const CLASE_BASE_VALUE_OBJECT_CONFIG: string = estandarConfig.back.claseBaseValueObject;
 
 /**
  * Analiza clases en el dominio para verificar que toda entidad o sub-entidad
@@ -13,20 +18,21 @@ export interface ViolacionEntidad {
 export function detectarViolacionesEntidad(
   archivoRuta: string,
   contenido: string,
-  entidadesConocidas: Set<string> = new Set(["Entidad", "AgregadoRaiz"]),
+  entidadesConocidas: Set<string> = new Set(CLASES_BASE_ENTIDAD_CONFIG),
+  claseBaseValueObject: string = CLASE_BASE_VALUE_OBJECT_CONFIG,
 ): ViolacionEntidad[] {
   const normalizada = archivoRuta.replaceAll("\\", "/");
   const violaciones: ViolacionEntidad[] = [];
 
   // Excluir clases base y utilidades
-  if (
-    normalizada.endsWith("/Entidad.ts") ||
-    normalizada.endsWith("/AgregadoRaiz.ts") ||
-    normalizada.endsWith("/ValueObject.ts") ||
+  const esClaseBase =
+    CLASES_BASE_ENTIDAD_CONFIG.some((base) => normalizada.endsWith(`/${base}.ts`)) ||
+    normalizada.endsWith(`/${claseBaseValueObject}.ts`) ||
     normalizada.endsWith("/ErrorDominio.ts") ||
     normalizada.includes("/calculadores/") ||
-    normalizada.includes("/servicios/")
-  ) {
+    normalizada.includes("/servicios/");
+
+  if (esClaseBase) {
     return [];
   }
 
@@ -60,8 +66,9 @@ export function detectarViolacionesEntidad(
       ? contenido.substring(indiceLlaveApertura + 1, indiceFinClase)
       : contenido.substring(indiceLlaveApertura + 1);
 
-    // Value Objects que usan Object.freeze o extienden ValueObject no son entidades
-    const esValueObject = claseBase === "ValueObject" || /Object\.freeze\s*\(/.test(cuerpoClase);
+    // Value Objects que usan Object.freeze o extienden claseBaseValueObject no son entidades
+    const esValueObject = claseBase === claseBaseValueObject ||
+      /Object\.freeze\s*\(/.test(cuerpoClase);
     if (esValueObject) continue;
 
     // Buscar comentario previo a la clase
@@ -75,10 +82,9 @@ export function detectarViolacionesEntidad(
         violaciones.push({
           archivo: normalizada,
           clase: nombreClase,
-          motivo:
-            `La entidad '${nombreClase}' debe extender 'Entidad' o 'AgregadoRaiz' (extiende: '${
-              claseBase || "ninguna"
-            }')`,
+          motivo: `La entidad '${nombreClase}' debe extender una clase base (${
+            Array.from(CLASES_BASE_ENTIDAD_CONFIG).join("/")
+          }) (extiende: '${claseBase || "ninguna"}')`,
         });
       }
     }
@@ -163,10 +169,13 @@ Deno.test("Arquitectura - Autoverificacion sintetica de herencia de Entidad y Ag
 
 Deno.test("Arquitectura - Toda entidad o sub-entidad en src/dominio debe extender Entidad o AgregadoRaiz", () => {
   const archivosDominio = obtenerArchivosTypeScript("src/dominio");
-  assert(archivosDominio.length > 0, "Debe existir al menos un archivo en src/dominio");
+  assert(
+    archivosDominio.length > 0,
+    "Guarda anti-vacuidad: no se encontraron archivos en 'src/dominio'. Verifique la configuracion en estandar.config.ts",
+  );
 
   // Recopilar jerarquia conocida de entidades en el dominio (ej. Persona extiende AgregadoRaiz)
-  const entidadesConocidas = new Set<string>(["Entidad", "AgregadoRaiz"]);
+  const entidadesConocidas = new Set<string>(CLASES_BASE_ENTIDAD_CONFIG);
 
   // Pase 1: Registrar clases que extienden Entidad o AgregadoRaiz para soportar herencia transitiva
   for (const archivo of archivosDominio) {

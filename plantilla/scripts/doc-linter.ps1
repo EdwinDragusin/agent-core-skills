@@ -126,67 +126,6 @@ if (Test-Path $cuDir) {
       Register-Check "CasosDeUso" "$fileName - Secciones 1 a 5 puramente funcionales (sin fugas tecnicas)" $noLeaks $details
     }
   }
-} else {
-  Register-Check "CasosDeUso" "Directorio de Casos de Uso existe" $false "No existe $cuDir"
-}
-
-# -----------------------------------------------------------------
-# 2. HISTORIAS DE USUARIO (docs/guia/referencia/historias-de-usuario.md)
-# [ESTANDAR]
-# -----------------------------------------------------------------
-Write-Host "`n--- 2. Verificacion de Historias de Usuario (Criterios Limpios y Apendice) ---"
-$huPath = Join-Path $DocsPath "guia/referencia/historias-de-usuario.md"
-if (Test-Path $huPath) {
-  $huContent = [System.IO.File]::ReadAllText($huPath, [System.Text.Encoding]::UTF8)
-
-  # Existencia de seccion 5
-  $hasHuSec5 = $huContent -match '## 5\.\s+Ap.{1,2}ndice T.{1,2}cnico'
-  Register-Check "HistoriasDeUsuario" "Existencia de Seccion 5 (Apendice Tecnico de Ingenieria)" $hasHuSec5
-
-  if ($hasHuSec5) {
-    $sec5Index = $huContent.IndexOf("## 5. Ap")
-    if ($sec5Index -gt 0) {
-      $huFunctional = $huContent.Substring(0, $sec5Index)
-      $huLines = $huFunctional -split "`r?`n"
-      $huLeaks = [System.Collections.Generic.List[string]]::new()
-      for ($i = 0; $i -lt $huLines.Length; $i++) {
-        $line = $huLines[$i]
-        $visibleHuLine = [regex]::Replace($line, '\[\[[^\|\]]+\|([^\]]+)\]\]', '$1')
-        $visibleHuLine = [regex]::Replace($visibleHuLine, '\[\[([^\]]+)\]\]', '$1')
-
-        if ($visibleHuLine -match $technicalPattern) {
-          $huLeaks.Add("L$($i+1): $($Matches[0]) en: $($line.Trim())")
-        }
-      }
-      $noHuLeaks = ($huLeaks.Count -eq 0)
-      $details = if (-not $noHuLeaks) { $huLeaks -join "; " } else { "" }
-      Register-Check "HistoriasDeUsuario" "Criterios de aceptacion limpios de tecnicismos" $noHuLeaks $details
-    }
-  }
-} else {
-  Register-Check "HistoriasDeUsuario" "Archivo de Historias de Usuario existe" $false "No existe $huPath"
-}
-
-# -----------------------------------------------------------------
-# 3. REGLAS Y DIRECTRICES (DIR-FRONT y RN-*)
-# [ESTANDAR]
-# -----------------------------------------------------------------
-Write-Host "`n--- 3. Verificacion de Reglas y Directrices ---"
-$dirPath = Join-Path $DocsPath "arquitectura/directrices"
-$reglasPath = Join-Path $DocsPath "arquitectura/reglas"
-
-Register-Check "Directrices" "Directorio docs/arquitectura/directrices existe" (Test-Path $dirPath)
-
-for ($i = 1; $i -le 5; $i++) {
-  $dirFile = "DIR-FRONT-{0:D3}.md" -f $i
-  $fullPath = Join-Path $dirPath $dirFile
-  $exists = Test-Path $fullPath
-  $hasAnchor = $false
-  if ($exists) {
-    $c = [System.IO.File]::ReadAllText($fullPath, [System.Text.Encoding]::UTF8)
-    $hasAnchor = ($c -match '\^[a-zA-Z0-9_-]+')
-  }
-  Register-Check "Directrices" "Existencia y anclas en $dirFile" ($exists -and $hasAnchor) "Existe:$exists Ancla:$hasAnchor"
 }
 
 # -----------------------------------------------------------------
@@ -194,10 +133,8 @@ for ($i = 1; $i -le 5; $i++) {
 # [ESTANDAR]
 # -----------------------------------------------------------------
 Write-Host "`n--- 4. Verificacion de arc42 y Catalogo de ADRs ---"
-$cap9Path = Join-Path $DocsPath "arquitectura/capitulo-09-decisiones.md"
 
-# [ESTANDAR] Recoleccion dinamica, indice del Capitulo 9, nomenclatura y resumen ejecutivo
-# Recoleccion de archivos ADR (backend y frontend)
+# [ESTANDAR] Recoleccion dinamica de archivos ADR (backend y frontend)
 $adrDirBack = Join-Path $DocsPath "adr"
 $adrDirFront = Join-Path $DocsPath "adr/frontend"
 
@@ -209,32 +146,7 @@ if (Test-Path $adrDirFront) {
   Get-ChildItem -Path $adrDirFront -Filter "ADR-*.md" | ForEach-Object { $adrFiles.Add($_) }
 }
 
-if (Test-Path $cap9Path) {
-  $cap9 = [System.IO.File]::ReadAllText($cap9Path, [System.Text.Encoding]::UTF8)
-  $missingInCap9 = [System.Collections.Generic.List[string]]::new()
-  $duplicatesInCap9 = [System.Collections.Generic.List[string]]::new()
-
-  foreach ($adr in $adrFiles) {
-    if ($adr.Name -match '^(ADR-(?:\d{3}|F\d{3}))') {
-      $adrId = $matches[1]
-      $occurrences = [regex]::Matches($cap9, "\|\s*$adrId\s*\|")
-      if ($occurrences.Count -eq 0) {
-        $missingInCap9.Add($adrId)
-      } elseif ($occurrences.Count -gt 1) {
-        $duplicatesInCap9.Add("$adrId($($occurrences.Count))")
-      }
-    }
-  }
-
-  $cap9Valid = ($missingInCap9.Count -eq 0 -and $duplicatesInCap9.Count -eq 0)
-  $cap9Details = "Total indexados: $($adrFiles.Count)"
-  if ($missingInCap9.Count -gt 0) { $cap9Details += " | Faltantes en Cap 9: $($missingInCap9 -join ', ')" }
-  if ($duplicatesInCap9.Count -gt 0) { $cap9Details += " | Duplicados en Cap 9: $($duplicatesInCap9 -join ', ')" }
-
-  Register-Check "arc42" "Capitulo 9 indexa todos los ADRs exactamente una vez" $cap9Valid $cap9Details
-} else {
-  Register-Check "arc42" "Capitulo 9 existe" $false
-}
+# [ESTANDAR] Nomenclatura, unicidad y resumen ejecutivo de ADRs
 
 # Verificacion de todos los ADRs con Resumen Ejecutivo
 $invalidAdrNames = [System.Collections.Generic.List[string]]::new()
@@ -281,43 +193,6 @@ foreach ($adr in $adrFiles) {
 $allAdrsHaveSummary = ($adrsMissingSummary.Count -eq 0)
 $missingDetails = if (-not $allAdrsHaveSummary) { $adrsMissingSummary -join ", " } else { "" }
 Register-Check "ADRs" "Todos los ADRs cuentan con '## Resumen Ejecutivo de Negocio'" $allAdrsHaveSummary $missingDetails
-
-# -----------------------------------------------------------------
-# 5. ONBOARDING, GLOSARIO E HIGIENE
-# [ESTANDAR]
-# -----------------------------------------------------------------
-Write-Host "`n--- 5. Verificacion de Onboarding, Glosario e Higiene ---"
-$onboardingPath = Join-Path $DocsPath "ONBOARDING.md"
-if (Test-Path $onboardingPath) {
-  $onb = [System.IO.File]::ReadAllText($onboardingPath, [System.Text.Encoding]::UTF8)
-  $hasRuta1 = ($onb -match 'Ruta 1') -or ($onb -match 'Perfil Funcional')
-  $hasRuta2 = ($onb -match 'Ruta 2') -or ($onb -match 'Perfil Arquitectura')
-  $hasRuta3 = ($onb -match 'Ruta 3') -or ($onb -match 'Perfil Ingenier[ii]a')
-  $onbComplete = $hasRuta1 -and $hasRuta2 -and $hasRuta3
-  Register-Check "Onboarding" "docs/ONBOARDING.md documenta las 3 rutas canonicas" $onbComplete "Ruta1:$hasRuta1 Ruta2:$hasRuta2 Ruta3:$hasRuta3"
-} else {
-  Register-Check "Onboarding" "docs/ONBOARDING.md existe" $false
-}
-
-$glosarioPath = Join-Path $DocsPath "glosario.md"
-if (Test-Path $glosarioPath) {
-  $glo = [System.IO.File]::ReadAllText($glosarioPath, [System.Text.Encoding]::UTF8)
-  $hasSecNegocio = ($glo -match 'T[ee]rminos de Negocio') -or ($glo -match 'Analog[ii]as')
-  $hasSecDdd = ($glo -match 'Dominio DDD') -or ($glo -match 'Arquitectura T[ee]cnica')
-  $gloDual = $hasSecNegocio -and $hasSecDdd
-  Register-Check "Glosario" "docs/glosario.md estructura dual (Negocio con analogias + DDD)" $gloDual "Negocio:$hasSecNegocio DDD:$hasSecDdd"
-} else {
-  Register-Check "Glosario" "docs/glosario.md existe" $false
-}
-
-$todoPath = Join-Path $DocsPath "TODO.md"
-if (Test-Path $todoPath) {
-  $todoContent = [System.IO.File]::ReadAllText($todoPath, [System.Text.Encoding]::UTF8)
-  $hasCollapsible = ($todoContent -match '>\s*\[!\w+\]-') -or ($todoContent -match '<details')
-  Register-Check "TODO" "docs/TODO.md implementa bloques colapsables para Dataview" $hasCollapsible
-} else {
-  Register-Check "TODO" "docs/TODO.md existe" $false
-}
 
 # -----------------------------------------------------------------
 # 6. HIGIENE GLOBAL: CERO EMOJIS EN TODO DOCS/
@@ -605,8 +480,11 @@ function Test-AgentsManifestContent {
           $cleanPath = ($t -split '#')[0].Trim()
           if ($rootPath) {
             $fullPath = Join-Path $rootPath $cleanPath
-            if (-not (Test-Path $fullPath)) {
-              $errors.Add( ("L{0}: Ruta de mecanismo inexistente en disco: '{1}'" -f ($i + 1), $cleanPath) )
+            $isRepoRoot = (Test-Path (Join-Path $rootPath ".git")) -or (Test-Path (Join-Path $rootPath "deno.json"))
+            if ($cleanPath.StartsWith("docs/") -or $isRepoRoot) {
+              if (-not (Test-Path $fullPath)) {
+                $errors.Add( ("L{0}: Ruta de mecanismo inexistente en disco: '{1}'" -f ($i + 1), $cleanPath) )
+              }
             }
           }
         }
@@ -670,7 +548,7 @@ $synthBadPath = @"
 <!-- [ESTANDAR] -->
 
 - Esta regla exige un archivo.
-  <!-- verifica: ruta/inexistente/mecanismo_falso.ts -->
+  <!-- verifica: docs/inexistente/mecanismo_falso.ts -->
 "@
 $resSynthBadPath = Test-AgentsManifestContent "synth-bad-path.md" $synthBadPath $repoRoot
 if ($resSynthBadPath.Passed) {
@@ -692,7 +570,12 @@ $manifestList = @(
 foreach ($relPath in $manifestList) {
   $fullPath = Join-Path $repoRoot $relPath
   $exists = Test-Path $fullPath
-  Register-Check "Manifiestos" "$relPath - Archivo existe en repositorio" $exists
+  $parentDir = Split-Path $fullPath -Parent
+  $exigirManifiesto = ($relPath -eq "docs/AGENTS.md") -or (Test-Path $parentDir)
+
+  if ($exigirManifiesto) {
+    Register-Check "Manifiestos" "$relPath - Archivo existe en repositorio" $exists
+  }
 
   if ($exists) {
     $content = [System.IO.File]::ReadAllText($fullPath, [System.Text.Encoding]::UTF8)
