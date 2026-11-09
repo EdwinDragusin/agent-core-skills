@@ -43,18 +43,16 @@ agy plugin install .
 # o desde marketplace registrado: agy plugin install agent-core-skills@agent-core-skills-marketplace
 ```
 
-### En Claude Code (1 paso)
+### En Claude Code
 
-Claude Code resuelve dependencias de marketplace automaticamente a traves de `.claude-plugin/plugin.json`:
+Claude Code instala Superpowers como dependencia, pero solo si su marketplace ya esta agregado:
 ```bash
-claude plugin install agent-core-skills
+claude plugin marketplace add obra/superpowers-marketplace
+claude plugin marketplace add EdwinDragusin/agent-core-skills
+claude plugin install agent-core-skills@agent-core-skills-marketplace
 ```
 
-Tambien puede instalarse manualmente desde el marketplace oficial:
-```bash
-/plugin marketplace add obra/superpowers-marketplace
-/plugin install superpowers@superpowers-marketplace
-```
+Sin el primer comando, la instalacion termina pero el plugin no carga: falta la dependencia `superpowers`.
 
 ## Uso
 
