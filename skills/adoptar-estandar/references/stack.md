@@ -23,6 +23,19 @@ Durante la Fase 1 (Auditoria de Solo Lectura), el adoptante evalua los archivos 
 - **Modo Heterogeneo / Stack Alternativo:**
   Emite advertencia en la Fase 1. Se restringe la adopcion a los mecanismos agnosticos universales, absteniendose de transferir tests de capas acoplados al runtime de Deno a menos que se traduzcan al runner nativo del proyecto.
 
+### Flexibilidad del Modelo de Persistencia (archivoEsquema)
+En modo proyecto existente, la propiedad `back.archivoEsquema` en `estandar.config.ts` admite:
+- Archivo unico: `"back/src/infraestructura/persistencia/esquema.ts"`.
+- Lista de archivos: `["back/src/infraestructura/persistencia/esquema.ts", ...]`.
+- Directorio con barra final: `"back/src/infraestructura/persistencia/esquema/"`.
+Los casos de prueba sinteticos de los tests de arquitectura son agnosticos respecto a la configuracion del proyecto adoptante y prueban las invariantes del estandar sin depender de las tablas reales.
+
+### Clases Base y Utilidades de Dominio (No viajan en el espejo)
+Los tests de arquitectura backend (`back/tests/arquitectura/`) verifican el cumplimiento de Clean Architecture apoyandose en contratos de clases base (`Entidad`, `AgregadoRaiz`, `ValueObject`), generadores de identificadores (`generarUuid`), logging estructurado (`LoggerConsola`) y composicion de DI manual (`archivosComposicionDIManual`).
+Estos artefactos NO viajan en el espejo para preservar la autonomia del dominio de la aplicacion adoptante. El adoptante debe declararlos en `estandar.config.ts` (`clasesBaseEntidad`, `claseBaseValueObject`, `generadorUuid`, `adaptadorLogger`, `archivosComposicionDIManual`). Como referencia funcional de implementacion, consultar:
+- `plantilla/esqueleto/back/src/dominio/compartido/` (`Entidad.ts`, `AgregadoRaiz.ts`, `ValueObject.ts`, `generarUuid.ts`).
+- `plantilla/esqueleto/back/src/infraestructura/observabilidad/` (`LoggerConsola.ts`).
+
 ### Adaptacion Frontend con Vitest (Alternativa a Deno Test)
 La plantilla estandar ejecuta las pruebas unitarias y de arquitectura del frontend mediante `deno test`. En proyectos donde el frontend utiliza Vite + Vitest (`vitest` en `package.json` o `vite.config.ts`):
 - **Opcion recomendada:** Mantener Vitest como runner nativo de pruebas frontend y ejecutar `npx vitest run --coverage` (proveedor `@vitest/coverage-v8` o `istanbul`).
