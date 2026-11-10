@@ -51,8 +51,9 @@ Resumen ejecutivo del estado del repositorio y confirmacion de que los mecanismo
 | 6 | Mutacion: Atribucion no permitida | PASS / FAIL | Linea Co-Authored-By rechazada |
 | 7 | Mutacion: Umbral de cobertura | PASS / FAIL | Incremento simulado falla con reporte preciso |
 | 8 | Mutacion: Higiene sin emojis | PASS / FAIL | Emoji sintetico detectado en codigo y docs |
-| 9 | Mutacion: Doc-linter | PASS / FAIL | ADR huerfano o encabezado sin marca rechazado |
-| 10 | Blindaje de rama main | PASS / FAIL | Ruleset activo con checks obligatorios |
+| 9 | Mutacion: Doc-linter y estructura del vault | PASS / FAIL | ADR huerfano, capitulo arc42 faltante o encabezado sin marca rechazado |
+| 10 | Mutacion: Cobertura de config y trinquete listasBase | PASS / FAIL | Archivo `.ts` huerfano o entrada muerta en `listasBase` rechazada |
+| 11 | Blindaje de rama main | PASS / FAIL | Ruleset activo con checks obligatorios |
 
 ## 4. Blindaje de la Rama Principal
 
@@ -90,7 +91,7 @@ Detalle de cualquier desajuste encontrado durante la auditoria clasificado por s
 - Status checks opcionales en lugar de obligatorios en GitHub.
 
 ### Prioridad Media (Deuda Tecnica Controlada)
-- Elementos en lista base (allowlists) que deben calendarizarse para su resolucion definitiva.
+- Elementos en `listasBase` (`estandar.config.ts`) con `tope` y `todo` que deben calendarizarse para su reduccion definitiva (en modo proyecto nuevo `listasBase` debe ser `{}`).
 
 ### Prioridad Baja
 - Ajustes menores de documentacion o redaccion en manuales.
@@ -102,7 +103,7 @@ Resumen consolidado de reglas del repositorio destino:
 | Estado | Cantidad | Descripcion |
 |---|---|---|
 | VERIFICADA | N | Respaldada por prueba de arquitectura, linter o hook automatizado. |
-| PARCIAL | N | Mecanismo activo pero con excepciones en allowlist o cobertura parcial. |
+| PARCIAL | N | Mecanismo activo pero con excepciones en `listasBase` (`estandar.config.ts`) o cobertura parcial. |
 | SOLO PROSA | N | Reglas operativas y de instruccion no automatizables por software. |
 
 ### Evaluacion de Reglas de Instruccion y Riesgo Residual

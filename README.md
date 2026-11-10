@@ -64,8 +64,8 @@ Para auditar y transferir la infraestructura de calidad, hooks de Git y CI a un 
 ```
 
 El flujo ejecuta:
-1. Auditoria de solo lectura contra `plantilla/MANIFIESTO.md`.
-2. Plan de adopcion estructurado en olas independientes.
+1. Auditoria de solo lectura contra `plantilla/MANIFIESTO.md` y deteccion de modo (`proyecto nuevo` con esqueleto funcional y vault sembrado sin listas base vs `proyecto existente` por olas con listas base de trinquete en `estandar.config.ts`).
+2. Plan de adopcion estructurado en olas independientes (o inicializacion base en modo nuevo).
 3. Verificacion por mutacion de cada mecanismo de proteccion.
 
 ## Regeneracion de la Plantilla
@@ -73,6 +73,8 @@ El flujo ejecuta:
 Para sincronizar o regenerar los mecanismos estandar desde el repositorio de referencia:
 ```bash
 deno run -A scripts/extraer-plantilla.ts <ruta-repositorio-referencia>
+deno run -A scripts/extraer-plantilla.ts --verificar ./plantilla
+deno run -A scripts/extraer-plantilla.ts --verificar-esqueleto ./plantilla
 ```
 
 El script copia y filtra las secciones de proyecto, garantizando idempotencia y verificando la ausencia de terminos de dominio especificos.

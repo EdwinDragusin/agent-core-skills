@@ -86,24 +86,45 @@ Los siguientes mecanismos no dependen del lenguaje de programacion ni del framew
 
 ---
 
-## 3. Tratamiento de Violaciones Masivas Preexistentes
+## 3. Tratamiento de Violaciones Masivas Preexistentes (Listas Base con Trinquete)
 
-Al adoptar el estandar sobre proyectos existentes o sistemas heredados (legacy), es habitual encontrar cientos de violaciones acumuladas de Clean Architecture o FSD (ej. imports relativos profundos sin alias `@dominio/`, inyeccion de dependencias dispersa fuera de la raiz de composicion, o entidades de dominio sin herencia de clase base `Entidad`/`AgregadoRaiz`).
+Al adoptar el estandar sobre proyectos existentes o sistemas heredados (legacy), es habitual encontrar violaciones acumuladas de Clean Architecture, FSD, higiene o archivos fuera de cobertura (ej. imports relativos ascendentes sin alias `@dominio/`, inyeccion de dependencias dispersa fuera de la raiz de composicion, o entidades de dominio sin herencia de `Entidad`/`AgregadoRaiz`). En modo **proyecto nuevo**, el uso de listas base esta prohibido (`listasBase: {}`).
 
-### Protocolo de Lista Base Congelada (Allowlist con TODO)
-- **Principio:** No bloquear la adopcion del estandar ni forzar una reescritura masiva de alto riesgo en una sola iteracion.
-- **Mecanismo:** Registrar una lista base congelada (`ALLOWLIST`) directamente en el test de arquitectura correspondiente, documentando las rutas o identificadores tolerados:
+### Mecanismo de Lista Base con Trinquete (`listasBase` en `estandar.config.ts`)
+- **Principio:** No bloquear la adopcion del estandar ni editar el codigo de los tests. Las excepciones heredadas se registran centralizadamente en el campo `listasBase` de `estandar.config.ts` y son evaluadas por `filtrarConListaBase` y `auditarTrinqueteListasBase` (`back/tests/arquitectura/listasBase.test.ts`, `front/tests/arquitectura/front-dependencias.test.ts` y `scripts/estandar/cobertura-config.test.ts`).
+- **Estructura en `estandar.config.ts`:**
   ```typescript
-  // Lista base temporal de archivos heredados pendientes de desacoplamiento
-  // TODO(arquitectura): desacoplar dependencias segun plan de refactor
-  const ARCHIVOS_EXCLUIDOS_HEREDADOS = new Set([
-    "src/dominio/legado/ServicioAntiguo.ts",
-    "src/dominio/legado/HelperRelativo.ts",
-  ]);
+  listasBase: {
+    "back/aliases": {
+      tope: 2,
+      entradas: [
+        {
+          ruta: "src/aplicacion/usecases/LegadoUseCase.ts",
+          todo: "TODO(#todo/arquitectura): migrar import relativo a alias @dominio",
+        },
+        {
+          ruta: "src/dominio/legado/HelperRelativo.ts",
+          todo: "TODO(#todo/arquitectura): extraer helper y usar alias de capa",
+        },
+      ],
+    },
+    "cobertura/config": {
+      tope: 1,
+      entradas: [
+        {
+          ruta: "herramientas/script-legado.ts",
+          todo: "TODO(#todo/arquitectura): reubicar en scripts/ o eliminar",
+        },
+      ],
+    },
+  },
   ```
-- **Asercion estricta contra regresiones:** El test filtra los archivos de la lista base y verifica que no aparezcan nuevas infracciones:
-  ```typescript
-  const violacionesNuevas = violaciones.filter(v => !ARCHIVOS_EXCLUIDOS_HEREDADOS.has(v.archivo));
-  assertEquals(violacionesNuevas.length, 0, `Nuevas violaciones detectadas: ${violacionesNuevas.join(", ")}`);
-  ```
-- **Politica de saneamiento continuo:** Todo codigo nuevo o refactorizado debe cumplir al 100% las reglas de arquitectura. Conforme se limpien archivos heredados, se eliminan del allowlist y se reduce el conjunto tolerado (politica de trinquete de calidad arquitectonica).
+- **Identificadores de test soportados (`id`):**
+  - Backend: `back/aliases`, `back/dependencias-dominio`, `back/dependencias-aplicacion`, `back/dependencias-infraestructura`, `back/dependencias-tests-aplicacion`, `back/diManual`, `back/entidades`, `back/logger`, `back/usecases`, `back/uuid`, `back/valueObjects`.
+  - Frontend: `front/RN-F01`, `front/RN-F02`, `front/RN-F03`, `front/CAPAS`, `front/SHARED`, `front/entorno`, `front/storage`.
+  - Cobertura de config: `cobertura/config`.
+- **Reglas del trinquete (ratchet):**
+  1. **El tope solo puede bajar:** `entradas.length` debe ser exactamente igual a `tope`. Si supera `tope`, falla; si es menor que `tope`, falla exigiendo bajar `tope` al nuevo conteo.
+  2. **Justificacion obligatoria:** Cada entrada debe tener `ruta` y `todo` no vacios. Fallara si alguna entrada carece de `todo`.
+  3. **Prohibicion de entradas muertas:** Si un archivo listado en `entradas` ya fue corregido o eliminado y deja de producir la violacion durante el escaneo, `filtrarConListaBase` lanza error (`Entrada muerta`) exigiendo retirarlo de `listasBase` y reducir `tope`.
+  4. **Vigilancia del tope en PR y CI:** Dado que `tope` vive en el mismo archivo `estandar.config.ts`, la revision humana del Pull Request (o un chequeo automatico contra `main` en CI) debe vigilar que ningun cambio incremente un `tope` existente ni agregue nuevas entradas una vez fijada la linea base inicial.

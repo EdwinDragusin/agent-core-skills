@@ -5,8 +5,10 @@ import {
   assertNotMatch,
 } from "jsr:@std/assert@^1.0.0";
 import {
+  construirComandosVerificacionEsqueleto,
   contieneTerminoDominio,
   detectarTerminosDominio,
+  ensamblarEsqueletoEnDirectorio,
   extraerPlantilla,
   extraerRutasDeConfig,
   filtrarBloquesPs1Proyecto,
@@ -500,5 +502,89 @@ Deno.test("Preservacion de esqueleto/ - extraerPlantilla no borra ni sobrescribe
     assertEquals(await verificarPlantillaCli(tmpDestino), 1);
   } finally {
     await Deno.remove(tmpDestino, { recursive: true });
+  }
+});
+
+Deno.test("Verificacion de esqueleto (parte pura) - construye lista de comandos y superpone esqueleto sobre espejo", async () => {
+  const comandos = construirComandosVerificacionEsqueleto();
+  assertEquals(comandos.map((c) => c.etiqueta), [
+    "deno task lint:docs",
+    "deno task test:scripts",
+    "deno test --allow-read back/tests/arquitectura/",
+    "(cd front && deno test -A tests/)",
+    "deno task ci:rapido",
+  ]);
+  assertEquals(comandos[3].cwdRelativo, "front");
+
+  const tmpOrigen = await Deno.makeTempDir({ prefix: "esq-origen-" });
+  const tmpEnsamblado = await Deno.makeTempDir({ prefix: "esq-dest-" });
+
+  try {
+    // Crear archivos de espejo y archivos de esqueleto que deben superponerse
+    await Deno.mkdir(`${tmpOrigen}/front`, { recursive: true });
+    await Deno.mkdir(`${tmpOrigen}/esqueleto/front`, { recursive: true });
+    await Deno.mkdir(`${tmpOrigen}/esqueleto/back/src/dominio`, {
+      recursive: true,
+    });
+
+    await Deno.writeTextFile(
+      `${tmpOrigen}/estandar.config.ts`,
+      "// config con marcadores {{APP_1}}\n",
+    );
+    await Deno.writeTextFile(
+      `${tmpOrigen}/front/deno.json`,
+      '{"tasks":{"test":"{{APP_1}}"}}\n',
+    );
+    await Deno.writeTextFile(
+      `${tmpOrigen}/MANIFIESTO.md`,
+      "# Manifiesto espejo\n",
+    );
+
+    await Deno.writeTextFile(
+      `${tmpOrigen}/esqueleto/estandar.config.ts`,
+      "// config concreta web\n",
+    );
+    await Deno.writeTextFile(
+      `${tmpOrigen}/esqueleto/front/deno.json`,
+      '{"tasks":{"test":"deno test tests/"}}\n',
+    );
+    await Deno.writeTextFile(
+      `${tmpOrigen}/esqueleto/back/src/dominio/Tarea.ts`,
+      "export class Tarea {}\n",
+    );
+
+    const res = await ensamblarEsqueletoEnDirectorio(tmpOrigen, tmpEnsamblado);
+    assertEquals(res.copiadosEspejo, 3);
+    assertEquals(res.superpuestosEsqueleto, 3);
+
+    // El esqueleto reemplaza estandar.config.ts y front/deno.json
+    assertEquals(
+      await Deno.readTextFile(`${tmpEnsamblado}/estandar.config.ts`),
+      "// config concreta web\n",
+    );
+    assertEquals(
+      await Deno.readTextFile(`${tmpEnsamblado}/front/deno.json`),
+      '{"tasks":{"test":"deno test tests/"}}\n',
+    );
+    // Archivos exclusivos del espejo y del esqueleto coexisten
+    assertEquals(
+      await Deno.readTextFile(`${tmpEnsamblado}/MANIFIESTO.md`),
+      "# Manifiesto espejo\n",
+    );
+    assertEquals(
+      await Deno.readTextFile(`${tmpEnsamblado}/back/src/dominio/Tarea.ts`),
+      "export class Tarea {}\n",
+    );
+    // El subdirectorio esqueleto/ no se copia como carpeta dentro del destino
+    let existeSubcarpetaEsqueleto = true;
+    try {
+      await Deno.stat(`${tmpEnsamblado}/esqueleto`);
+    } catch {
+      existeSubcarpetaEsqueleto = false;
+    }
+    assertEquals(existeSubcarpetaEsqueleto, false);
+  } finally {
+    await Deno.remove(tmpOrigen, { recursive: true });
+    await Deno.remove(tmpEnsamblado, { recursive: true });
   }
 });
