@@ -54,7 +54,8 @@ export function extraerRutasDeConfig(
 }
 
 export const RUTAS_CONFIG_DEFECTO = extraerRutasDeConfig();
-export const RUTA_SHARED_AGENTS = `${RUTAS_CONFIG_DEFECTO.rutaShared}/AGENTS.md`;
+export const RUTA_SHARED_AGENTS =
+  `${RUTAS_CONFIG_DEFECTO.rutaShared}/AGENTS.md`;
 
 export interface TransformacionDeclarada {
   archivo: string;
@@ -406,6 +407,18 @@ export function filtrarBloquesPs1Proyecto(contenido: string): string {
   return c;
 }
 
+/**
+ * Remueve referencias numeradas a ADRs entre parentesis (ej. (ADR-015), (ADR-018),
+ * (ADR-005/016), (ADR-005,\n  ADR-016)) preservando la puntuacion y sin dejar
+ * espacios dobles ni oraciones truncadas.
+ */
+export function removerReferenciasAdrEntreParentesis(texto: string): string {
+  return texto.replace(
+    /\s*\((?:ADR-(?:F?\d+|F?\d+\/\d+)(?:(?:[,\s\n\/]+|[\s\n]*\/[\s\n]*)ADR-(?:F?\d+|F?\d+\/\d+))*)\)/g,
+    "",
+  );
+}
+
 export const TRANSFORMACIONES_DECLARADAS: TransformacionDeclarada[] = [
   {
     archivo: "estandar.config.ts",
@@ -426,9 +439,47 @@ export const TRANSFORMACIONES_DECLARADAS: TransformacionDeclarada[] = [
       "Parametriza nombre del proyecto y sustituye preambulo especifico por descripcion configurable.",
   },
   {
+    archivo: "AGENTS.md",
+    marcadorOPlaceholder: "stack agnostico / reglas operativas",
+    valorOriginal:
+      "servicio de conversion PDF en stack y referencias a decisiones tecnicas de referencia en parentesis",
+    valorSustituto: "stack agnostico y reglas limpias",
+    descripcion:
+      "Elimina servicio de conversion PDF de la declaracion de stack y remueve referencias numeradas a decisiones tecnicas de referencia.",
+  },
+  {
+    archivo: `${RUTAS_CONFIG_DEFECTO.backRaiz}/AGENTS.md`,
+    marcadorOPlaceholder: "reglas operativas agnosticas",
+    valorOriginal:
+      "referencias a decisiones tecnicas en reglas transaccionales y de concurrencia",
+    valorSustituto:
+      "reglas operativas sin acoplamiento a decisiones de referencia",
+    descripcion:
+      "Remueve referencias numeradas a decisiones especificas del proyecto de referencia en backend.",
+  },
+  {
+    archivo: "back/tests/arquitectura/logger.test.ts",
+    marcadorOPlaceholder: "puerto estructurado Logger",
+    valorOriginal:
+      "referencia a decision tecnica en comentarios y aserciones de logger",
+    valorSustituto: "puerto estructurado Logger",
+    descripcion:
+      "Remueve referencia a decision tecnica del proyecto de referencia.",
+  },
+  {
+    archivo: "back/tests/arquitectura/uuid.test.ts",
+    marcadorOPlaceholder: "generador de UUID",
+    valorOriginal:
+      "referencia a decision tecnica en comentarios y aserciones de UUID",
+    valorSustituto: "generador de UUID",
+    descripcion:
+      "Remueve referencia a decision tecnica del proyecto de referencia.",
+  },
+  {
     archivo: `${RUTAS_CONFIG_DEFECTO.backRaiz}/AGENTS.md`,
     marcadorOPlaceholder: "{{NOMBRE_PROYECTO}}, control de migraciones",
-    valorOriginal: "nombre de aplicacion API original / termino reservado en indice de capa",
+    valorOriginal:
+      "nombre de aplicacion API original / termino reservado en indice de capa",
     valorSustituto: "{{NOMBRE_PROYECTO}} API / control de migraciones",
     descripcion:
       "Parametriza encabezado y neutraliza terminologia en el indice de manifiestos por capa.",
@@ -451,49 +502,12 @@ export const TRANSFORMACIONES_DECLARADAS: TransformacionDeclarada[] = [
       "Parametriza nombres de portales en la regla de aislamiento absoluto de la capa compartida.",
   },
   {
-    archivo: "scripts/estandar/cobertura-config.test.ts",
-    marcadorOPlaceholder: "{{APP_1}}, {{APP_2}}",
-    valorOriginal:
-      "nombres y rutas de aplicaciones frontend en autoverificacion sintetica",
-    valorSustituto: "{{APP_1}}, {{APP_2}}",
-    descripcion:
-      "Parametriza nombres y rutas de aplicaciones frontend en el test de cobertura de estandar.config.ts.",
-  },
-  {
     archivo: "docs/AGENTS.md",
     marcadorOPlaceholder: "{{SLUG_PROYECTO}}",
     valorOriginal: "identificador de vault de referencia",
     valorSustituto: "{{SLUG_PROYECTO}}-docs",
     descripcion:
       "Parametriza identificador de vault Obsidian en el manifiesto documental raiz.",
-  },
-  {
-    archivo: "front/tests/arquitectura/front-dependencias.test.ts",
-    marcadorOPlaceholder:
-      "{{APP_1}}, {{APP_2}}, @{{PROYECTO}}, moduloA, LayoutPrincipal",
-    valorOriginal:
-      "portal publico, portal administrativo, alias de paquete monorepo, modulos especificos, layout especifico",
-    valorSustituto:
-      "{{APP_1}}, {{APP_2}}, @{{PROYECTO}}, moduloA, LayoutPrincipal",
-    descripcion:
-      "Parametriza aplicaciones front, alias de monorepo y generaliza entidades/layouts en tests FSD.",
-  },
-  {
-    archivo: "front/tests/higiene/entorno.test.ts",
-    marcadorOPlaceholder: "{{APP_1}}, {{APP_2}}",
-    valorOriginal: "directorios de portales especificos en mensaje de error",
-    valorSustituto: "({{APP_1}}/src y {{APP_2}}/src)",
-    descripcion:
-      "Generaliza mensaje de error de asercion de cantidad minima de portales.",
-  },
-  {
-    archivo: "front/tests/higiene/storage.test.ts",
-    marcadorOPlaceholder: "{{APP_EFIMERA}}, rutaAppEfimeraSrc",
-    valorOriginal:
-      "nombre de aplicacion efimera y variable de recoleccion original",
-    valorSustituto: "{{APP_EFIMERA}} / rutaAppEfimeraSrc",
-    descripcion:
-      "Parametriza portal y recolector de codigo con requerimiento de sesion efimera en sessionStorage.",
   },
   {
     archivo: "back/tests/arquitectura/entidades.test.ts",
@@ -599,7 +613,8 @@ export const TRANSFORMACIONES_DECLARADAS: TransformacionDeclarada[] = [
     archivo: "deno.json",
     marcadorOPlaceholder: "N/A (tareas)",
     valorOriginal: "tareas docker y semillas de base de datos",
-    valorSustituto: "tareas estandar de calidad y CI (--allow-read --allow-run en test:scripts)",
+    valorSustituto:
+      "tareas estandar de calidad y CI (--allow-read --allow-run en test:scripts)",
     descripcion:
       "Filtra tareas de base de datos especificas preservando pipeline CI estandar y permisos de `test:scripts` (`scripts/estandar/cobertura-config.test.ts`).",
   },
@@ -690,6 +705,8 @@ export function transformarContenido(
         /ejecutar desde `examen\/back\/`:/g,
         "ejecutar desde `back/`:",
       );
+      c = c.replace(/,\s*Gotenberg(?:\s+\d+)?/gi, "");
+      c = removerReferenciasAdrEntreParentesis(c);
       break;
 
     case `${RUTAS_CONFIG_DEFECTO.backRaiz}/AGENTS.md`:
@@ -703,6 +720,7 @@ export function transformarContenido(
         /y gesti[o\u00f3]n de migraciones/g,
         "y control de migraciones",
       );
+      c = removerReferenciasAdrEntreParentesis(c);
       break;
 
     case `${RUTAS_CONFIG_DEFECTO.frontRaiz}/AGENTS.md`:
@@ -828,7 +846,22 @@ export function transformarContenido(
       break;
 
     case "back/tests/arquitectura/logger.test.ts":
+    case `${RUTAS_CONFIG_DEFECTO.backRaiz}/tests/arquitectura/logger.test.ts`:
       c = c.replace(/curp\.valor/g, "identificador.valor");
+      c = removerReferenciasAdrEntreParentesis(c);
+      c = c.replace(
+        /motivo:\s*`Uso no autorizado de '\${\r?\n\s*match\[0\]\r?\n\s*}'\. Usar el puerto estructurado 'Logger'\.`,/g,
+        "motivo: `Uso no autorizado de '${match[0]}'. Usar el puerto estructurado 'Logger'.`,",
+      );
+      break;
+
+    case "back/tests/arquitectura/uuid.test.ts":
+    case `${RUTAS_CONFIG_DEFECTO.backRaiz}/tests/arquitectura/uuid.test.ts`:
+      c = removerReferenciasAdrEntreParentesis(c);
+      c = c.replace(
+        /motivo:\r?\n\s*"Uso no autorizado de 'randomUUID\(\)'\. Usar 'generarUuid\(\)' para garantizar UUID v7\.",/g,
+        "motivo: \"Uso no autorizado de 'randomUUID()'. Usar 'generarUuid()' para garantizar UUID v7.\",",
+      );
       break;
 
     case "scripts/ci/verificar-migraciones.test.ts":
@@ -1242,7 +1275,8 @@ export function construirArchivosEstandar(
       categoria: "arquitectura-back",
       regla: "Generacion de UUIDv7 en capa de dominio (back/AGENTS.md)",
       requiereAdaptacion: "Solo via estandar.config.ts",
-      guiaAdaptacion: "Configurado via estandar.config.ts (back.generadorUuid).",
+      guiaAdaptacion:
+        "Configurado via estandar.config.ts (back.generadorUuid).",
       tipoTransformacion: "copia-directa",
     },
     {
@@ -1281,7 +1315,8 @@ export function construirArchivosEstandar(
       origen: "front/tests/higiene/storage.test.ts",
       destino: "front/tests/higiene/storage.test.ts",
       categoria: "higiene-front",
-      regla: "Prohibicion de localStorage en portales efimeros (front/AGENTS.md)",
+      regla:
+        "Prohibicion de localStorage en portales efimeros (front/AGENTS.md)",
       requiereAdaptacion: "Solo via estandar.config.ts",
       guiaAdaptacion:
         "Configurado via estandar.config.ts (aplicaciones con sesionEfimera: true).",
@@ -1554,8 +1589,7 @@ export function construirArchivosEstandar(
       origen: "docs/guia/how-to/flujo-multiagente.md",
       destino: "docs/guia/how-to/flujo-multiagente.md",
       categoria: "docs",
-      regla:
-        "Orquestacion y trabajo en paralelo con worktrees (AGENTS.md)",
+      regla: "Orquestacion y trabajo en paralelo con worktrees (AGENTS.md)",
       requiereAdaptacion: false,
       guiaAdaptacion: "Copiar directo.",
       tipoTransformacion: "copia-directa",
@@ -1565,15 +1599,175 @@ export function construirArchivosEstandar(
 
 export const ARCHIVOS_ESTANDAR: ArchivoEstandar[] = construirArchivosEstandar();
 
-export function generarManifiestoMd(
-  archivos: ArchivoEstandar[],
-  transformaciones: TransformacionDeclarada[],
-): string {
-  const lineas: string[] = [
+/**
+ * Obtiene el commit corto del repositorio origen via Git CLI.
+ * Si el origen no es un repositorio Git o el comando falla, devuelve 'origen sin version de git'.
+ */
+export function obtenerCommitOrigen(rutaOrigen: string): string {
+  try {
+    const cmd = new Deno.Command("git", {
+      args: ["-C", rutaOrigen, "rev-parse", "--short", "HEAD"],
+      stdout: "piped",
+      stderr: "piped",
+    });
+    const output = cmd.outputSync();
+    if (!output.success) {
+      return "origen sin version de git";
+    }
+    const stdout = new TextDecoder().decode(output.stdout).trim();
+    if (!stdout || stdout.includes("\n") || stdout.includes(" ")) {
+      return "origen sin version de git";
+    }
+    return stdout;
+  } catch {
+    return "origen sin version de git";
+  }
+}
+
+/**
+ * Genera las lineas del encabezado de MANIFIESTO.md con el commit real o indicador agnostico.
+ */
+export function armarEncabezadoManifiesto(versionOCommit: string): string[] {
+  const detalle =
+    (!versionOCommit || versionOCommit === "origen sin version de git")
+      ? "origen sin version de git"
+      : versionOCommit.startsWith("commit ")
+      ? versionOCommit
+      : `commit \`${versionOCommit.trim()}\``;
+
+  return [
     "# MANIFIESTO DE LA PLANTILLA ESTANDAR",
     "",
     "Este catalogo registra cada mecanismo exportado desde el repositorio de referencia",
-    "institucional (commit `3aad52c3`, PR #19) hacia el plugin `agent-core-skills` (v3).",
+    `institucional (${detalle}) hacia el plugin \`agent-core-skills\` (v3).`,
+  ];
+}
+
+export const METADATOS_MARCADORES_CONOCIDOS: Record<
+  string,
+  { proposito: string; rolOriginal: string }
+> = {
+  "{{NOMBRE_PROYECTO}}": {
+    proposito: "Nombre del sistema o proyecto adoptante",
+    rolOriginal: "Nombre institucional del proyecto",
+  },
+  "{{DESCRIPCION_PROYECTO}}": {
+    proposito: "Resumen institucional de proposito y alcance del proyecto",
+    rolOriginal: "Descripcion institucional original de referencia",
+  },
+  "{{SLUG_PROYECTO}}": {
+    proposito: "Identificador en kebab-case del vault de documentacion",
+    rolOriginal: "Nombre del vault Obsidian",
+  },
+  "{{APP_1}}": {
+    proposito: "Nombre de la primera SPA del portal web",
+    rolOriginal: "Portal de autoservicio publico",
+  },
+  "{{APP_2}}": {
+    proposito:
+      "Nombre de la segunda SPA del portal web (opcional si el proyecto usa una sola SPA)",
+    rolOriginal: "Portal administrativo y operativo",
+  },
+};
+
+/**
+ * Escanea recursivamente un directorio de plantilla buscando marcadores {{...}},
+ * omitiendo MANIFIESTO.md y opcionalmente esqueleto/.
+ */
+export async function escanearMarcadoresEnDirectorio(
+  dirPlantilla: string,
+  opciones?: { incluirEsqueleto?: boolean },
+): Promise<Map<string, string[]>> {
+  const mapa = new Map<string, Set<string>>();
+  const raiz = path.resolve(dirPlantilla);
+
+  for await (const entry of walk(raiz, { includeDirs: false })) {
+    const rel = path.relative(raiz, entry.path).replaceAll("\\", "/");
+    if (rel === "MANIFIESTO.md") continue;
+    if (
+      !opciones?.incluirEsqueleto &&
+      (rel === "esqueleto" || rel.startsWith("esqueleto/"))
+    ) {
+      continue;
+    }
+    const txt = await Deno.readTextFile(entry.path);
+    const matches = txt.match(/\{\{[A-Z0-9_]+\}\}/g);
+    if (matches) {
+      for (const m of matches) {
+        if (!mapa.has(m)) mapa.set(m, new Set());
+        mapa.get(m)!.add(rel);
+      }
+    }
+  }
+
+  const resultado = new Map<string, string[]>();
+  for (const [m, setArchivos] of mapa.entries()) {
+    resultado.set(m, Array.from(setArchivos).sort());
+  }
+  return resultado;
+}
+
+export interface OpcionesGenerarManifiesto {
+  commitOrigen?: string;
+  marcadores?: Map<string, string[]>;
+}
+
+export function generarManifiestoMd(
+  archivos: ArchivoEstandar[],
+  transformaciones: TransformacionDeclarada[],
+  opciones?: OpcionesGenerarManifiesto,
+): string {
+  const commit = opciones?.commitOrigen ?? "origen sin version de git";
+  const lineasEncabezado = armarEncabezadoManifiesto(commit);
+
+  const mapaMarcadores = opciones?.marcadores ?? new Map<string, string[]>();
+  if (mapaMarcadores.size === 0) {
+    for (const a of archivos) {
+      if (a.marcadores) {
+        for (const m of a.marcadores) {
+          if (!mapaMarcadores.has(m)) mapaMarcadores.set(m, []);
+          mapaMarcadores.get(m)!.push(a.destino);
+        }
+      }
+    }
+  }
+
+  const ordenPreferido = [
+    "{{NOMBRE_PROYECTO}}",
+    "{{DESCRIPCION_PROYECTO}}",
+    "{{SLUG_PROYECTO}}",
+    "{{APP_1}}",
+    "{{APP_2}}",
+  ];
+  const marcadoresOrdenados = Array.from(mapaMarcadores.keys()).sort((a, b) => {
+    const idxA = ordenPreferido.indexOf(a);
+    const idxB = ordenPreferido.indexOf(b);
+    if (idxA !== -1 && idxB !== -1) return idxA - idxB;
+    if (idxA !== -1) return -1;
+    if (idxB !== -1) return 1;
+    return a.localeCompare(b);
+  });
+
+  const filasMarcadores: string[] = [
+    "| Marcador | Proposito | Archivos Afectados | Rol Original en Referencia |",
+    "|---|---|---|---|",
+  ];
+
+  for (const m of marcadoresOrdenados) {
+    const info = METADATOS_MARCADORES_CONOCIDOS[m] ?? {
+      proposito: "Marcador de sustitucion configurable",
+      rolOriginal: "Parametro de configuracion",
+    };
+    const archivosListados = (mapaMarcadores.get(m) ?? [])
+      .map((a) => `\`${a.replaceAll("\\", "/")}\``)
+      .join(", ");
+    filasMarcadores.push(
+      `| \`${m}\` | ${info.proposito} | ${archivosListados} | ${info.rolOriginal} |`,
+    );
+  }
+
+  const lineas: string[] = [
+    ...lineasEncabezado,
     "",
     "**IMPORTANTE**: Esta carpeta `plantilla/` es un espejo generado de forma determinista.",
     "No debe editarse manualmente. Para regenerar o actualizar, ejecutar:",
@@ -1599,15 +1793,15 @@ export function generarManifiestoMd(
     "Los proyectos que adopten esta plantilla mediante la skill `adoptar-estandar` deben",
     "sustituir los siguientes marcadores de acuerdo con su arquitectura especifica:",
     "",
-    "| Marcador | Proposito | Archivos Afectados | Rol Original en Referencia |",
-    "|---|---|---|---|",
-    "| `{{NOMBRE_PROYECTO}}` | Nombre del sistema o proyecto adoptante | `AGENTS.md`, `back/AGENTS.md`, `front/AGENTS.md` | Nombre institucional del proyecto |",
-    "| `{{DESCRIPCION_PROYECTO}}` | Resumen institucional de proposito y alcance del proyecto | `AGENTS.md` | Descripcion institucional original de referencia |",
-    "| `{{SLUG_PROYECTO}}` | Identificador en kebab-case del vault de documentacion | `docs/AGENTS.md` | Nombre del vault Obsidian |",
-    `| \`{{APP_1}}\` | Nombre de la primera SPA del portal web | \`estandar.config.ts\`, \`front/deno.json\`, \`front/AGENTS.md\`, \`${RUTA_SHARED_AGENTS}\` | Portal de autoservicio publico |`,
-    `| \`{{APP_2}}\` | Nombre de la segunda SPA del portal web | \`estandar.config.ts\`, \`front/deno.json\`, \`front/AGENTS.md\`, \`${RUTA_SHARED_AGENTS}\` | Portal administrativo y operativo |`,
-    "| `@{{PROYECTO}}` | Prefijo de importacion de paquetes monorepo | `front/tests/arquitectura/front-dependencias.test.ts` | Prefijo de paquete institucional |",
-    "| `{{APP_EFIMERA}}` | Nombre de la app con requerimiento estricto de sesion efimera (sessionStorage) | `front/tests/higiene/storage.test.ts` | Aplicacion con sesion temporal |",
+    ...filasMarcadores,
+    "",
+    "### Adaptacion para Proyectos con una Sola SPA Frontend",
+    "",
+    "Si el proyecto adoptante cuenta con una unica aplicacion frontend (SPA unica):",
+    '1. En `estandar.config.ts`: dejar una sola entrada en `front.aplicaciones` (ej. `[{ nombre: "web", rutaSrc: "src" }]`).',
+    "2. En `front/deno.json`: remover `{{APP_2}}` de `workspace` y de las tareas (`dev`, `build`, `test`).",
+    "3. En `front/AGENTS.md` y documentacion en `docs/`: eliminar las referencias a `{{APP_2}}`.",
+    "4. Como referencia practica, consultar `plantilla/esqueleto/front/deno.json` y `plantilla/esqueleto/estandar.config.ts`, que implementan la configuracion canonica para una sola SPA.",
     "",
     "---",
     "",
@@ -1673,6 +1867,10 @@ export async function extraerPlantilla(
     ? path.resolve(rutaDestinoPlantilla)
     : path.join(raizRepo, "plantilla");
 
+  // Obtener version corta de git del origen
+  const commitOrigen = obtenerCommitOrigen(raizExamen);
+  const marcadoresRecolectados = new Map<string, Set<string>>();
+
   // Limpiar entradas previas del espejo en destinoBase preservando intacto esqueleto/
   try {
     for await (const entrada of Deno.readDir(destinoBase)) {
@@ -1729,7 +1927,10 @@ export async function extraerPlantilla(
     );
 
     // Si es front/AGENTS.md, tambien se le aplica filtro md
-    if (archivo.origen === `${rutasOrigen.frontRaiz}/AGENTS.md` || archivo.origen === "front/AGENTS.md") {
+    if (
+      archivo.origen === `${rutasOrigen.frontRaiz}/AGENTS.md` ||
+      archivo.origen === "front/AGENTS.md"
+    ) {
       contenidoTransformado = filtrarSeccionesMdProyecto(contenidoTransformado);
     }
 
@@ -1753,6 +1954,34 @@ export async function extraerPlantilla(
       );
     }
 
+    // Validar ausencia de fugas prohibidas (Gotenberg y referencias ADR no autorizadas)
+    const fugas = detectarFugasPlantilla(
+      contenidoTransformado,
+      archivo.destino,
+    );
+    if (fugas.length > 0) {
+      errores.push(
+        `Archivo '${archivo.destino}' contiene fugas prohibidas:\n${
+          fugas.join("\n")
+        }`,
+      );
+    }
+
+    // Recolectar marcadores de sustitucion presentes en el archivo generado
+    const matchesMarcadores = contenidoTransformado.match(
+      /\{\{[A-Z0-9_]+\}\}/g,
+    );
+    if (matchesMarcadores) {
+      for (const m of matchesMarcadores) {
+        if (!marcadoresRecolectados.has(m)) {
+          marcadoresRecolectados.set(m, new Set());
+        }
+        marcadoresRecolectados.get(m)!.add(
+          archivo.destino.replaceAll("\\", "/"),
+        );
+      }
+    }
+
     // Escribir archivo de destino
     const rutaDestinoCompleta = path.join(destinoBase, archivo.destino);
     await Deno.mkdir(path.dirname(rutaDestinoCompleta), { recursive: true });
@@ -1772,11 +2001,18 @@ export async function extraerPlantilla(
     }
   }
 
+  // Recopilar mapa final ordenado de marcadores de sustitucion reales
+  const mapaFinalMarcadores = new Map<string, string[]>();
+  for (const [m, setArchivos] of marcadoresRecolectados.entries()) {
+    mapaFinalMarcadores.set(m, Array.from(setArchivos).sort());
+  }
+
   // Generar y escribir plantilla/MANIFIESTO.md en ASCII puro
   const manifiestoMd = convertirAAsciiPuro(
     generarManifiestoMd(
       archivosAExtraer,
       TRANSFORMACIONES_DECLARADAS,
+      { commitOrigen, marcadores: mapaFinalMarcadores },
     ),
   );
   const rutaManifiesto = path.join(destinoBase, "MANIFIESTO.md");
@@ -1821,9 +2057,94 @@ export async function validarSintaxisPowerShell(
   }
 }
 
+export const REFERENCIAS_ADR_GENERICAS_PERMITIDAS: readonly string[] = Object
+  .freeze([
+    "ADR-NNN",
+    "ADR-FNNN",
+    "ADR-0NN",
+    "ADR-000",
+  ]);
+
+export function esReferenciaAdrPermitida(
+  referencia: string,
+  rutaRelativa: string,
+): boolean {
+  const norm = rutaRelativa.replaceAll("\\", "/");
+
+  // Plantilla de ADR y documentacion de plantillas
+  if (
+    norm.endsWith("docs/_plantillas/PLANTILLA-ADR.md") ||
+    norm.endsWith("docs/_plantillas/README.md")
+  ) {
+    return true;
+  }
+
+  // Genericas globales de formato
+  if (REFERENCIAS_ADR_GENERICAS_PERMITIDAS.includes(referencia)) {
+    return true;
+  }
+
+  // Documentacion de numeracion de tres digitos en docs/adr/AGENTS.md
+  if (norm.endsWith("docs/adr/AGENTS.md")) {
+    if (["ADR-001", "ADR-002", "ADR-F001", "ADR-F002"].includes(referencia)) {
+      return true;
+    }
+  }
+
+  // Plantilla esqueleto (proyecto nuevo con ADR-001 inicial y placeholders)
+  if (norm.startsWith("esqueleto/") || norm.includes("/esqueleto/")) {
+    if (["ADR-001", "ADR-F001", "ADR-F002"].includes(referencia)) {
+      return true;
+    }
+  }
+
+  return false;
+}
+
+export function detectarFugasPlantilla(
+  contenido: string,
+  rutaRelativa: string,
+): string[] {
+  const hallazgos: string[] = [];
+  const norm = rutaRelativa.replaceAll("\\", "/");
+  const lineas = contenido.split("\n");
+
+  // 1. Prohibicion de Gotenberg
+  for (let i = 0; i < lineas.length; i++) {
+    const l = lineas[i];
+    if (/\bGotenberg\b/i.test(l)) {
+      hallazgos.push(
+        `L${i + 1}: termino prohibido 'Gotenberg' en '${l.trim()}'`,
+      );
+    }
+  }
+
+  // 2. Prohibicion de referencias ADR-<digitos> o ADR-F<digitos> no autorizadas
+  if (
+    !norm.endsWith("docs/_plantillas/PLANTILLA-ADR.md") &&
+    !norm.endsWith("docs/_plantillas/README.md")
+  ) {
+    const regexAdr = /\b(ADR-(?:F\d+|\d+))\b/g;
+    for (let i = 0; i < lineas.length; i++) {
+      const l = lineas[i];
+      const matches = l.matchAll(regexAdr);
+      for (const m of matches) {
+        const ref = m[1];
+        if (!esReferenciaAdrPermitida(ref, norm)) {
+          hallazgos.push(
+            `L${i + 1}: referencia ADR no autorizada '${ref}' en '${l.trim()}'`,
+          );
+        }
+      }
+    }
+  }
+
+  return hallazgos;
+}
+
 /**
  * Verifica recursivamente todos los archivos de un directorio buscando
- * terminos de dominio prohibidos o marcas [PROYECTO].
+ * terminos de dominio prohibidos, marcas [PROYECTO] o fugas de plantilla.
  * Retorna 0 si no hay hallazgos, 1 si hay violaciones.
  */
 export async function verificarPlantillaCli(
@@ -1863,6 +2184,16 @@ export async function verificarPlantillaCli(
       errores.push(
         `- '${relPath}' contiene terminos de dominio prohibidos:\n    ${
           hallazgos.join("\n    ")
+        }`,
+      );
+    }
+
+    // 3. Validar fugas de estandar (Gotenberg y referencias ADR no autorizadas)
+    const fugas = detectarFugasPlantilla(contenido, relPath);
+    if (fugas.length > 0) {
+      errores.push(
+        `- '${relPath}' contiene fugas prohibidas:\n    ${
+          fugas.join("\n    ")
         }`,
       );
     }
@@ -1987,7 +2318,9 @@ export async function verificarEsqueletoCli(
     }
   } catch (e) {
     console.error(
-      `[ERROR] No se pudo acceder a la plantilla o su esqueleto: ${(e as Error).message}`,
+      `[ERROR] No se pudo acceder a la plantilla o su esqueleto: ${
+        (e as Error).message
+      }`,
     );
     return 1;
   }
@@ -2004,7 +2337,10 @@ export async function verificarEsqueletoCli(
     // Inicializar repo git local + commit inicial
     const pasosGit: { args: string[]; desc: string }[] = [
       { args: ["init", "-b", "main"], desc: "git init" },
-      { args: ["config", "user.email", "ci@estandar.local"], desc: "git config email" },
+      {
+        args: ["config", "user.email", "ci@estandar.local"],
+        desc: "git config email",
+      },
       { args: ["config", "user.name", "ci"], desc: "git config name" },
       { args: ["add", "."], desc: "git add ." },
       {
@@ -2022,7 +2358,9 @@ export async function verificarEsqueletoCli(
       }).output();
       if (!out.success) {
         const errTxt = new TextDecoder().decode(out.stderr).trim();
-        console.error(`[ERROR] Fallo en preparacion Git (${paso.desc}): ${errTxt}`);
+        console.error(
+          `[ERROR] Fallo en preparacion Git (${paso.desc}): ${errTxt}`,
+        );
         return 1;
       }
     }

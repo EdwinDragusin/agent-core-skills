@@ -5,14 +5,20 @@ import {
   assertNotMatch,
 } from "jsr:@std/assert@^1.0.0";
 import {
+  armarEncabezadoManifiesto,
   construirComandosVerificacionEsqueleto,
   contieneTerminoDominio,
+  detectarFugasPlantilla,
   detectarTerminosDominio,
   ensamblarEsqueletoEnDirectorio,
+  escanearMarcadoresEnDirectorio,
+  esReferenciaAdrPermitida,
   extraerPlantilla,
   extraerRutasDeConfig,
   filtrarBloquesPs1Proyecto,
   filtrarSeccionesMdProyecto,
+  obtenerCommitOrigen,
+  removerReferenciasAdrEntreParentesis,
   RUTA_SHARED_AGENTS,
   TRANSFORMACIONES_DECLARADAS,
   transformarContenido,
@@ -201,7 +207,10 @@ export const estandarConfig = {
   },
 };
 `;
-  const transCob = transformarContenido("estandar.config.ts", conCoberturaYListas);
+  const transCob = transformarContenido(
+    "estandar.config.ts",
+    conCoberturaYListas,
+  );
   assert(transCob.includes('"front/{{APP_1}}/vite.config.ts"'));
   assert(transCob.includes('"front/{{APP_2}}/vite.config.ts"'));
   assert(transCob.includes("listasBase: {}"));
@@ -364,6 +373,40 @@ Deno.test("Transformaciones declaradas - existencia y documentacion", () => {
   }
 });
 
+Deno.test("Transformaciones declaradas - cada marcador declarado aparece en el archivo de plantilla/", () => {
+  const raizPlantilla = new URL("../plantilla", import.meta.url).pathname
+    .replace(/^\/([A-Za-z]:)/, "$1");
+  const huerfanos: string[] = [];
+  for (const t of TRANSFORMACIONES_DECLARADAS) {
+    const marcadores = t.marcadorOPlaceholder.match(/\{\{[A-Z_0-9]+\}\}/g) ??
+      [];
+    if (marcadores.length === 0) continue;
+    let contenido: string;
+    try {
+      contenido = Deno.readTextFileSync(`${raizPlantilla}/${t.archivo}`);
+    } catch {
+      huerfanos.push(
+        `${t.archivo}: el archivo declarado no existe en plantilla/`,
+      );
+      continue;
+    }
+    for (const m of marcadores) {
+      if (!contenido.includes(m)) {
+        huerfanos.push(
+          `${t.archivo}: declara ${m} pero el archivo no lo contiene`,
+        );
+      }
+    }
+  }
+  assertEquals(
+    huerfanos,
+    [],
+    `Transformaciones declaradas que ya no ocurren (borrelas del registro):\n${
+      huerfanos.join("\n")
+    }`,
+  );
+});
+
 Deno.test("Verificacion de integridad - cada ruta verifica: en AGENTS.md existe dentro de plantilla/", () => {
   const raizPlantilla = new URL("../plantilla", import.meta.url).pathname
     .replace(/^\/([A-Za-z]:)/, "$1");
@@ -488,9 +531,9 @@ Deno.test("Preservacion de esqueleto/ - extraerPlantilla no borra ni sobrescribe
     }
     assertEquals(existeObsoleto, false);
 
-    // 5. Verificar que MANIFIESTO.md no lista esqueleto/
+    // 5. Verificar que MANIFIESTO.md no lista esqueleto/ en el catalogo de archivos
     const manifiesto = await Deno.readTextFile(`${tmpDestino}/MANIFIESTO.md`);
-    assertNotMatch(manifiesto, /esqueleto\//i);
+    assertNotMatch(manifiesto, /\|\s*`esqueleto\//i);
 
     // 6. Verificar que --verificar pasa con esqueleto limpio y falla si esqueleto tiene termino de dominio
     assertEquals(await verificarPlantillaCli(tmpDestino), 0);
@@ -587,4 +630,240 @@ Deno.test("Verificacion de esqueleto (parte pura) - construye lista de comandos 
     await Deno.remove(tmpOrigen, { recursive: true });
     await Deno.remove(tmpEnsamblado, { recursive: true });
   }
+});
+
+Deno.test("Encabezado de MANIFIESTO.md - commit real o sin version de git sin numero de PR", () => {
+  // Con commit corto valido
+  const conCommit = armarEncabezadoManifiesto("ff4778e7").join("\n");
+  assertMatch(conCommit, /commit `ff4778e7`/);
+  assertNotMatch(conCommit, /PR\s*#/i);
+
+  // Con prefijo commit ya formateado
+  const conPrefijo = armarEncabezadoManifiesto("commit `3aad52c3`").join("\n");
+  assertMatch(conPrefijo, /commit `3aad52c3`/);
+  assertNotMatch(conPrefijo, /PR\s*#/i);
+
+  // Sin version de git o vacio
+  const sinVersion = armarEncabezadoManifiesto("origen sin version de git")
+    .join("\n");
+  assertMatch(sinVersion, /\(origen sin version de git\)/);
+  assertNotMatch(sinVersion, /PR\s*#/i);
+
+  const conVacio = armarEncabezadoManifiesto("").join("\n");
+  assertMatch(conVacio, /\(origen sin version de git\)/);
+  assertNotMatch(conVacio, /PR\s*#/i);
+});
+
+Deno.test("Consistencia bidireccional de marcadores - MANIFIESTO.md vs plantilla/", async () => {
+  const raizPlantilla = new URL("../plantilla", import.meta.url).pathname
+    .replace(/^\/([A-Za-z]:)/, "$1");
+  const rutaManifiesto = `${raizPlantilla}/MANIFIESTO.md`;
+
+  let contenidoManifiesto: string;
+  try {
+    contenidoManifiesto = await Deno.readTextFile(rutaManifiesto);
+  } catch {
+    // Si plantilla aun no se ha generado, omitir asercion
+    return;
+  }
+
+  // Extraer marcadores listados en la tabla de sustitucion de MANIFIESTO.md
+  const seccionMarcadores =
+    contenidoManifiesto.split("## Marcadores de Sustitucion")[1]
+      ?.split("## Catalogo de Archivos")[0] ?? "";
+  const matchesTabla = seccionMarcadores.matchAll(
+    /\|\s*`(\{\{[A-Z0-9_]+\}\})`\s*\|/g,
+  );
+  const marcadoresEnManifiesto = new Set<string>();
+  for (const m of matchesTabla) {
+    marcadoresEnManifiesto.add(m[1]);
+  }
+
+  // Escanear marcadores reales presentes en los archivos generados de plantilla/ (excluyendo MANIFIESTO.md)
+  const mapaPlantilla = await escanearMarcadoresEnDirectorio(raizPlantilla, {
+    incluirEsqueleto: false,
+  });
+  const marcadoresEnPlantilla = new Set<string>(mapaPlantilla.keys());
+
+  // Validar que no haya marcadores en MANIFIESTO ausentes en plantilla
+  const ausentesEnPlantilla: string[] = [];
+  for (const m of marcadoresEnManifiesto) {
+    if (!marcadoresEnPlantilla.has(m)) {
+      ausentesEnPlantilla.push(m);
+    }
+  }
+
+  // Validar que no haya marcadores en plantilla no listados en MANIFIESTO
+  const ausentesEnManifiesto: string[] = [];
+  for (const m of marcadoresEnPlantilla) {
+    if (!marcadoresEnManifiesto.has(m)) {
+      ausentesEnManifiesto.push(m);
+    }
+  }
+
+  assertEquals(
+    ausentesEnPlantilla,
+    [],
+    `Marcadores listados en MANIFIESTO.md pero ausentes en archivos de plantilla/: ${
+      ausentesEnPlantilla.join(", ")
+    }`,
+  );
+  assertEquals(
+    ausentesEnManifiesto,
+    [],
+    `Marcadores presentes en archivos de plantilla/ pero no listados en MANIFIESTO.md: ${
+      ausentesEnManifiesto.join(", ")
+    }`,
+  );
+});
+
+Deno.test("Deteccion de fugas de estandar - Gotenberg y referencias ADR permitidas vs prohibidas", () => {
+  // Prohibicion de Gotenberg en cualquier archivo
+  const fugaGotenberg = detectarFugasPlantilla(
+    "Stack: Deno 2.x, Hono, Gotenberg 8, PostgreSQL",
+    "AGENTS.md",
+  );
+  assertEquals(fugaGotenberg.length > 0, true);
+  assertMatch(fugaGotenberg[0], /Gotenberg/);
+
+  // Referencias genericas permitidas globalmente
+  assertEquals(
+    detectarFugasPlantilla("Usa ADR-NNN para nombrar", "AGENTS.md"),
+    [],
+  );
+  assertEquals(
+    detectarFugasPlantilla("Usa ADR-FNNN en frontend", "front/AGENTS.md"),
+    [],
+  );
+  assertEquals(
+    detectarFugasPlantilla("Usa ADR-0NN como prefijo", "docs/AGENTS.md"),
+    [],
+  );
+  assertEquals(
+    detectarFugasPlantilla("Indice maestro ADR-000", "docs/AGENTS.md"),
+    [],
+  );
+
+  // Referencias permitidas exclusivamente en docs/adr/AGENTS.md para documentar formato
+  assertEquals(
+    detectarFugasPlantilla(
+      "Numeracion secuencial (ADR-001, ADR-002, ...)",
+      "docs/adr/AGENTS.md",
+    ),
+    [],
+  );
+  assertEquals(
+    detectarFugasPlantilla(
+      "Prefijo frontend (ADR-F001, ADR-F002, ...)",
+      "docs/adr/AGENTS.md",
+    ),
+    [],
+  );
+
+  // Contenido integro de plantilla de ADR permitido
+  assertEquals(
+    detectarFugasPlantilla(
+      "Ejemplo: ADR-009-exclusion-cas-identidad-catalogos",
+      "docs/_plantillas/PLANTILLA-ADR.md",
+    ),
+    [],
+  );
+
+  // Starter ADR en esqueleto/ permitido
+  assertEquals(
+    detectarFugasPlantilla(
+      "Decision ADR-001 de calidad",
+      "esqueleto/docs/adr/ADR-001-adoptar.md",
+    ),
+    [],
+  );
+
+  // Referencias a ADRs numerados especificos PROHIBIDAS fuera de las excepciones
+  const fugaAdrAgents = detectarFugasPlantilla(
+    "- **UnitOfWork**: atomicidad (ADR-015).",
+    "AGENTS.md",
+  );
+  assertEquals(fugaAdrAgents.length > 0, true);
+  assertMatch(fugaAdrAgents[0], /ADR-015/);
+
+  const fugaAdrBack = detectarFugasPlantilla(
+    "- Concurrencia CAS (ADR-005, ADR-016).",
+    "back/AGENTS.md",
+  );
+  assertEquals(fugaAdrBack.length >= 2, true);
+
+  const fugaAdrLogger = detectarFugasPlantilla(
+    "Implementacion del puerto (ADR-028).",
+    "back/tests/arquitectura/logger.test.ts",
+  );
+  assertEquals(fugaAdrLogger.length > 0, true);
+  assertMatch(fugaAdrLogger[0], /ADR-028/);
+
+  const fugaAdrUuid = detectarFugasPlantilla(
+    "Usar generarUuid() (ADR-018) siempre.",
+    "back/tests/arquitectura/uuid.test.ts",
+  );
+  assertEquals(fugaAdrUuid.length > 0, true);
+  assertMatch(fugaAdrUuid[0], /ADR-018/);
+});
+
+Deno.test("Transformaciones declaradas - eliminacion de Gotenberg y referencias ADR entre parentesis", () => {
+  // 1. Limpieza de Gotenberg y ADRs en AGENTS.md
+  const agentesOriginal = [
+    "# Project Rules - Sistema de Examenes de Ingreso",
+    "API REST gubernamental (Gobierno de Hidalgo) para postulacion de aspirantes a puestos publicos.",
+    "Stack: Deno 2.x, Hono, PostgreSQL 16, Drizzle ORM, JWT HS256 + Argon2id, Gotenberg 8.",
+    "- **UnitOfWork**: atomicidad via port `UnitOfWork` (ADR-015).",
+    "- UUIDs v7 via `generarUuid()` en dominio (ADR-018).",
+    "- Concurrencia optimista: compare-and-swap, no row locks (ADR-005/016).",
+  ].join("\n");
+
+  const agentesTransformado = transformarContenido(
+    "AGENTS.md",
+    agentesOriginal,
+  );
+  assertNotMatch(agentesTransformado, /Gotenberg/i);
+  assertNotMatch(agentesTransformado, /ADR-015/);
+  assertNotMatch(agentesTransformado, /ADR-018/);
+  assertNotMatch(agentesTransformado, /ADR-005/);
+  assertNotMatch(agentesTransformado, /ADR-016/);
+  assertMatch(agentesTransformado, /atomicidad via port `UnitOfWork`\./);
+  assertMatch(
+    agentesTransformado,
+    /UUIDs v7 via `generarUuid\(\)` en dominio\./,
+  );
+  assertMatch(agentesTransformado, /compare-and-swap, no row locks\./);
+
+  // 2. Limpieza de ADRs en back/AGENTS.md con saltos de linea internos
+  const backOriginal = [
+    "# Backend Operational Manifest - Examen de Ingreso API",
+    "- **Estructura Transaccional**: UnitOfWork + patron Outbox (ADR-015).",
+    "- **Concurrencia**: Control optimista Compare-And-Swap (CAS) con columna `version` (ADR-005,\n  ADR-016).",
+  ].join("\n");
+
+  const backTransformado = transformarContenido("back/AGENTS.md", backOriginal);
+  assertNotMatch(backTransformado, /ADR-015/);
+  assertNotMatch(backTransformado, /ADR-005/);
+  assertNotMatch(backTransformado, /ADR-016/);
+  assertMatch(backTransformado, /UnitOfWork \+ patron Outbox\./);
+  assertMatch(backTransformado, /con columna `version`\./);
+
+  // 3. Limpieza en tests de arquitectura
+  const loggerOriginal = "Usar el puerto estructurado 'Logger' (ADR-028).";
+  const loggerTransformado = transformarContenido(
+    "back/tests/arquitectura/logger.test.ts",
+    loggerOriginal,
+  );
+  assertEquals(loggerTransformado, "Usar el puerto estructurado 'Logger'.");
+
+  const uuidOriginal =
+    "Usar 'generarUuid()' (ADR-018) para garantizar UUID v7.";
+  const uuidTransformado = transformarContenido(
+    "back/tests/arquitectura/uuid.test.ts",
+    uuidOriginal,
+  );
+  assertEquals(
+    uuidTransformado,
+    "Usar 'generarUuid()' para garantizar UUID v7.",
+  );
 });

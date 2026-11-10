@@ -70,6 +70,14 @@ Impedir commits con formato invalido, emojis, lineas de atribucion ajenas o bran
    - `git config core.hooksPath .githooks`
 3. Asegurar que los scripts de validacion tengan permisos de ejecucion.
 4. Integrar la ejecucion de `validar-commit.test.ts` y `validar-rama.test.ts` en `deno task ci`.
+5. Si el repositorio destino cuenta con `CLAUDE.md` (o `.claude/CLAUDE.md`, `CLAUDE.local.md`), mantenerlo como puntero minimo importando `@AGENTS.md` sin duplicar reglas (Claude Code ignora `AGENTS.md` raiz si detecta `CLAUDE.md`).
+
+### Puntero Minimo CLAUDE.md (Advertencia Obligatoria)
+Si el repositorio destino utiliza Claude Code y cuenta con `CLAUDE.md`, `.claude/CLAUDE.md` o `CLAUDE.local.md`, Claude Code ignora completamente `AGENTS.md` en la raiz.
+Para preservar la gobernanza unificada:
+1. Mantener `CLAUDE.md` exclusivamente como un puntero minimo que importe `AGENTS.md` via directiva `@AGENTS.md`.
+2. Prohibido duplicar reglas de ingenieria o gobernanza dentro de `CLAUDE.md`.
+3. Verificar en la Fase 1 que no existan discrepancias ni reglas paralelas.
 
 ### Protocolo de Verificacion por Mutacion (Ola 2)
 - **Mutacion 2A (Mensaje invalido):** Intentar commit con texto libre (ej. `arreglos varios`).
@@ -112,14 +120,41 @@ Este archivo es la fuente unica de verdad para las rutas del backend, la topolog
 - **Listas Base con Trinquete (`listasBase` y `back/tests/arquitectura/listasBase.test.ts`):** En proyectos existentes con violaciones previas, se registran en `estandarConfig.listasBase` indexadas por el id del test (`back/aliases`, `back/dependencias-dominio`, `back/dependencias-aplicacion`, `back/dependencias-infraestructura`, `back/dependencias-tests-aplicacion`, `back/diManual`, `back/entidades`, `back/logger`, `back/usecases`, `back/uuid`, `back/valueObjects`, `front/RN-F01`, `front/RN-F02`, `front/RN-F03`, `front/CAPAS`, `front/SHARED`, `front/entorno`, `front/storage`, `cobertura/config`). Cada entrada exige `{ ruta, todo }`, `entradas.length === tope`, el `tope` solo puede bajar, y falla ante entradas muertas o sin `todo`. Dado que `tope` vive en `estandar.config.ts`, la revision del PR (o un chequeo contra `main` en CI) debe vigilar que `tope` nunca suba.
 Todos los tests de arquitectura (`back/tests/arquitectura/`, `front/tests/arquitectura/`), tests de higiene y scripts de migraciones leen su configuracion dinamicamente de este archivo sin requerir modificacion directa de codigo de prueba.
 
-### Marcadores de Plantilla Frontend (Sustitucion Obligatoria)
-La plantilla utiliza marcadores parametricos que deben ser reemplazados al configurar `estandar.config.ts` y aliases segun la declaracion de `RAIZ_PLUGIN/plantilla/MANIFIESTO.md`:
-- `{{APP_1}}`: Nombre del primer modulo o SPA del portal (ej. `portal`, `cliente`, `web`).
-- `{{APP_2}}`: Nombre del segundo modulo o SPA administrativa (ej. `admin`, `backoffice`, `gestion`).
-- `@{{PROYECTO}}`: Prefijo de aliases internos de librerias compartidas.
-- `{{APP_EFIMERA}}`: Directorio de aplicaciones o vistas transitorias si existieran.
+### Marcadores de Plantilla (Sustitucion Obligatoria)
+La plantilla utiliza marcadores parametricos que deben ser reemplazados al configurar `estandar.config.ts`, manifiestos y tareas segun la declaracion de `RAIZ_PLUGIN/plantilla/MANIFIESTO.md`:
+- `{{NOMBRE_PROYECTO}}`: Nombre institucional del proyecto adoptante (`AGENTS.md`, `back/AGENTS.md`, `front/AGENTS.md`).
+- `{{DESCRIPCION_PROYECTO}}`: Resumen institucional de proposito y alcance (`AGENTS.md`).
+- `{{SLUG_PROYECTO}}`: Identificador en kebab-case del vault Obsidian (`docs/AGENTS.md`).
+- `{{APP_1}}`: Nombre de la primera SPA del portal web (`estandar.config.ts`, `front/deno.json`, `front/AGENTS.md`, etc.).
+- `{{APP_2}}`: Nombre de la segunda SPA del portal web (opcional si el proyecto cuenta con una sola SPA).
 
-> **INSTRUCCION CRITICA:** La ola de arquitectura e higiene empieza obligatoriamente por crear `estandar.config.ts` y sustituir los marcadores `{{APP_1}}`, `{{APP_2}}`, `@{{PROYECTO}}` y `{{APP_EFIMERA}}` segun la topologia real del proyecto antes de correr las pruebas.
+### Topologia Frontend: SPA Unica vs Multiples SPAs
+Para proyectos con una sola aplicacion frontend (SPA unica):
+1. `estandar.config.ts`: Dejar una sola entrada en `front.aplicaciones` (ej. `[{ nombre: "web", rutaSrc: "src" }]`).
+2. `front/deno.json`: Quitar `{{APP_2}}` del array `workspace` y de las tareas (`dev:{{APP_2}}`, `build:{{APP_2}}`, `test:{{APP_2}}`).
+3. `front/AGENTS.md` y documentacion en `docs/`: Quitar las referencias a `{{APP_2}}`.
+4. Referencia canonica: Usar `plantilla/esqueleto/front/deno.json` y `plantilla/esqueleto/estandar.config.ts` como ejemplo funcional de SPA unica.
+
+### Configuracion de Esquema de Base de Datos (archivoEsquema)
+En modo proyecto existente, el campo `back.archivoEsquema` de `estandar.config.ts` admite:
+- Una ruta a un archivo individual (string, ej. `"back/src/infraestructura/persistencia/esquema.ts"`).
+- Una lista de archivos (`string[]`).
+- Una ruta a un directorio con barra final (ej. `"back/src/infraestructura/persistencia/esquema/"`).
+Los casos de prueba sinteticos de los tests de arquitectura no dependen de la configuracion real del proyecto adoptante y validan los contratos sin acoplarse a las entidades del negocio.
+
+### Clases Base y Utilidades de Arquitectura (No viajan en el espejo)
+Las clases base y utilidades que los tests de arquitectura (`back/tests/arquitectura/`) exigen (`Entidad`, `AgregadoRaiz`, `ValueObject`, `generarUuid`, `LoggerConsola` y archivos autorizados de DI manual) NO viajan en el espejo de plantilla para evitar sobreescribir el modelo de dominio propio del adoptante.
+El adoptante debe crearlas o mapear las existentes en `estandar.config.ts` mediante:
+- `back.clasesBaseEntidad` (ej. `["Entidad", "AgregadoRaiz"]`)
+- `back.claseBaseValueObject` (ej. `"ValueObject"`)
+- `back.generadorUuid`: ruta del generador relativa a `back.raiz` (ej. `"src/dominio/compartido/generarUuid.ts"`)
+- `back.adaptadorLogger`: ruta del adaptador relativa a `back.raiz` (ej. `"src/infraestructura/observabilidad/LoggerConsola.ts"`)
+- `back.archivosComposicionDIManual`: rutas relativas a `back.raiz` (ej. `["src/interfaz/http/main.ts", "src/interfaz/http/crearApp.ts"]`)
+Implementaciones de referencia disponibles en:
+- `plantilla/esqueleto/back/src/dominio/compartido/` (`Entidad.ts`, `AgregadoRaiz.ts`, `ValueObject.ts`, `generarUuid.ts`).
+- `plantilla/esqueleto/back/src/infraestructura/observabilidad/` (`LoggerConsola.ts`).
+
+> **INSTRUCCION CRITICA:** La ola de arquitectura e higiene empieza obligatoriamente por crear `estandar.config.ts` y sustituir los marcadores segun la topologia real del proyecto antes de correr las pruebas.
 
 ### Lista de Comprobacion
 1. Copiar `estandar.config.ts` y `scripts/estandar/cobertura-config.test.ts` desde `RAIZ_PLUGIN/plantilla/` a la raiz y `scripts/estandar/`, configurando la topologia real y `cobertura.rutasAdicionales`.
