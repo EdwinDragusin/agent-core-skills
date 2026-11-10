@@ -112,6 +112,11 @@ Deno.test("Arquitectura - Autoverificacion sintetica de DI manual de adaptadores
     "HashServiceArgon2",
   ]);
 
+  const archivosAutorizadosSinteticos = [
+    "src/interfaz/http/main.ts",
+    "src/interfaz/http/crearApp.ts",
+  ];
+
   // 1. Caso valido: controlador recibe dependencias por constructor sin new
   const codigoControladorValido = `
     export class UsuarioController {
@@ -122,12 +127,18 @@ Deno.test("Arquitectura - Autoverificacion sintetica de DI manual de adaptadores
     "src/interfaz/http/controllers/UsuarioController.ts",
     codigoControladorValido,
     clasesInfra,
+    archivosAutorizadosSinteticos,
   );
   assertEquals(v1.length, 0);
 
   // 2. Caso valido: main.ts (composition root) puede instanciar adaptadores
   const codigoMain = `const repo = new UsuarioRepositoryDrizzle(db);`;
-  const v2 = detectarViolacionesDIManual("src/interfaz/http/main.ts", codigoMain, clasesInfra);
+  const v2 = detectarViolacionesDIManual(
+    "src/interfaz/http/main.ts",
+    codigoMain,
+    clasesInfra,
+    archivosAutorizadosSinteticos,
+  );
   assertEquals(v2.length, 0);
 
   // 3. Caso valido: crearApp.ts puede instanciar valores por defecto
@@ -136,6 +147,7 @@ Deno.test("Arquitectura - Autoverificacion sintetica de DI manual de adaptadores
     "src/interfaz/http/crearApp.ts",
     codigoCrearApp,
     clasesInfra,
+    archivosAutorizadosSinteticos,
   );
   assertEquals(v3.length, 0);
 
@@ -149,6 +161,7 @@ Deno.test("Arquitectura - Autoverificacion sintetica de DI manual de adaptadores
     "src/interfaz/http/controllers/BadController.ts",
     codigoControladorInvalido,
     clasesInfra,
+    archivosAutorizadosSinteticos,
   );
   assertEquals(v4.length, 1);
   assertEquals(v4[0].claseInstanciada, "UsuarioRepositoryDrizzle");
@@ -163,6 +176,7 @@ Deno.test("Arquitectura - Autoverificacion sintetica de DI manual de adaptadores
     "src/aplicacion/usecases/BadUseCase.ts",
     codigoUseCaseInvalido,
     clasesInfra,
+    archivosAutorizadosSinteticos,
   );
   assertEquals(v5.length, 1);
   assertEquals(v5[0].claseInstanciada, "AlmacenamientoLocalAdapter");

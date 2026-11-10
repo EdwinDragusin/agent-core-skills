@@ -18,6 +18,71 @@ function obtenerArchivosTypeScript(dirPath: string): string[] {
 }
 
 /**
+ * Elimina comentarios preservando saltos de linea y sin alterar literales de cadena ni plantillas.
+ */
+function eliminarComentarios(codigo: string): string {
+  let resultado = "";
+  let i = 0;
+  const n = codigo.length;
+
+  while (i < n) {
+    const ch = codigo[i];
+    const sig = codigo[i + 1];
+
+    // Comentario de linea: // ...
+    if (ch === "/" && sig === "/") {
+      i += 2;
+      while (i < n && codigo[i] !== "\n") {
+        i++;
+      }
+      continue;
+    }
+
+    // Comentario de bloque o JSDoc: /* ... */
+    if (ch === "/" && sig === "*") {
+      i += 2;
+      while (i < n && !(codigo[i] === "*" && codigo[i + 1] === "/")) {
+        if (codigo[i] === "\n") {
+          resultado += "\n";
+        } else {
+          resultado += " ";
+        }
+        i++;
+      }
+      i += 2;
+      resultado += " ";
+      continue;
+    }
+
+    // Strings y templates: preservar tal cual, incluyendo // o /* adentro
+    if (ch === "'" || ch === '"' || ch === "`") {
+      const delimitador = ch;
+      resultado += ch;
+      i++;
+      while (i < n && codigo[i] !== delimitador) {
+        if (codigo[i] === "\\" && i + 1 < n) {
+          resultado += codigo[i] + codigo[i + 1];
+          i += 2;
+          continue;
+        }
+        resultado += codigo[i];
+        i++;
+      }
+      if (i < n) {
+        resultado += codigo[i];
+        i++;
+      }
+      continue;
+    }
+
+    resultado += ch;
+    i++;
+  }
+
+  return resultado;
+}
+
+/**
  * Extrae todas las rutas y paquetes importados o reexportados en codigo TypeScript.
  * Detecta:
  * 1. import ... from 'x'
@@ -27,6 +92,7 @@ function obtenerArchivosTypeScript(dirPath: string): string[] {
  * 5. import('x') dinamico con literal
  */
 export function extraerImportsDeCodigo(contenido: string): string[] {
+  const sinComentarios = eliminarComentarios(contenido);
   const patrones = [
     /(?:^|[\s;])(?:import|export)\s+(?:type\s+)?[\s\S]*?\s+from\s+['"]([^'"]+)['"]/gm,
     /(?:^|[\s;])import\s+['"]([^'"]+)['"]/gm,
@@ -36,7 +102,7 @@ export function extraerImportsDeCodigo(contenido: string): string[] {
 
   for (const patron of patrones) {
     let match: RegExpExecArray | null;
-    while ((match = patron.exec(contenido)) !== null) {
+    while ((match = patron.exec(sinComentarios)) !== null) {
       imports.push(match[1]);
     }
   }
@@ -259,5 +325,94 @@ Deno.test("Arquitectura - Autoverificacion sintetica de extraccion de imports en
       "./infra/adaptadores.ts",
       "./infra/driver.ts",
     ].sort(),
+  );
+
+  // 6. Ignorar imports comentados (linea, bloque, JSDoc) sin romper cadenas con // ni templates
+  // Comentario de linea
+  assertEquals(
+    extraerImportsDeCodigo('// import type { X } from "../../aplicacion/dtos/X.ts";'),
+    [],
+  );
+  assertEquals(
+    extraerImportsDeCodigo('  // import { Oculto } from "./dominio/Oculto.ts";'),
+    [],
+  );
+
+  // Comentario de bloque
+  assertEquals(
+    extraerImportsDeCodigo('/* import { Y } from "./dominio/Y.ts"; */'),
+    [],
+  );
+  assertEquals(
+    extraerImportsDeCodigo('/*\n * import { Bloque } from "./Bloque.ts";\n */'),
+    [],
+  );
+
+  // Comentario JSDoc
+  assertEquals(
+    extraerImportsDeCodigo(`
+      /**
+       * @example
+       * import { Ejemplo } from "./dominio/Ejemplo.ts";
+       * const res = await import("./dinamicoEjemplo.ts");
+       */
+      const activo = true;
+    `),
+    [],
+  );
+
+  // Cadena con URL conteniendo // y caracteres especiales no debe romperse ni tratarse como comentario
+  assertEquals(
+    extraerImportsDeCodigo('const url = "https://example.com/api";'),
+    [],
+  );
+  assertEquals(
+    extraerImportsDeCodigo('const pkg = "npm:@scope/paquete";'),
+    [],
+  );
+  assertEquals(
+    extraerImportsDeCodigo(`
+      const url = "https://dominio.gob.mx/recurso";
+      import { Recurso } from "./dominio/Recurso.ts";
+    `),
+    ["./dominio/Recurso.ts"],
+  );
+
+  // Plantilla (template literal) conteniendo //
+  assertEquals(
+    extraerImportsDeCodigo(`
+      const baseUrl = \`https://servidor.local/v1\`;
+      import { ServicioApi } from "./infra/ServicioApi.ts";
+    `),
+    ["./infra/ServicioApi.ts"],
+  );
+
+  // Import real precedido inmediatamente por un comentario de linea
+  assertEquals(
+    extraerImportsDeCodigo(`
+      // Comentario explicativo antes de import
+      import { Legado } from "./dominio/Legado.ts";
+    `),
+    ["./dominio/Legado.ts"],
+  );
+
+  // Import real precedido por comentario de bloque en la misma linea
+  assertEquals(
+    extraerImportsDeCodigo(`/* inline */ import { Inline } from "./dominio/Inline.ts";`),
+    ["./dominio/Inline.ts"],
+  );
+
+  // Import dinamico real y comentado
+  assertEquals(
+    extraerImportsDeCodigo('const m = await import("./modulos/dinamico.ts");'),
+    ["./modulos/dinamico.ts"],
+  );
+  assertEquals(
+    extraerImportsDeCodigo('// const m = await import("./modulos/dinamico.ts");'),
+    [],
+  );
+  assertEquals(
+    extraerImportsDeCodigo('/* const m = await import("./modulos/dinamico.ts"); */'),
+    [],
   );
 });

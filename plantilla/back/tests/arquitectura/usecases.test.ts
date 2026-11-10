@@ -14,6 +14,7 @@ export interface ViolacionUseCase {
 export function detectarViolacionesUseCase(
   archivoRuta: string,
   contenido: string,
+  _directorioUseCases: string = estandarConfig.back.directorioUseCases,
 ): ViolacionUseCase[] {
   const normalizada = archivoRuta.replaceAll("\\", "/");
   const violaciones: ViolacionUseCase[] = [];
@@ -77,6 +78,8 @@ function obtenerArchivosTypeScript(dirPath: string): string[] {
 }
 
 Deno.test("Arquitectura - Autoverificacion sintetica de exposicion de metodo ejecutar en use cases", () => {
+  const dirUseCasesSintetico = "src/aplicacion/usecases";
+
   // 1. Caso valido: clase con metodo ejecutar
   const codigoValido = `
     export class RegistrarUsuarioUseCase {
@@ -89,6 +92,7 @@ Deno.test("Arquitectura - Autoverificacion sintetica de exposicion de metodo eje
   const violaciones1 = detectarViolacionesUseCase(
     "src/aplicacion/usecases/RegistrarUsuarioUseCase.ts",
     codigoValido,
+    dirUseCasesSintetico,
   );
   assertEquals(violaciones1.length, 0);
 
@@ -101,6 +105,7 @@ Deno.test("Arquitectura - Autoverificacion sintetica de exposicion de metodo eje
   const violaciones2 = detectarViolacionesUseCase(
     "src/aplicacion/usecases/FacturarUseCase.ts",
     codigoInvalido,
+    dirUseCasesSintetico,
   );
   assertEquals(violaciones2.length, 1);
   assertEquals(violaciones2[0].clase, "FacturarUseCase");
@@ -112,6 +117,7 @@ Deno.test("Arquitectura - Autoverificacion sintetica de exposicion de metodo eje
   const violaciones3 = detectarViolacionesUseCase(
     "src/aplicacion/usecases/VacioUseCase.ts",
     codigoVacio,
+    dirUseCasesSintetico,
   );
   assertEquals(violaciones3.length, 1);
   assertEquals(violaciones3[0].clase, "VacioUseCase");

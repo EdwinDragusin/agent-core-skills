@@ -387,6 +387,150 @@ $validMermaidDirectives = @(
   "quadrantchart"
 )
 
+function Test-MermaidBlockContent {
+  param(
+    [string]$body,
+    [string]$sourceName = "bloque"
+  )
+
+  $errors = [System.Collections.Generic.List[string]]::new()
+
+  if ([string]::IsNullOrWhiteSpace($body)) {
+    $errors.Add("$($sourceName): bloque mermaid vacio")
+    return [PSCustomObject]@{
+      Passed = $false
+      Errors = $errors
+      Directive = ""
+    }
+  }
+
+  # Obtener primera linea no vacia y no comentario
+  $bodyLines = $body -split "`r?`n"
+  $firstDirective = ""
+  foreach ($bl in $bodyLines) {
+    $cleanLine = $bl.Trim()
+    if (-not $cleanLine -or $cleanLine.StartsWith("%%")) { continue }
+    # -split con regex: String.Split(" `t") se comporta distinto en PowerShell 5.1 y 7
+    $firstDirective = ($cleanLine -split '\s+')[0].ToLowerInvariant()
+    break
+  }
+
+  if (-not $firstDirective) {
+    $errors.Add("$($sourceName): bloque mermaid sin directivas validas")
+    return [PSCustomObject]@{
+      Passed = $false
+      Errors = $errors
+      Directive = ""
+    }
+  }
+
+  if ($validMermaidDirectives -notcontains $firstDirective) {
+    $errors.Add("$($sourceName): directiva mermaid no reconocida '$firstDirective'")
+    return [PSCustomObject]@{
+      Passed = $false
+      Errors = $errors
+      Directive = $firstDirective
+    }
+  }
+
+  # Verificacion de balance de delimitadores basicos (corchetes, llaves, parentesis)
+  # Excluyendo texto en comillas simples/dobles
+  $openParen = 0; $closeParen = 0
+  $openBracket = 0; $closeBracket = 0
+  $openBrace = 0; $closeBrace = 0
+
+  foreach ($bl in $bodyLines) {
+    $trimmed = $bl.Trim()
+    if ($trimmed.StartsWith("%%")) { continue }
+    # Remover strings entre comillas para evitar falsos positivos
+    $withoutStrings = [regex]::Replace($trimmed, '"[^"]*"', '""')
+
+    # En erDiagram, los operadores de relacion/cardinalidad (ej. ||--o{, }o--||, }|..|{)
+    # llevan llaves sin par. Se eliminan para balancear unicamente bloques de entidad.
+    if ($firstDirective -eq "erdiagram") {
+      $withoutStrings = [regex]::Replace($withoutStrings, '[|o\}]{1,2}\s*(?:--|\.\.)\s*[|o\{]{1,2}|[|o\}]{1,2}\s*(?:--|\.\.)|(?:--|\.\.)\s*[|o\{]{1,2}', '')
+    }
+
+    $openParen += ($withoutStrings -replace '[^(]').Length
+    $closeParen += ($withoutStrings -replace '[^)]').Length
+    $openBracket += ($withoutStrings -replace '[^\[]').Length
+    $closeBracket += ($withoutStrings -replace '[^\]]').Length
+    $openBrace += ($withoutStrings -replace '[^{]').Length
+    $closeBrace += ($withoutStrings -replace '[^}]').Length
+  }
+
+  # En diagramas de secuencia Mermaid, las etiquetas y notas no exigen parentesis pareados estrictos,
+  # pero corchetes y llaves estructuran nodos y bloques.
+  if ($openBracket -ne $closeBracket) {
+    $errors.Add("$($sourceName) [$firstDirective]: desbalance de corchetes [ ] ($openBracket abiertos vs $closeBracket cerrados)")
+  }
+  if ($openBrace -ne $closeBrace) {
+    $errors.Add("$($sourceName) [$firstDirective]: desbalance de llaves { } ($openBrace abiertas vs $closeBrace cerradas)")
+  }
+
+  return [PSCustomObject]@{
+    Passed = ($errors.Count -eq 0)
+    Errors = $errors
+    Directive = $firstDirective
+  }
+}
+
+# Autoprueba sintetica en memoria de diagramas Mermaid
+$synthMermaidPassed = $true
+$synthMermaidDetails = [System.Collections.Generic.List[string]]::new()
+
+$synthValidEr = @"
+erDiagram
+    CUSTOMER ||--o{ ORDER : places
+    ORDER ||--|{ LINE-ITEM : contains
+    CUSTOMER }|..|{ DELIVERY-ADDRESS : uses
+    CUSTOMER {
+        string name
+        string custNumber
+    }
+    ORDER {
+        int orderNumber
+    }
+"@
+$resValidEr = Test-MermaidBlockContent $synthValidEr "synth-er-valid"
+if (-not $resValidEr.Passed) {
+  $synthMermaidPassed = $false
+  $synthMermaidDetails.Add("Falso positivo en erDiagram valido con relaciones y bloques")
+}
+
+$synthInvalidEr = @"
+erDiagram
+    CUSTOMER ||--o{ ORDER : places
+    CUSTOMER {
+        string name
+    ORDER {
+        int orderNumber
+    }
+"@
+$resInvalidEr = Test-MermaidBlockContent $synthInvalidEr "synth-er-invalid"
+if ($resInvalidEr.Passed) {
+  $synthMermaidPassed = $false
+  $synthMermaidDetails.Add("Fallo deteccion de erDiagram con bloque de entidad sin cerrar")
+}
+
+$synthInvalidFlow = @"
+flowchart TD
+    A[Inicio] --> B{Es valido?
+    B -->|Si| C[Fin]
+"@
+$resInvalidFlow = Test-MermaidBlockContent $synthInvalidFlow "synth-flow-invalid"
+if ($resInvalidFlow.Passed) {
+  $synthMermaidPassed = $false
+  $synthMermaidDetails.Add("Fallo deteccion de flowchart con llaves desbalanceadas")
+}
+
+$synthMermaidMsg = if ($synthMermaidPassed) {
+  "Tres escenarios sinteticos validados en memoria (erDiagram valido, erDiagram invalido, flowchart desbalanceado)"
+} else {
+  $synthMermaidDetails -join "; "
+}
+Register-Check "Mermaid" "Autoprueba sintetica del validador Mermaid" $synthMermaidPassed $synthMermaidMsg
+
 $mermaidBlockCount = 0
 $mermaidErrors = [System.Collections.Generic.List[string]]::new()
 
@@ -401,60 +545,11 @@ foreach ($file in $allMdFiles) {
   foreach ($m in $matches) {
     $mermaidBlockCount++
     $body = $m.Groups[1].Value.Trim()
-
-    if ([string]::IsNullOrWhiteSpace($body)) {
-      $mermaidErrors.Add("$($file.Name): bloque mermaid vacio")
-      continue
-    }
-
-    # Obtener primera linea no vacia y no comentario
-    $bodyLines = $body -split "`r?`n"
-    $firstDirective = ""
-    foreach ($bl in $bodyLines) {
-      $cleanLine = $bl.Trim()
-      if (-not $cleanLine -or $cleanLine.StartsWith("%%")) { continue }
-      # -split con regex: String.Split(" `t") se comporta distinto en PowerShell 5.1 y 7
-      $firstDirective = ($cleanLine -split '\s+')[0].ToLowerInvariant()
-      break
-    }
-
-    if (-not $firstDirective) {
-      $mermaidErrors.Add("$($file.Name): bloque mermaid sin directivas validas")
-      continue
-    }
-
-    if ($validMermaidDirectives -notcontains $firstDirective) {
-      $mermaidErrors.Add("$($file.Name): directiva mermaid no reconocida '$firstDirective'")
-      continue
-    }
-
-    # Verificacion de balance de delimitadores basicos (corchetes, llaves, parentesis)
-    # Excluyendo texto en comillas simples/dobles
-    $openParen = 0; $closeParen = 0
-    $openBracket = 0; $closeBracket = 0
-    $openBrace = 0; $closeBrace = 0
-
-    foreach ($bl in $bodyLines) {
-      $trimmed = $bl.Trim()
-      if ($trimmed.StartsWith("%%")) { continue }
-      # Remover strings entre comillas para evitar falsos positivos
-      $withoutStrings = [regex]::Replace($trimmed, '"[^"]*"', '""')
-
-      $openParen += ($withoutStrings -replace '[^(]').Length
-      $closeParen += ($withoutStrings -replace '[^)]').Length
-      $openBracket += ($withoutStrings -replace '[^\[]').Length
-      $closeBracket += ($withoutStrings -replace '[^\]]').Length
-      $openBrace += ($withoutStrings -replace '[^{]').Length
-      $closeBrace += ($withoutStrings -replace '[^}]').Length
-    }
-
-    # En diagramas de secuencia Mermaid, las etiquetas y notas no exigen parentesis pareados estrictos,
-    # pero corchetes y llaves estructuran nodos y bloques.
-    if ($openBracket -ne $closeBracket) {
-      $mermaidErrors.Add("$($file.Name) [$firstDirective]: desbalance de corchetes [ ] ($openBracket abiertos vs $closeBracket cerrados)")
-    }
-    if ($openBrace -ne $closeBrace) {
-      $mermaidErrors.Add("$($file.Name) [$firstDirective]: desbalance de llaves { } ($openBrace abiertas vs $closeBrace cerradas)")
+    $resBlock = Test-MermaidBlockContent $body $file.Name
+    if (-not $resBlock.Passed) {
+      foreach ($err in $resBlock.Errors) {
+        $mermaidErrors.Add($err)
+      }
     }
   }
 }
