@@ -1,7 +1,7 @@
 # MANIFIESTO DE LA PLANTILLA ESTANDAR
 
 Este catalogo registra cada mecanismo exportado desde el repositorio de referencia
-institucional (commit `3aad52c3`, PR #19) hacia el plugin `agent-core-skills` (v3).
+institucional (commit `ff4778e7`) hacia el plugin `agent-core-skills` (v3).
 
 **IMPORTANTE**: Esta carpeta `plantilla/` es un espejo generado de forma determinista.
 No debe editarse manualmente. Para regenerar o actualizar, ejecutar:
@@ -32,10 +32,16 @@ sustituir los siguientes marcadores de acuerdo con su arquitectura especifica:
 | `{{NOMBRE_PROYECTO}}` | Nombre del sistema o proyecto adoptante | `AGENTS.md`, `back/AGENTS.md`, `front/AGENTS.md` | Nombre institucional del proyecto |
 | `{{DESCRIPCION_PROYECTO}}` | Resumen institucional de proposito y alcance del proyecto | `AGENTS.md` | Descripcion institucional original de referencia |
 | `{{SLUG_PROYECTO}}` | Identificador en kebab-case del vault de documentacion | `docs/AGENTS.md` | Nombre del vault Obsidian |
-| `{{APP_1}}` | Nombre de la primera SPA del portal web | `estandar.config.ts`, `front/deno.json`, `front/AGENTS.md`, `front/shared/AGENTS.md` | Portal de autoservicio publico |
-| `{{APP_2}}` | Nombre de la segunda SPA del portal web | `estandar.config.ts`, `front/deno.json`, `front/AGENTS.md`, `front/shared/AGENTS.md` | Portal administrativo y operativo |
-| `@{{PROYECTO}}` | Prefijo de importacion de paquetes monorepo | `front/tests/arquitectura/front-dependencias.test.ts` | Prefijo de paquete institucional |
-| `{{APP_EFIMERA}}` | Nombre de la app con requerimiento estricto de sesion efimera (sessionStorage) | `front/tests/higiene/storage.test.ts` | Aplicacion con sesion temporal |
+| `{{APP_1}}` | Nombre de la primera SPA del portal web | `docs/guia/how-to/flujo-multiagente.md`, `estandar.config.ts`, `front/AGENTS.md`, `front/deno.json`, `front/shared/AGENTS.md` | Portal de autoservicio publico |
+| `{{APP_2}}` | Nombre de la segunda SPA del portal web (opcional si el proyecto usa una sola SPA) | `docs/guia/how-to/flujo-multiagente.md`, `estandar.config.ts`, `front/AGENTS.md`, `front/deno.json`, `front/shared/AGENTS.md` | Portal administrativo y operativo |
+
+### Adaptacion para Proyectos con una Sola SPA Frontend
+
+Si el proyecto adoptante cuenta con una unica aplicacion frontend (SPA unica):
+1. En `estandar.config.ts`: dejar una sola entrada en `front.aplicaciones` (ej. `[{ nombre: "web", rutaSrc: "src" }]`).
+2. En `front/deno.json`: remover `{{APP_2}}` de `workspace` y de las tareas (`dev`, `build`, `test`).
+3. En `front/AGENTS.md` y documentacion en `docs/`: eliminar las referencias a `{{APP_2}}`.
+4. Como referencia practica, consultar `plantilla/esqueleto/front/deno.json` y `plantilla/esqueleto/estandar.config.ts`, que implementan la configuracion canonica para una sola SPA.
 
 ---
 
@@ -105,14 +111,14 @@ sustituir los siguientes marcadores de acuerdo con su arquitectura especifica:
 |---|---|---|---|---|
 | `estandar.config.ts` | `{{APP_1}}, {{APP_2}}, listasBase: {}` | `nombres y rutas de aplicaciones front, rutasAdicionales de cobertura y listasBase` | `{{APP_1}}, {{APP_2}}, listasBase: {}` | Parametriza aplicaciones frontend y rutasAdicionales de cobertura (`scripts/estandar/cobertura-config.test.ts`), y deja `listasBase` vacio (`{}`) para el trinquete (`back/tests/arquitectura/listasBase.test.ts`). |
 | `AGENTS.md` | `{{NOMBRE_PROYECTO}}, {{DESCRIPCION_PROYECTO}}` | `preambulo de aplicacion REST original y marco institucional de referencia` | `{{NOMBRE_PROYECTO}} / {{DESCRIPCION_PROYECTO}}` | Parametriza nombre del proyecto y sustituye preambulo especifico por descripcion configurable. |
+| `AGENTS.md` | `stack agnostico / reglas operativas` | `servicio de conversion PDF en stack y referencias a decisiones tecnicas de referencia en parentesis` | `stack agnostico y reglas limpias` | Elimina servicio de conversion PDF de la declaracion de stack y remueve referencias numeradas a decisiones tecnicas de referencia. |
+| `back/AGENTS.md` | `reglas operativas agnosticas` | `referencias a decisiones tecnicas en reglas transaccionales y de concurrencia` | `reglas operativas sin acoplamiento a decisiones de referencia` | Remueve referencias numeradas a decisiones especificas del proyecto de referencia en backend. |
+| `back/tests/arquitectura/logger.test.ts` | `puerto estructurado Logger` | `referencia a decision tecnica en comentarios y aserciones de logger` | `puerto estructurado Logger` | Remueve referencia a decision tecnica del proyecto de referencia. |
+| `back/tests/arquitectura/uuid.test.ts` | `generador de UUID` | `referencia a decision tecnica en comentarios y aserciones de UUID` | `generador de UUID` | Remueve referencia a decision tecnica del proyecto de referencia. |
 | `back/AGENTS.md` | `{{NOMBRE_PROYECTO}}, control de migraciones` | `nombre de aplicacion API original / termino reservado en indice de capa` | `{{NOMBRE_PROYECTO}} API / control de migraciones` | Parametriza encabezado y neutraliza terminologia en el indice de manifiestos por capa. |
 | `front/AGENTS.md` | `{{NOMBRE_PROYECTO}}, {{APP_1}}, {{APP_2}}` | `nombre de aplicacion Web Client original / nombres y flujos de portales originales` | `{{NOMBRE_PROYECTO}} Web Client / {{APP_1}}, {{APP_2}}` | Parametriza encabezado e indice de manifiestos de aplicaciones por portal. |
 | `front/shared/AGENTS.md` | `{{APP_1}}, {{APP_2}}` | `nombres de portales especificos en regla de aislamiento` | `({{APP_1}}/, {{APP_2}}/)` | Parametriza nombres de portales en la regla de aislamiento absoluto de la capa compartida. |
-| `scripts/estandar/cobertura-config.test.ts` | `{{APP_1}}, {{APP_2}}` | `nombres y rutas de aplicaciones frontend en autoverificacion sintetica` | `{{APP_1}}, {{APP_2}}` | Parametriza nombres y rutas de aplicaciones frontend en el test de cobertura de estandar.config.ts. |
 | `docs/AGENTS.md` | `{{SLUG_PROYECTO}}` | `identificador de vault de referencia` | `{{SLUG_PROYECTO}}-docs` | Parametriza identificador de vault Obsidian en el manifiesto documental raiz. |
-| `front/tests/arquitectura/front-dependencias.test.ts` | `{{APP_1}}, {{APP_2}}, @{{PROYECTO}}, moduloA, LayoutPrincipal` | `portal publico, portal administrativo, alias de paquete monorepo, modulos especificos, layout especifico` | `{{APP_1}}, {{APP_2}}, @{{PROYECTO}}, moduloA, LayoutPrincipal` | Parametriza aplicaciones front, alias de monorepo y generaliza entidades/layouts en tests FSD. |
-| `front/tests/higiene/entorno.test.ts` | `{{APP_1}}, {{APP_2}}` | `directorios de portales especificos en mensaje de error` | `({{APP_1}}/src y {{APP_2}}/src)` | Generaliza mensaje de error de asercion de cantidad minima de portales. |
-| `front/tests/higiene/storage.test.ts` | `{{APP_EFIMERA}}, rutaAppEfimeraSrc` | `nombre de aplicacion efimera y variable de recoleccion original` | `{{APP_EFIMERA}} / rutaAppEfimeraSrc` | Parametriza portal y recolector de codigo con requerimiento de sesion efimera en sessionStorage. |
 | `back/tests/arquitectura/entidades.test.ts` | `Item, Pedido` | `Seccion de evaluacion, Agregado raiz original` | `Item de pedido, Pedido` | Sustituye fixtures de dominio de referencia por entidades genericas de pedidos. |
 | `back/tests/arquitectura/logger.test.ts` | `identificador` | `campo tributario en comentario JSDoc` | `identificador.valor` | Sustituye ejemplo en comentario JSDoc por identificador agnostico. |
 | `scripts/ci/verificar-migraciones.test.ts` | `usuario` | `ruta de entidad de candidato en fixture` | `back/src/dominio/usuario/Usuario.ts` | Sustituye ruta ficticia de fixture de migraciones por entidad generica. |

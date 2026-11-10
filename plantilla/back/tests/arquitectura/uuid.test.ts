@@ -32,7 +32,7 @@ export const ARCHIVO_GENERADOR_AUTORIZADO = estandarConfig.back.generadorUuid;
 
 /**
  * Verifica que en `back/src` la generacion de identificadores se centralice
- * exclusivamente en `generarUuid()` (ADR-018), prohibiendo el uso directo de
+ * exclusivamente en `generarUuid()`, prohibiendo el uso directo de
  * `crypto.randomUUID`, `node:crypto` randomUUID o paquetes `uuid`.
  */
 export function detectarViolacionesUuid(
@@ -71,8 +71,7 @@ export function detectarViolacionesUuid(
   while ((match = patronRandomUuid.exec(contenido)) !== null) {
     violaciones.push({
       archivo: normalizada,
-      motivo:
-        "Uso no autorizado de 'randomUUID()'. Usar 'generarUuid()' (ADR-018) para garantizar UUID v7.",
+      motivo: "Uso no autorizado de 'randomUUID()'. Usar 'generarUuid()' para garantizar UUID v7.",
       evidencia: match[0],
     });
   }
