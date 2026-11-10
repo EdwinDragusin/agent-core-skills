@@ -2018,6 +2018,10 @@ export async function extraerPlantilla(
   const rutaManifiesto = path.join(destinoBase, "MANIFIESTO.md");
   await Deno.writeTextFile(rutaManifiesto, manifiestoMd);
 
+  // El esqueleto se escribe a mano, pero su estandar.config.ts solo puede
+  // diferir del espejo en sus datos: tipos e helpers se toman del espejo.
+  await sincronizarConfigEsqueleto(destinoBase);
+
   return { extraidos, errores };
 }
 
@@ -2297,6 +2301,400 @@ export async function ensamblarEsqueletoEnDirectorio(
 }
 
 /**
+ * Inicializa un repositorio git local con commit inicial en el directorio dado.
+ * Retorna null si todo salio bien, o el mensaje de error del primer paso fallido.
+ */
+export async function inicializarRepoGitTemporal(
+  dir: string,
+): Promise<string | null> {
+  const pasosGit: { args: string[]; desc: string }[] = [
+    { args: ["init", "-b", "main"], desc: "git init" },
+    {
+      args: ["config", "user.email", "ci@estandar.local"],
+      desc: "git config email",
+    },
+    { args: ["config", "user.name", "ci"], desc: "git config name" },
+    { args: ["add", "."], desc: "git add ." },
+    {
+      args: ["commit", "-m", "chore(esqueleto): inicializar proyecto nuevo"],
+      desc: "git commit",
+    },
+  ];
+
+  for (const paso of pasosGit) {
+    const out = await new Deno.Command("git", {
+      args: paso.args,
+      cwd: dir,
+      stdout: "piped",
+      stderr: "piped",
+    }).output();
+    if (!out.success) {
+      const errTxt = new TextDecoder().decode(out.stderr).trim();
+      return `[ERROR] Fallo en preparacion Git (${paso.desc}): ${errTxt}`;
+    }
+  }
+  return null;
+}
+
+/**
+ * Objeto estandarConfig de una topologia deliberadamente distinta a la de
+ * Examen y a la del esqueleto: otras raices, otros nombres de carpeta y de
+ * clase, esquema en lista de archivo y directorio, dos aplicaciones front con
+ * capa compartida de otro nombre. Las autoverificaciones sinteticas no deben
+ * depender de ninguno de estos valores.
+ */
+export const CONFIG_PERTURBADA_LITERAL =
+  `export const estandarConfig: EstandarConfig = {
+  back: {
+    raiz: "api",
+    directorioMigraciones: "db/migrations",
+    archivoEsquema: ["db/schema/", "db/tablas.ts"],
+    directorioUseCases: "src/aplicacion/casos",
+    archivosComposicionDIManual: ["src/main.ts", "src/app.ts"],
+    generadorUuid: "src/dominio/id.ts",
+    adaptadorLogger: "src/infra/log.ts",
+    directoriosExcluidosLogger: ["src/otros/"],
+    clasesBaseEntidad: ["Base"],
+    claseBaseValueObject: "VO",
+  },
+  front: {
+    raiz: "cliente",
+    aplicaciones: [
+      { nombre: "web", rutaSrc: "web/src", sesionEfimera: true },
+      { nombre: "panel", rutaSrc: "panel/src", sesionEfimera: false },
+    ],
+    capaCompartida: { nombre: "comun", ruta: "comun" },
+    capasFSD: ["app", "pages", "widgets", "features", "entities", "shared"],
+  },
+  listasBase: {},
+  cobertura: { rutasAdicionales: [] },
+};`;
+
+/**
+ * Sustituye en el texto de un estandar.config.ts la declaracion
+ * `export const estandarConfig ... = { ... };` por la config perturbada,
+ * conservando intactos los helpers y tipos que la rodean. Lanza un error si no
+ * encuentra la declaracion.
+ */
+export function aplicarConfigPerturbada(contenidoConfig: string): string {
+  return sustituirLiteralEstandarConfig(
+    contenidoConfig,
+    CONFIG_PERTURBADA_LITERAL,
+  );
+}
+
+/**
+ * Localiza la declaracion `export const estandarConfig ... = { ... };` en el
+ * texto de un estandar.config.ts. Retorna el rango [inicio, fin) que cubre la
+ * declaracion completa incluido el punto y coma final. Lanza un error si no la
+ * encuentra o no cierra sus llaves.
+ */
+export function localizarLiteralEstandarConfig(
+  contenidoConfig: string,
+): { inicio: number; fin: number } {
+  const inicio = contenidoConfig.search(/export const estandarConfig\b/);
+  if (inicio < 0) {
+    throw new Error(
+      "No se encontro 'export const estandarConfig' en la config",
+    );
+  }
+  const llaveInicial = contenidoConfig.indexOf(
+    "{",
+    contenidoConfig.indexOf("=", inicio),
+  );
+  if (llaveInicial < 0) {
+    throw new Error("No se encontro el literal de estandarConfig");
+  }
+
+  let profundidad = 0;
+  let comilla: string | null = null;
+  let cierre = -1;
+  for (let i = llaveInicial; i < contenidoConfig.length; i++) {
+    const c = contenidoConfig[i];
+    if (comilla) {
+      if (c === "\\") i++;
+      else if (c === comilla) comilla = null;
+      continue;
+    }
+    if (c === '"' || c === "'" || c === "`") {
+      comilla = c;
+    } else if (c === "{") {
+      profundidad++;
+    } else if (c === "}") {
+      profundidad--;
+      if (profundidad === 0) {
+        cierre = i;
+        break;
+      }
+    }
+  }
+  if (cierre < 0) {
+    throw new Error("El literal de estandarConfig no cierra sus llaves");
+  }
+  const fin = contenidoConfig[cierre + 1] === ";" ? cierre + 2 : cierre + 1;
+  return { inicio, fin };
+}
+
+/**
+ * Reemplaza la declaracion de estandarConfig de `contenidoConfig` por el texto
+ * `literalNuevo` (declaracion completa), conservando tipos y helpers.
+ */
+export function sustituirLiteralEstandarConfig(
+  contenidoConfig: string,
+  literalNuevo: string,
+): string {
+  const { inicio, fin } = localizarLiteralEstandarConfig(contenidoConfig);
+  return contenidoConfig.slice(0, inicio) + literalNuevo +
+    contenidoConfig.slice(fin);
+}
+
+/**
+ * Construye el estandar.config.ts que debe tener el esqueleto: el texto del
+ * espejo (tipos, interfaces y helpers) con la declaracion de estandarConfig del
+ * propio esqueleto. Asi el esqueleto solo se diferencia del espejo en sus datos.
+ */
+export function construirConfigEsqueletoDesdeEspejo(
+  configEspejo: string,
+  configEsqueleto: string,
+): string {
+  const { inicio, fin } = localizarLiteralEstandarConfig(configEsqueleto);
+  return sustituirLiteralEstandarConfig(
+    configEspejo,
+    configEsqueleto.slice(inicio, fin),
+  );
+}
+
+/**
+ * Retorna null si el estandar.config.ts del esqueleto ya es el que deriva del
+ * espejo; si no, un mensaje que describe la deriva.
+ */
+export async function detectarDerivaConfigEsqueleto(
+  dirPlantilla: string,
+): Promise<string | null> {
+  const rutaEspejo = path.join(dirPlantilla, "estandar.config.ts");
+  const rutaEsqueleto = path.join(
+    dirPlantilla,
+    "esqueleto",
+    "estandar.config.ts",
+  );
+  let espejo: string;
+  let esqueleto: string;
+  try {
+    espejo = await Deno.readTextFile(rutaEspejo);
+    esqueleto = await Deno.readTextFile(rutaEsqueleto);
+  } catch {
+    return `Falta ${rutaEspejo} o ${rutaEsqueleto}`;
+  }
+  const esperado = construirConfigEsqueletoDesdeEspejo(espejo, esqueleto);
+  const aLf = (t: string) => t.replaceAll("\r\n", "\n");
+  if (aLf(esperado) !== aLf(esqueleto)) {
+    return "El estandar.config.ts del esqueleto difiere del espejo fuera del " +
+      "literal estandarConfig (tipos, interfaces o helpers desactualizados). " +
+      "Regenere la plantilla con el extractor, que lo sincroniza.";
+  }
+  return null;
+}
+
+/**
+ * Sincroniza plantilla/esqueleto/estandar.config.ts con el espejo: conserva los
+ * datos del esqueleto y toma tipos y helpers del espejo. Retorna true si
+ * reescribio el archivo.
+ */
+export async function sincronizarConfigEsqueleto(
+  dirPlantilla: string,
+): Promise<boolean> {
+  const rutaEspejo = path.join(dirPlantilla, "estandar.config.ts");
+  const rutaEsqueleto = path.join(
+    dirPlantilla,
+    "esqueleto",
+    "estandar.config.ts",
+  );
+  let esqueleto: string;
+  try {
+    esqueleto = await Deno.readTextFile(rutaEsqueleto);
+  } catch {
+    return false;
+  }
+  const espejo = await Deno.readTextFile(rutaEspejo);
+  const nuevo = construirConfigEsqueletoDesdeEspejo(espejo, esqueleto);
+  if (nuevo.replaceAll("\r\n", "\n") === esqueleto.replaceAll("\r\n", "\n")) {
+    return false;
+  }
+  await Deno.writeTextFile(rutaEsqueleto, nuevo);
+  return true;
+}
+
+export interface ComandoConfigPerturbada extends ComandoVerificacionEsqueleto {
+  /** Minimo de pruebas que deben ejecutarse y pasar (guarda anti-vacuidad). */
+  minimoPruebas: number;
+}
+
+/**
+ * Suites que SOLO ejecutan autoverificaciones sinteticas o tests que reciben su
+ * propia configuracion. Los tests que escanean el codigo real se excluyen
+ * adrede: con la config perturbada sus rutas no existen.
+ */
+export function construirComandosConfigPerturbada(): ComandoConfigPerturbada[] {
+  return [
+    {
+      etiqueta: "back: autoverificaciones de arquitectura",
+      cmd: "deno",
+      args: [
+        "test",
+        "--allow-read",
+        "--filter",
+        "Autoverificacion",
+        "back/tests/arquitectura/",
+      ],
+      minimoPruebas: 5,
+    },
+    {
+      etiqueta: "front: autopruebas de arquitectura e higiene",
+      cmd: "deno",
+      args: ["test", "-A", "--filter", "Autoprueba", "tests/"],
+      cwdRelativo: "front",
+      minimoPruebas: 2,
+    },
+    {
+      etiqueta: "front: soporte de topologias de una o varias SPA",
+      cmd: "deno",
+      args: ["test", "-A", "--filter", "Soporta", "tests/"],
+      cwdRelativo: "front",
+      minimoPruebas: 1,
+    },
+    {
+      etiqueta: "scripts/ci: verificacion de migraciones con config inyectada",
+      cmd: "deno",
+      args: ["test", "--allow-read", "--allow-run", "scripts/ci/"],
+      minimoPruebas: 5,
+    },
+    {
+      etiqueta: "scripts/estandar: autoverificacion sintetica de cobertura",
+      cmd: "deno",
+      args: [
+        "test",
+        "--allow-read",
+        "--allow-run",
+        "--filter",
+        "sintetica",
+        "scripts/estandar/",
+      ],
+      minimoPruebas: 1,
+    },
+  ];
+}
+
+/**
+ * Extrae el resumen final de `deno test` ("ok | N passed | M failed ...").
+ * Retorna null si la salida no contiene un resumen reconocible.
+ */
+export function parsearResumenDenoTest(
+  salida: string,
+): { passed: number; failed: number } | null {
+  const limpia = salida.replace(/\u001b\[[0-9;]*m/g, "");
+  const m = limpia.match(
+    /(?:ok|FAILED)\s*\|\s*(\d+)\s+passed\s*\|\s*(\d+)\s+failed/,
+  );
+  if (!m) return null;
+  return { passed: Number(m[1]), failed: Number(m[2]) };
+}
+
+/**
+ * Guarda contra el acoplamiento a la configuracion real: ensambla espejo y
+ * esqueleto en un temporal, sustituye estandar.config.ts por una topologia
+ * deliberadamente distinta y exige que pasen las autoverificaciones sinteticas
+ * y los tests que reciben su propia configuracion.
+ */
+export async function verificarConfigPerturbadaCli(
+  dirPlantilla: string = "plantilla",
+): Promise<number> {
+  const rutaCompleta = path.resolve(dirPlantilla);
+  try {
+    const statP = await Deno.stat(rutaCompleta);
+    const statE = await Deno.stat(path.join(rutaCompleta, "esqueleto"));
+    if (!statP.isDirectory || !statE.isDirectory) {
+      console.error(
+        `[ERROR] No se encontro plantilla o esqueleto en ${rutaCompleta}`,
+      );
+      return 1;
+    }
+  } catch (e) {
+    console.error(
+      `[ERROR] No se pudo acceder a la plantilla: ${(e as Error).message}`,
+    );
+    return 1;
+  }
+
+  const derivaConfig = await detectarDerivaConfigEsqueleto(rutaCompleta);
+  if (derivaConfig) {
+    console.error(`[FAIL] ${derivaConfig}`);
+    return 1;
+  }
+
+  const tmpDir = await Deno.makeTempDir({
+    prefix: "verificar-config-perturbada-",
+  });
+  try {
+    await ensamblarEsqueletoEnDirectorio(rutaCompleta, tmpDir);
+
+    const rutaConfig = path.join(tmpDir, "estandar.config.ts");
+    const original = await Deno.readTextFile(rutaConfig);
+    await Deno.writeTextFile(rutaConfig, aplicarConfigPerturbada(original));
+
+    const errorGit = await inicializarRepoGitTemporal(tmpDir);
+    if (errorGit) {
+      console.error(errorGit);
+      return 1;
+    }
+
+    const comandos = construirComandosConfigPerturbada();
+    for (const item of comandos) {
+      const cwdEjecucion = item.cwdRelativo
+        ? path.join(tmpDir, item.cwdRelativo)
+        : tmpDir;
+      console.log(`[RUN] ${item.etiqueta}`);
+      const res = await new Deno.Command(item.cmd, {
+        args: item.args,
+        cwd: cwdEjecucion,
+        stdout: "piped",
+        stderr: "piped",
+      }).output();
+      const salida = `${new TextDecoder().decode(res.stdout)}\n${
+        new TextDecoder().decode(res.stderr)
+      }`;
+      const resumen = parsearResumenDenoTest(salida);
+
+      if (!res.success || !resumen || resumen.failed > 0) {
+        console.error(salida.trim());
+        console.error(
+          `[FAIL] Con una config distinta falla: ${item.etiqueta}. Probable acoplamiento a la configuracion real de origen en una autoverificacion.`,
+        );
+        return res.code !== 0 ? res.code : 1;
+      }
+      if (resumen.passed < item.minimoPruebas) {
+        console.error(salida.trim());
+        console.error(
+          `[FAIL] ${item.etiqueta}: se ejecutaron ${resumen.passed} pruebas y se exigen al menos ${item.minimoPruebas} (guarda anti-vacuidad).`,
+        );
+        return 1;
+      }
+      console.log(`[PASS] ${item.etiqueta} (${resumen.passed} pruebas)`);
+    }
+
+    console.log(
+      `[OK] Las autoverificaciones no dependen de la configuracion real (${comandos.length} suites con config perturbada).`,
+    );
+    return 0;
+  } finally {
+    try {
+      await Deno.remove(tmpDir, { recursive: true });
+    } catch {
+      // Ignorar errores de limpieza en sistema de archivos
+    }
+  }
+}
+
+/**
  * Ensambla plantilla/ + plantilla/esqueleto/ en un directorio temporal unico,
  * inicializa un repositorio git local con commit inicial y ejecuta todas las
  * suites de verificacion del estandar. Limpia siempre el directorio temporal.
@@ -2325,6 +2723,12 @@ export async function verificarEsqueletoCli(
     return 1;
   }
 
+  const derivaConfig = await detectarDerivaConfigEsqueleto(rutaCompleta);
+  if (derivaConfig) {
+    console.error(`[FAIL] ${derivaConfig}`);
+    return 1;
+  }
+
   const tmpDir = await Deno.makeTempDir({ prefix: "verificar-esqueleto-" });
 
   try {
@@ -2335,34 +2739,10 @@ export async function verificarEsqueletoCli(
     );
 
     // Inicializar repo git local + commit inicial
-    const pasosGit: { args: string[]; desc: string }[] = [
-      { args: ["init", "-b", "main"], desc: "git init" },
-      {
-        args: ["config", "user.email", "ci@estandar.local"],
-        desc: "git config email",
-      },
-      { args: ["config", "user.name", "ci"], desc: "git config name" },
-      { args: ["add", "."], desc: "git add ." },
-      {
-        args: ["commit", "-m", "chore(esqueleto): inicializar proyecto nuevo"],
-        desc: "git commit",
-      },
-    ];
-
-    for (const paso of pasosGit) {
-      const out = await new Deno.Command("git", {
-        args: paso.args,
-        cwd: tmpDir,
-        stdout: "piped",
-        stderr: "piped",
-      }).output();
-      if (!out.success) {
-        const errTxt = new TextDecoder().decode(out.stderr).trim();
-        console.error(
-          `[ERROR] Fallo en preparacion Git (${paso.desc}): ${errTxt}`,
-        );
-        return 1;
-      }
+    const errorGit = await inicializarRepoGitTemporal(tmpDir);
+    if (errorGit) {
+      console.error(errorGit);
+      return 1;
     }
 
     const comandos = construirComandosVerificacionEsqueleto();
@@ -2410,7 +2790,7 @@ if (import.meta.main) {
   const args = Deno.args;
   if (args.length === 0) {
     console.error(
-      "Uso: deno run -A scripts/extraer-plantilla.ts <ruta-examen> [<ruta-destino>]\n     deno run -A scripts/extraer-plantilla.ts --verificar [<ruta-plantilla>]\n     deno run -A scripts/extraer-plantilla.ts --verificar-esqueleto [<ruta-plantilla>]",
+      "Uso: deno run -A scripts/extraer-plantilla.ts <ruta-examen> [<ruta-destino>]\n     deno run -A scripts/extraer-plantilla.ts --verificar [<ruta-plantilla>]\n     deno run -A scripts/extraer-plantilla.ts --verificar-esqueleto [<ruta-plantilla>]\n     deno run -A scripts/extraer-plantilla.ts --verificar-config-perturbada [<ruta-plantilla>]",
     );
     Deno.exit(1);
   }
@@ -2424,6 +2804,12 @@ if (import.meta.main) {
   if (args[0] === "--verificar-esqueleto") {
     const dirPlantilla = args[1] || "plantilla";
     const codigo = await verificarEsqueletoCli(dirPlantilla);
+    Deno.exit(codigo);
+  }
+
+  if (args[0] === "--verificar-config-perturbada") {
+    const dirPlantilla = args[1] || "plantilla";
+    const codigo = await verificarConfigPerturbadaCli(dirPlantilla);
     Deno.exit(codigo);
   }
 

@@ -75,9 +75,10 @@ Para sincronizar o regenerar los mecanismos estandar desde el repositorio de ref
 deno run -A scripts/extraer-plantilla.ts <ruta-repositorio-referencia>
 deno run -A scripts/extraer-plantilla.ts --verificar ./plantilla
 deno run -A scripts/extraer-plantilla.ts --verificar-esqueleto ./plantilla
+deno run -A scripts/extraer-plantilla.ts --verificar-config-perturbada ./plantilla
 ```
 
-El script copia y filtra las secciones de proyecto, garantizando idempotencia y verificando la ausencia de terminos de dominio especificos.
+El script copia y filtra las secciones de proyecto, garantizando idempotencia y verificando la ausencia de terminos de dominio especificos. `--verificar-config-perturbada` ejecuta las autoverificaciones de la plantilla con una `estandar.config.ts` de otra topologia y falla si alguna depende de la configuracion de origen.
 
 ## Plugin Complementario: Extras
 
