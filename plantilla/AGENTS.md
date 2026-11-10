@@ -1,7 +1,7 @@
 # Project Rules - {{NOMBRE_PROYECTO}}
 
 {{DESCRIPCION_PROYECTO}}
-Stack: Deno 2.x, Hono, PostgreSQL 16, Drizzle ORM, JWT HS256 + Argon2id, Gotenberg 8.
+Stack: Deno 2.x, Hono, PostgreSQL 16, Drizzle ORM, JWT HS256 + Argon2id.
 
 ---
 
@@ -127,11 +127,11 @@ interfaz --> aplicacion <-- infraestructura (implementa ports)
   <!-- verifica: instruccion -->
 - **DI manual**: `crearApp.ts` + `main.ts`. Sin framework.
   <!-- verifica: back/tests/arquitectura/diManual.test.ts -->
-- **UnitOfWork**: atomicidad via port `UnitOfWork` (ADR-015).
+- **UnitOfWork**: atomicidad via port `UnitOfWork`.
   <!-- verifica: instruccion -->
-- UUIDs v7 via `generarUuid()` en dominio (ADR-018).
+- UUIDs v7 via `generarUuid()` en dominio.
   <!-- verifica: back/tests/arquitectura/uuid.test.ts -->
-- Concurrencia optimista: compare-and-swap, no row locks (ADR-005/016).
+- Concurrencia optimista: compare-and-swap, no row locks.
   <!-- verifica: instruccion -->
 
 ## Workflow de Git (Aplica a Back y Front)

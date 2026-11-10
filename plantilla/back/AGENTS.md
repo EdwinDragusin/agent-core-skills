@@ -22,10 +22,9 @@ operan, compilan, refactorizan o auditan el codigo fuente del backend (`back/`).
 - **Modo de Compilacion**: TypeScript estricto (`strict: true`, `noImplicitAny: true`,
   `strictNullChecks: true`).
   <!-- verifica: back/deno.json -->
-- **Estructura Transaccional**: UnitOfWork + patron Outbox (ADR-015).
+- **Estructura Transaccional**: UnitOfWork + patron Outbox.
   <!-- verifica: back/tests/arquitectura/dependencias.test.ts -->
-- **Concurrencia**: Control optimista Compare-And-Swap (CAS) con columna `version` (ADR-005,
-  ADR-016).
+- **Concurrencia**: Control optimista Compare-And-Swap (CAS) con columna `version`.
   <!-- verifica: instruccion -->
 
 ## 2. Comandos Deterministas de Desarrollo y CI

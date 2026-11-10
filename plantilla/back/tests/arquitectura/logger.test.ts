@@ -12,7 +12,7 @@ export interface ViolacionLogger {
  * Exclusiones explicitas y autorizadas para el uso de console.* en back/src:
  *
  * 1. Adaptador Logger:
- *    Implementacion concreta del puerto Logger (ADR-028) que canaliza la salida
+ *    Implementacion concreta del puerto Logger que canaliza la salida
  *    estructurada JSON hacia stdout/stderr del proceso.
  *
  * 2. Scripts de siembra:
@@ -71,9 +71,7 @@ export function detectarViolacionesLogger(
         archivo: normalizada,
         linea: numLinea + 1,
         evidencia: match[0],
-        motivo: `Uso no autorizado de '${
-          match[0]
-        }'. Usar el puerto estructurado 'Logger' (ADR-028).`,
+        motivo: `Uso no autorizado de '${match[0]}'. Usar el puerto estructurado 'Logger'.`,
       });
     }
   }
