@@ -5,9 +5,14 @@ import {
   assertNotMatch,
 } from "jsr:@std/assert@^1.0.0";
 import {
+  aplicarConfigPerturbada,
   armarEncabezadoManifiesto,
+  CONFIG_PERTURBADA_LITERAL,
+  construirComandosConfigPerturbada,
   construirComandosVerificacionEsqueleto,
+  construirConfigEsqueletoDesdeEspejo,
   contieneTerminoDominio,
+  detectarDerivaConfigEsqueleto,
   detectarFugasPlantilla,
   detectarTerminosDominio,
   ensamblarEsqueletoEnDirectorio,
@@ -17,7 +22,9 @@ import {
   extraerRutasDeConfig,
   filtrarBloquesPs1Proyecto,
   filtrarSeccionesMdProyecto,
+  localizarLiteralEstandarConfig,
   obtenerCommitOrigen,
+  parsearResumenDenoTest,
   removerReferenciasAdrEntreParentesis,
   RUTA_SHARED_AGENTS,
   TRANSFORMACIONES_DECLARADAS,
@@ -866,4 +873,107 @@ Deno.test("Transformaciones declaradas - eliminacion de Gotenberg y referencias 
     uuidTransformado,
     "Usar 'generarUuid()' para garantizar UUID v7.",
   );
+});
+
+// ---------------------------------------------------------------------------
+// Guarda de config perturbada y deriva de la config del esqueleto
+// ---------------------------------------------------------------------------
+
+const CONFIG_EJEMPLO = `// cabecera
+export interface EstandarConfig { back: { raiz: string } }
+
+export const estandarConfig: EstandarConfig = {
+  back: { raiz: "back", ruta: "src/{raro}/x.ts" },
+  nota: 'con } llave y "comillas"',
+};
+
+export function helper(): string {
+  return "se conserva";
+}
+`;
+
+Deno.test("Config perturbada - localiza el literal respetando llaves dentro de cadenas", () => {
+  const { inicio, fin } = localizarLiteralEstandarConfig(CONFIG_EJEMPLO);
+  const literal = CONFIG_EJEMPLO.slice(inicio, fin);
+  assert(literal.startsWith("export const estandarConfig"));
+  assert(literal.endsWith("};"));
+  assert(literal.includes("src/{raro}/x.ts"));
+  assert(!literal.includes("helper"));
+});
+
+Deno.test("Config perturbada - sustituye solo el literal y conserva tipos y helpers", () => {
+  const resultado = aplicarConfigPerturbada(CONFIG_EJEMPLO);
+  assert(resultado.includes("export interface EstandarConfig"));
+  assert(resultado.includes('return "se conserva";'));
+  assert(resultado.includes(CONFIG_PERTURBADA_LITERAL));
+  assert(!resultado.includes('raiz: "back"'));
+  assertEquals(resultado.split("export const estandarConfig").length, 2);
+});
+
+Deno.test("Config perturbada - falla con mensaje claro si no hay declaracion o no cierra", () => {
+  let mensaje = "";
+  try {
+    aplicarConfigPerturbada("export const otra = 1;");
+  } catch (e) {
+    mensaje = (e as Error).message;
+  }
+  assertMatch(mensaje, /estandarConfig/);
+  mensaje = "";
+  try {
+    aplicarConfigPerturbada("export const estandarConfig = { a: 1");
+  } catch (e) {
+    mensaje = (e as Error).message;
+  }
+  assertMatch(mensaje, /no cierra/);
+});
+
+Deno.test("Config perturbada - la topologia es distinta de la del esqueleto y del espejo", () => {
+  for (
+    const valor of [
+      'raiz: "api"',
+      'raiz: "cliente"',
+      "capaCompartida",
+      '"comun"',
+    ]
+  ) {
+    assert(CONFIG_PERTURBADA_LITERAL.includes(valor), valor);
+  }
+  assert(!CONFIG_PERTURBADA_LITERAL.includes('raiz: "back"'));
+  assert(!CONFIG_PERTURBADA_LITERAL.includes('raiz: "front"'));
+});
+
+Deno.test("Config perturbada - resumen de deno test y guarda anti-vacuidad", () => {
+  assertEquals(
+    parsearResumenDenoTest(
+      "\u001b[0m\u001b[32mok\u001b[0m | 9 passed | 0 failed | 12 filtered out (7ms)",
+    ),
+    { passed: 9, failed: 0 },
+  );
+  assertEquals(
+    parsearResumenDenoTest("FAILED | 3 passed | 2 failed (1s)"),
+    { passed: 3, failed: 2 },
+  );
+  assertEquals(parsearResumenDenoTest("error: Type checking failed."), null);
+  const comandos = construirComandosConfigPerturbada();
+  assert(comandos.length >= 5);
+  for (const c of comandos) {
+    assert(c.minimoPruebas >= 1, `${c.etiqueta} sin minimo anti-vacuidad`);
+    assert(c.args.includes("test"));
+  }
+});
+
+Deno.test("Config del esqueleto - toma tipos y helpers del espejo y conserva sus datos", () => {
+  const espejo = CONFIG_EJEMPLO.replace("// cabecera", "// cabecera nueva");
+  const esqueleto = CONFIG_EJEMPLO.replace('raiz: "back"', 'raiz: "mio"')
+    .replace("// cabecera", "// cabecera vieja");
+  const esperado = construirConfigEsqueletoDesdeEspejo(espejo, esqueleto);
+  assert(esperado.includes("// cabecera nueva"));
+  assert(esperado.includes('raiz: "mio"'));
+  assert(!esperado.includes("cabecera vieja"));
+});
+
+Deno.test("Config del esqueleto - la plantilla generada no tiene deriva respecto del espejo", async () => {
+  const raizPlantilla = new URL("../plantilla", import.meta.url).pathname
+    .replace(/^\/([A-Za-z]:)/, "$1");
+  assertEquals(await detectarDerivaConfigEsqueleto(raizPlantilla), null);
 });

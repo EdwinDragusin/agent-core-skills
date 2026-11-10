@@ -112,3 +112,12 @@ jobs:
           else
             echo "plantilla/esqueleto no existe aun; omitiendo verificacion de esqueleto."
           fi
+
+      - name: Verificar que las Autoverificaciones no Dependen de la Config Real
+        run: |
+          if [ -d "plantilla/esqueleto" ]; then
+            command -v pwsh >/dev/null 2>&1 || { echo "::error::pwsh no esta disponible en el runner"; exit 1; }
+            deno run --allow-run --allow-read --allow-write --allow-env ./scripts/extraer-plantilla.ts --verificar-config-perturbada ./plantilla
+          else
+            echo "plantilla/esqueleto no existe aun; omitiendo guarda de config perturbada."
+          fi
