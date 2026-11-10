@@ -26,6 +26,11 @@ export const ARCHIVOS_EXCLUIDOS: readonly string[] = [
 export const PATRONES_DIRECTORIOS_EXCLUIDOS: readonly string[] =
   estandarConfig.back.directoriosExcluidosLogger ?? [];
 
+export interface ConfigLogger {
+  archivosExcluidos?: readonly string[];
+  directoriosExcluidos?: readonly string[];
+}
+
 /**
  * Elimina comentarios (linea y bloque) y cadenas literales para evitar falsos positivos
  * en ejemplos de documentacion JSDoc o cadenas que mencionen 'console.'.
@@ -49,12 +54,13 @@ function limpiarComentariosYStrings(contenido: string): string {
 export function detectarViolacionesLogger(
   archivoRuta: string,
   contenido: string,
+  config: ConfigLogger = {},
 ): ViolacionLogger[] {
   const normalizada = archivoRuta.replaceAll("\\", "/");
-  const esArchivoExcluido = ARCHIVOS_EXCLUIDOS.some((auth) => normalizada.endsWith(auth));
-  const esDirectorioExcluido = PATRONES_DIRECTORIOS_EXCLUIDOS.some((dir) =>
-    normalizada.includes(dir)
-  );
+  const archivosExcluidos = config.archivosExcluidos ?? ARCHIVOS_EXCLUIDOS;
+  const directoriosExcluidos = config.directoriosExcluidos ?? PATRONES_DIRECTORIOS_EXCLUIDOS;
+  const esArchivoExcluido = archivosExcluidos.some((auth) => normalizada.endsWith(auth));
+  const esDirectorioExcluido = directoriosExcluidos.some((dir) => normalizada.includes(dir));
   if (esArchivoExcluido || esDirectorioExcluido) return [];
 
   const violaciones: ViolacionLogger[] = [];
@@ -93,11 +99,16 @@ function obtenerArchivosTypeScript(dirPath: string): string[] {
 }
 
 Deno.test("Arquitectura - Autoverificacion sintetica de reglas de Logger sin console", () => {
+  const configSintetica: ConfigLogger = {
+    archivosExcluidos: ["src/infraestructura/observabilidad/LoggerConsola.ts"],
+    directoriosExcluidos: ["src/infraestructura/persistencia/semillas/"],
+  };
+
   // 1. Caso valido: uso del puerto Logger
   const codigoValido = `
     this.logger.informacion("Peticion atendida", { traceId: "123" });
   `;
-  const v1 = detectarViolacionesLogger("src/aplicacion/Servicio.ts", codigoValido);
+  const v1 = detectarViolacionesLogger("src/aplicacion/Servicio.ts", codigoValido, configSintetica);
   assertEquals(v1.length, 0);
 
   // 2. Caso valido: console.log dentro de JSDoc o comentario
@@ -109,7 +120,11 @@ Deno.test("Arquitectura - Autoverificacion sintetica de reglas de Logger sin con
     // console.log("debug previo");
     const valor = 42;
   `;
-  const v2 = detectarViolacionesLogger("src/dominio/MiEntidad.ts", codigoComentario);
+  const v2 = detectarViolacionesLogger(
+    "src/dominio/MiEntidad.ts",
+    codigoComentario,
+    configSintetica,
+  );
   assertEquals(v2.length, 0);
 
   // 3. Caso valido: adaptador LoggerConsola.ts esta autorizado
@@ -117,6 +132,7 @@ Deno.test("Arquitectura - Autoverificacion sintetica de reglas de Logger sin con
   const v3 = detectarViolacionesLogger(
     "src/infraestructura/observabilidad/LoggerConsola.ts",
     codigoLoggerConsola,
+    configSintetica,
   );
   assertEquals(v3.length, 0);
 
@@ -125,6 +141,7 @@ Deno.test("Arquitectura - Autoverificacion sintetica de reglas de Logger sin con
   const v4 = detectarViolacionesLogger(
     "src/infraestructura/persistencia/semillas/01-roles.ts",
     codigoSemilla,
+    configSintetica,
   );
   assertEquals(v4.length, 0);
 
@@ -136,7 +153,11 @@ Deno.test("Arquitectura - Autoverificacion sintetica de reglas de Logger sin con
       console.error("Fallo:", err);
     }
   `;
-  const v5 = detectarViolacionesLogger("src/interfaz/jobs/ejecutorJobs.ts", codigoInvalido);
+  const v5 = detectarViolacionesLogger(
+    "src/interfaz/jobs/ejecutorJobs.ts",
+    codigoInvalido,
+    configSintetica,
+  );
   assertEquals(v5.length, 1);
   assertEquals(v5[0].evidencia, "console.error(");
 });

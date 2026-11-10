@@ -204,7 +204,7 @@ Las siguientes reglas de ramas, commits, verificacion y Pull Requests aplican de
   <!-- verifica: instruccion -->
 - Secretos en `.env` (gitignored). Jamas commitear credenciales reales.
   <!-- verifica: .github/workflows/ci.yml#convenciones -->
-- Tras modificar `esquema.ts`, generar migracion con `drizzle-kit generate`.
+- Tras modificar el esquema (campo `archivoEsquema` de `estandar.config.ts`), generar migracion con `drizzle-kit generate`.
   <!-- verifica: back/deno.json#check:migraciones -->
 - Consultar `docs/adr/` antes de decisiones de diseno no reflejadas en codigo.
   <!-- verifica: instruccion -->

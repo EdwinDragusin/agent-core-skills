@@ -47,8 +47,8 @@ export interface EstandarConfigBack {
   raiz: string;
   /** Directorio de migraciones SQL relativo a back.raiz (ej. 'src/infraestructura/persistencia/migraciones') */
   directorioMigraciones: string;
-  /** Archivo fuente del esquema Drizzle relativo a back.raiz (ej. 'src/infraestructura/persistencia/esquema.ts') */
-  archivoEsquema: string;
+  /** Archivo(s) o directorio(s) fuente del esquema Drizzle relativos a back.raiz (ej. 'src/infraestructura/persistencia/esquema.ts' o 'src/infraestructura/database/schema/'). Un directorio se indica con barra final y coincide con cualquier .ts bajo el. */
+  archivoEsquema: string | string[];
   /** Directorio de casos de uso relativo a back.raiz (ej. 'src/aplicacion/usecases') */
   directorioUseCases: string;
   /** Archivos autorizados para inyeccion de dependencias manual relativos a back.raiz */

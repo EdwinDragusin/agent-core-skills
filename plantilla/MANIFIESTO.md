@@ -1,7 +1,7 @@
 # MANIFIESTO DE LA PLANTILLA ESTANDAR
 
 Este catalogo registra cada mecanismo exportado desde el repositorio de referencia
-institucional (commit `ff4778e7`) hacia el plugin `agent-core-skills` (v3).
+institucional (commit `69995090`) hacia el plugin `agent-core-skills` (v3).
 
 **IMPORTANTE**: Esta carpeta `plantilla/` es un espejo generado de forma determinista.
 No debe editarse manualmente. Para regenerar o actualizar, ejecutar:

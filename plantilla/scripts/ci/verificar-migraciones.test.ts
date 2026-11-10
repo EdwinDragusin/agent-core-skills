@@ -9,8 +9,10 @@ function assertEquals<T>(actual: T, expected: T, mensaje?: string): void {
   }
 }
 
+import { estandarConfig } from "../../estandar.config.ts";
 import {
   componerRutaBack,
+  type ConfigMigraciones,
   esArchivoEsquema,
   esArchivoMigracion,
   esJournalMigraciones,
@@ -20,72 +22,88 @@ import {
   verificarEntradasJournal,
 } from "./verificar-migraciones.ts";
 
+const configSintetica: ConfigMigraciones = {
+  back: {
+    raiz: "api",
+    directorioMigraciones: "db/migrations",
+    archivoEsquema: "db/schema.ts",
+  },
+};
+
+// Rutas de la configuracion real, derivadas de estandar.config.ts (nunca escritas en duro).
+const rutaMigracionesReal = normalizarRuta(
+  componerRutaBack(
+    estandarConfig.back.raiz,
+    estandarConfig.back.directorioMigraciones,
+  ),
+).replace(/\/+$/, "");
+const esquemaRealEjemplo = (() => {
+  const declarado = estandarConfig.back.archivoEsquema;
+  const primero = Array.isArray(declarado) ? declarado[0] : declarado;
+  const ruta = normalizarRuta(
+    componerRutaBack(estandarConfig.back.raiz, primero),
+  );
+  return ruta.endsWith("/") ? `${ruta}tabla.ts` : ruta;
+})();
+
 Deno.test("normalizarRuta convierte barras invertidas a barras normales", () => {
   assertEquals(
-    normalizarRuta(
-      "back\\src\\infraestructura\\persistencia\\migraciones\\0000_init.sql",
-    ),
-    "back/src/infraestructura/persistencia/migraciones/0000_init.sql",
+    normalizarRuta("api\\db\\migrations\\0000_init.sql"),
+    "api/db/migrations/0000_init.sql",
   );
 });
 
-Deno.test("identificacion de archivos de migracion y journal", () => {
-  const rutaSql =
-    "back/src/infraestructura/persistencia/migraciones/0000_lying_mindworm.sql";
-  const rutaJournal =
-    "back/src/infraestructura/persistencia/migraciones/meta/_journal.json";
-  const rutaSnapshot =
-    "back/src/infraestructura/persistencia/migraciones/meta/0000_snapshot.json";
-  const rutaDominio = "back/src/dominio/usuarios/Usuario.ts";
+Deno.test("identificacion de archivos de migracion y journal con config sintetica y real", () => {
+  const rutaSql = "api/db/migrations/0000_init.sql";
+  const rutaJournal = "api/db/migrations/meta/_journal.json";
+  const rutaSnapshot = "api/db/migrations/meta/0000_snapshot.json";
+  const rutaDominio = "api/src/dominio/usuarios/Usuario.ts";
 
-  assertEquals(esArchivoMigracion(rutaSql), true);
-  assertEquals(esArchivoMigracion(rutaJournal), true);
-  assertEquals(esArchivoMigracion(rutaSnapshot), true);
-  assertEquals(esArchivoMigracion(rutaDominio), false);
+  assertEquals(esArchivoMigracion(rutaSql, configSintetica), true);
+  assertEquals(esArchivoMigracion(rutaJournal, configSintetica), true);
+  assertEquals(esArchivoMigracion(rutaSnapshot, configSintetica), true);
+  assertEquals(esArchivoMigracion(rutaDominio, configSintetica), false);
 
-  assertEquals(esJournalMigraciones(rutaJournal), true);
-  assertEquals(esJournalMigraciones(rutaSql), false);
-  assertEquals(esJournalMigraciones(rutaSnapshot), false);
+  assertEquals(esJournalMigraciones(rutaJournal, configSintetica), true);
+  assertEquals(esJournalMigraciones(rutaSql, configSintetica), false);
+  assertEquals(esJournalMigraciones(rutaSnapshot, configSintetica), false);
+
+  // Mantenimiento de comportamiento con la configuracion real: las rutas se derivan de
+  // estandar.config.ts para que el test no dependa de los nombres de ningun proyecto concreto.
+  assertEquals(
+    esArchivoMigracion(`${rutaMigracionesReal}/0000_inicial.sql`),
+    true,
+  );
+  assertEquals(
+    esJournalMigraciones(`${rutaMigracionesReal}/meta/_journal.json`),
+    true,
+  );
+  assertEquals(esArchivoEsquema(esquemaRealEjemplo), true);
 });
 
 Deno.test("parsearDiffNameStatus procesa salidas de git diff", () => {
   const diffSalida = `
-M\tback/src/infraestructura/persistencia/migraciones/0000_init.sql
-A\tback/src/infraestructura/persistencia/migraciones/0015_nueva.sql
-D\tback/src/infraestructura/persistencia/migraciones/0001_old.sql
-R100\tback/src/infraestructura/persistencia/migraciones/0002_a.sql\tback/src/infraestructura/persistencia/migraciones/0002_b.sql
+M\tapi/db/migrations/0000_init.sql
+A\tapi/db/migrations/0015_nueva.sql
+D\tapi/db/migrations/0001_old.sql
+R100\tapi/db/migrations/0002_a.sql\tapi/db/migrations/0002_b.sql
 `;
 
   const cambios = parsearDiffNameStatus(diffSalida);
   assertEquals(cambios.length, 4);
 
   assertEquals(cambios[0].estado, "M");
-  assertEquals(
-    cambios[0].ruta,
-    "back/src/infraestructura/persistencia/migraciones/0000_init.sql",
-  );
+  assertEquals(cambios[0].ruta, "api/db/migrations/0000_init.sql");
 
   assertEquals(cambios[1].estado, "A");
-  assertEquals(
-    cambios[1].ruta,
-    "back/src/infraestructura/persistencia/migraciones/0015_nueva.sql",
-  );
+  assertEquals(cambios[1].ruta, "api/db/migrations/0015_nueva.sql");
 
   assertEquals(cambios[2].estado, "D");
-  assertEquals(
-    cambios[2].ruta,
-    "back/src/infraestructura/persistencia/migraciones/0001_old.sql",
-  );
+  assertEquals(cambios[2].ruta, "api/db/migrations/0001_old.sql");
 
   assertEquals(cambios[3].estado, "R100");
-  assertEquals(
-    cambios[3].rutaAnterior,
-    "back/src/infraestructura/persistencia/migraciones/0002_a.sql",
-  );
-  assertEquals(
-    cambios[3].ruta,
-    "back/src/infraestructura/persistencia/migraciones/0002_b.sql",
-  );
+  assertEquals(cambios[3].rutaAnterior, "api/db/migrations/0002_a.sql");
+  assertEquals(cambios[3].ruta, "api/db/migrations/0002_b.sql");
 });
 
 Deno.test("verificarEntradasJournal permite agregar nuevas entradas al final", () => {
@@ -185,24 +203,28 @@ Deno.test("verificarEntradasJournal rechaza eliminacion de entrada previa", () =
   assertEquals(res.valido, false);
 });
 
-Deno.test("verificarCambiosMigraciones valida escenarios de migracion", async () => {
+Deno.test("verificarCambiosMigraciones valida escenarios de migracion con config sintetica", async () => {
   // Caso 1: Agregar nueva migracion (valido)
   const cambiosValidos = [
     {
       estado: "A",
-      ruta: "back/src/infraestructura/persistencia/migraciones/0015_nueva.sql",
+      ruta: "api/db/migrations/0015_nueva.sql",
     },
     {
       estado: "A",
-      ruta:
-        "back/src/infraestructura/persistencia/migraciones/meta/0015_snapshot.json",
+      ruta: "api/db/migrations/meta/0015_snapshot.json",
     },
     {
       estado: "A",
-      ruta: "back/src/dominio/usuarios/NuevoCaso.ts",
+      ruta: "api/src/dominio/usuarios/NuevoCaso.ts",
     },
   ];
-  const res1 = await verificarCambiosMigraciones(cambiosValidos);
+  const res1 = await verificarCambiosMigraciones(
+    cambiosValidos,
+    undefined,
+    undefined,
+    configSintetica,
+  );
   assertEquals(res1.valido, true);
   assertEquals(res1.errores.length, 0);
 
@@ -210,11 +232,15 @@ Deno.test("verificarCambiosMigraciones valida escenarios de migracion", async ()
   const cambiosModificados = [
     {
       estado: "M",
-      ruta:
-        "back/src/infraestructura/persistencia/migraciones/0000_lying_mindworm.sql",
+      ruta: "api/db/migrations/0000_init.sql",
     },
   ];
-  const res2 = await verificarCambiosMigraciones(cambiosModificados);
+  const res2 = await verificarCambiosMigraciones(
+    cambiosModificados,
+    undefined,
+    undefined,
+    configSintetica,
+  );
   assertEquals(res2.valido, false);
   assertEquals(res2.errores.length, 1);
 
@@ -222,11 +248,15 @@ Deno.test("verificarCambiosMigraciones valida escenarios de migracion", async ()
   const cambiosBorrados = [
     {
       estado: "D",
-      ruta:
-        "back/src/infraestructura/persistencia/migraciones/0001_indices.sql",
+      ruta: "api/db/migrations/0001_indices.sql",
     },
   ];
-  const res3 = await verificarCambiosMigraciones(cambiosBorrados);
+  const res3 = await verificarCambiosMigraciones(
+    cambiosBorrados,
+    undefined,
+    undefined,
+    configSintetica,
+  );
   assertEquals(res3.valido, false);
   assertEquals(res3.errores.length, 1);
 
@@ -234,12 +264,16 @@ Deno.test("verificarCambiosMigraciones valida escenarios de migracion", async ()
   const cambiosRenombrados = [
     {
       estado: "R100",
-      rutaAnterior:
-        "back/src/infraestructura/persistencia/migraciones/0001_a.sql",
-      ruta: "back/src/infraestructura/persistencia/migraciones/0001_b.sql",
+      rutaAnterior: "api/db/migrations/0001_a.sql",
+      ruta: "api/db/migrations/0001_b.sql",
     },
   ];
-  const res4 = await verificarCambiosMigraciones(cambiosRenombrados);
+  const res4 = await verificarCambiosMigraciones(
+    cambiosRenombrados,
+    undefined,
+    undefined,
+    configSintetica,
+  );
   assertEquals(res4.valido, false);
   assertEquals(res4.errores.length, 1);
 
@@ -247,11 +281,15 @@ Deno.test("verificarCambiosMigraciones valida escenarios de migracion", async ()
   const journalEliminado = [
     {
       estado: "D",
-      ruta:
-        "back/src/infraestructura/persistencia/migraciones/meta/_journal.json",
+      ruta: "api/db/migrations/meta/_journal.json",
     },
   ];
-  const res5 = await verificarCambiosMigraciones(journalEliminado);
+  const res5 = await verificarCambiosMigraciones(
+    journalEliminado,
+    undefined,
+    undefined,
+    configSintetica,
+  );
   assertEquals(res5.valido, false);
   assertEquals(res5.errores.length, 1);
 
@@ -259,8 +297,7 @@ Deno.test("verificarCambiosMigraciones valida escenarios de migracion", async ()
   const journalModificado = [
     {
       estado: "M",
-      ruta:
-        "back/src/infraestructura/persistencia/migraciones/meta/_journal.json",
+      ruta: "api/db/migrations/meta/_journal.json",
     },
   ];
   const baseJournal = JSON.stringify({
@@ -286,6 +323,7 @@ Deno.test("verificarCambiosMigraciones valida escenarios de migracion", async ()
     journalModificado,
     () => baseJournal,
     () => headJournalValido,
+    configSintetica,
   );
   assertEquals(res6.valido, true);
 
@@ -301,91 +339,239 @@ Deno.test("verificarCambiosMigraciones valida escenarios de migracion", async ()
     journalModificado,
     () => baseJournal,
     () => headJournalInvalido,
+    configSintetica,
   );
   assertEquals(res7.valido, false);
   assertEquals(res7.errores.length, 1);
 
-  // Caso 8: Modificar esquema.ts sin acompanar nueva migracion (invalido)
+  // Caso 8: Modificar esquema sin acompanar nueva migracion (invalido)
   const esquemaSinMigracion = [
     {
       estado: "M",
-      ruta: "back/src/infraestructura/persistencia/esquema.ts",
+      ruta: "api/db/schema.ts",
     },
   ];
-  const res8 = await verificarCambiosMigraciones(esquemaSinMigracion);
+  const res8 = await verificarCambiosMigraciones(
+    esquemaSinMigracion,
+    undefined,
+    undefined,
+    configSintetica,
+  );
   assertEquals(res8.valido, false);
   assertEquals(
-    res8.errores.some((e) => e.includes("esquema.ts")),
+    res8.errores.some((e) => e.includes("schema.ts")),
     true,
   );
 
-  // Caso 9: Modificar esquema.ts acompanado de nueva migracion sql (valido)
+  // Caso 9: Modificar esquema acompanado de nueva migracion sql (valido)
   const esquemaConMigracion = [
     {
       estado: "M",
-      ruta: "back/src/infraestructura/persistencia/esquema.ts",
+      ruta: "api/db/schema.ts",
     },
     {
       estado: "A",
-      ruta: "back/src/infraestructura/persistencia/migraciones/0015_nueva.sql",
+      ruta: "api/db/migrations/0015_nueva.sql",
     },
   ];
-  const res9 = await verificarCambiosMigraciones(esquemaConMigracion);
+  const res9 = await verificarCambiosMigraciones(
+    esquemaConMigracion,
+    undefined,
+    undefined,
+    configSintetica,
+  );
   assertEquals(res9.valido, true);
   assertEquals(res9.errores.length, 0);
 });
 
 Deno.test("componerRutaBack combina raiz y subrutas con separador POSIX", () => {
   assertEquals(
-    componerRutaBack("back", "src/migraciones"),
-    "back/src/migraciones",
+    componerRutaBack("api", "db/migrations"),
+    "api/db/migrations",
   );
   assertEquals(
-    componerRutaBack("back/", "/src/migraciones"),
-    "back/src/migraciones",
+    componerRutaBack("api/", "/db/migrations"),
+    "api/db/migrations",
   );
-  assertEquals(componerRutaBack(".", "src/migraciones"), "src/migraciones");
-  assertEquals(componerRutaBack("", "src/migraciones"), "src/migraciones");
+  assertEquals(componerRutaBack(".", "db/migrations"), "db/migrations");
+  assertEquals(componerRutaBack("", "db/migrations"), "db/migrations");
 });
 
-Deno.test("verificarCambiosMigraciones soporta configuracion personalizada agnostica", async () => {
-  const configPersonalizada = {
-    back: {
-      raiz: "back",
-      directorioMigraciones: "src/infraestructura/database/migrations",
-      archivoEsquema: "src/infraestructura/database/schema.ts",
-      directorioUseCases: "src/aplicacion/use-cases",
-      archivosComposicionDIManual: ["src/main.ts"],
-      generadorUuid: "src/uuid.ts",
-      adaptadorLogger: "src/logger.ts",
-      clasesBaseEntidad: ["Entity"],
-      claseBaseValueObject: "ValueObject",
+Deno.test("verificarCambiosMigraciones preserva comportamiento por defecto con estandarConfig", async () => {
+  const esquemaSinMigracion = [
+    {
+      estado: "M",
+      ruta: esquemaRealEjemplo,
     },
-    front: {
-      raiz: "front",
-      aplicaciones: [{ nombre: "web", rutaSrc: "src" }],
-      capasFSD: ["app"],
+  ];
+  const res = await verificarCambiosMigraciones(esquemaSinMigracion);
+  assertEquals(res.valido, false);
+  assertEquals(
+    res.errores.some((e) => e.includes("El esquema de persistencia")),
+    true,
+  );
+});
+
+Deno.test("esArchivoEsquema y verificacion de migraciones con archivo unico, lista de archivos, directorio, archivo fuera y barras invertidas", async () => {
+  // 1. Archivo unico
+  const configArchivoUnico: ConfigMigraciones = {
+    back: {
+      raiz: "api",
+      directorioMigraciones: "db/migrations",
+      archivoEsquema: "db/schema.ts",
     },
   };
-
-  const rutaSql =
-    "back/src/infraestructura/database/migrations/0001_initial.sql";
-  const rutaJournal =
-    "back/src/infraestructura/database/migrations/meta/_journal.json";
-  const rutaSchema = "back/src/infraestructura/database/schema.ts";
-
-  assertEquals(esArchivoMigracion(rutaSql, configPersonalizada), true);
-  assertEquals(esJournalMigraciones(rutaJournal, configPersonalizada), true);
-  assertEquals(esArchivoEsquema(rutaSchema, configPersonalizada), true);
-
-  // Schema modificado sin migracion bajo config personalizada debe fallar
-  const cambioSchema = [{ estado: "M", ruta: rutaSchema }];
-  const resFallo = await verificarCambiosMigraciones(
-    cambioSchema,
-    undefined,
-    undefined,
-    configPersonalizada,
+  assertEquals(
+    esArchivoEsquema("api/db/schema.ts", configArchivoUnico),
+    true,
   );
-  assertEquals(resFallo.valido, false);
-  assertEquals(resFallo.errores[0].includes("schema.ts"), true);
+  assertEquals(esArchivoEsquema("db/schema.ts", configArchivoUnico), true);
+  assertEquals(esArchivoEsquema("schema.ts", configArchivoUnico), true);
+  assertEquals(
+    esArchivoEsquema("api\\db\\schema.ts", configArchivoUnico),
+    true,
+  );
+  assertEquals(
+    esArchivoEsquema("api/db/other.ts", configArchivoUnico),
+    false,
+  );
+
+  // 2. Lista de archivos
+  const configListaArchivos: ConfigMigraciones = {
+    back: {
+      raiz: "api",
+      directorioMigraciones: "db/migrations",
+      archivoEsquema: [
+        "src/schema/usuarios.ts",
+        "src/schema/roles.ts",
+      ],
+    },
+  };
+  assertEquals(
+    esArchivoEsquema("api/src/schema/usuarios.ts", configListaArchivos),
+    true,
+  );
+  assertEquals(
+    esArchivoEsquema("api/src/schema/roles.ts", configListaArchivos),
+    true,
+  );
+  assertEquals(
+    esArchivoEsquema("api\\src\\schema\\roles.ts", configListaArchivos),
+    true,
+  );
+  assertEquals(
+    esArchivoEsquema("api/src/schema/otros.ts", configListaArchivos),
+    false,
+  );
+  assertEquals(
+    esArchivoEsquema("api/src/dominio/usuarios.ts", configListaArchivos),
+    false,
+  );
+
+  // Verificacion de migracion obligatoria con lista de archivos
+  const resListaSinMig = await verificarCambiosMigraciones(
+    [{ estado: "M", ruta: "api/src/schema/roles.ts" }],
+    undefined,
+    undefined,
+    configListaArchivos,
+  );
+  assertEquals(resListaSinMig.valido, false);
+  assertEquals(
+    resListaSinMig.errores.some((e) => e.includes("roles.ts")),
+    true,
+  );
+
+  const resListaConMig = await verificarCambiosMigraciones(
+    [
+      { estado: "M", ruta: "api/src/schema/roles.ts" },
+      { estado: "A", ruta: "api/db/migrations/0002_roles.sql" },
+    ],
+    undefined,
+    undefined,
+    configListaArchivos,
+  );
+  assertEquals(resListaConMig.valido, true);
+
+  // 3. Directorio con barra final
+  const configDirectorio: ConfigMigraciones = {
+    back: {
+      raiz: "api",
+      directorioMigraciones: "db/migrations",
+      archivoEsquema: "src/infraestructura/database/schema/",
+    },
+  };
+  assertEquals(
+    esArchivoEsquema(
+      "api/src/infraestructura/database/schema/atenciones.ts",
+      configDirectorio,
+    ),
+    true,
+  );
+  assertEquals(
+    esArchivoEsquema(
+      "api/src/infraestructura/database/schema/sub/tablas.ts",
+      configDirectorio,
+    ),
+    true,
+  );
+  assertEquals(
+    esArchivoEsquema(
+      "api\\src\\infraestructura\\database\\schema\\atenciones.ts",
+      configDirectorio,
+    ),
+    true,
+  );
+  assertEquals(
+    esArchivoEsquema(
+      "src/infraestructura/database/schema/atenciones.ts",
+      configDirectorio,
+    ),
+    true,
+  );
+  // Archivo no .ts en el directorio no coincide
+  assertEquals(
+    esArchivoEsquema(
+      "api/src/infraestructura/database/schema/README.md",
+      configDirectorio,
+    ),
+    false,
+  );
+  // Archivo fuera del directorio no coincide
+  assertEquals(
+    esArchivoEsquema(
+      "api/src/infraestructura/database/otra/atenciones.ts",
+      configDirectorio,
+    ),
+    false,
+  );
+
+  // Verificacion de migracion obligatoria con directorio
+  const resDirSinMig = await verificarCambiosMigraciones(
+    [{
+      estado: "M",
+      ruta: "api/src/infraestructura/database/schema/atenciones.ts",
+    }],
+    undefined,
+    undefined,
+    configDirectorio,
+  );
+  assertEquals(resDirSinMig.valido, false);
+  assertEquals(
+    resDirSinMig.errores.some((e) => e.includes("schema")),
+    true,
+  );
+
+  const resDirConMig = await verificarCambiosMigraciones(
+    [
+      {
+        estado: "M",
+        ruta: "api/src/infraestructura/database/schema/atenciones.ts",
+      },
+      { estado: "A", ruta: "api/db/migrations/0002_add_atenciones.sql" },
+    ],
+    undefined,
+    undefined,
+    configDirectorio,
+  );
+  assertEquals(resDirConMig.valido, true);
 });

@@ -2,9 +2,67 @@ import { assert, assertEquals } from "@std/assert";
 import { estandarConfig, filtrarConListaBase, resolverRutaBack } from "../../../estandar.config.ts";
 
 /**
+ * Elimina comentarios preservando saltos de linea y sin alterar literales de cadena ni plantillas.
+ */
+function eliminarComentarios(codigo: string): string {
+  let resultado = "";
+  let i = 0;
+  const n = codigo.length;
+
+  while (i < n) {
+    const ch = codigo[i];
+    const sig = codigo[i + 1];
+
+    if (ch === "/" && sig === "/") {
+      i += 2;
+      while (i < n && codigo[i] !== "\n") i++;
+      continue;
+    }
+
+    if (ch === "/" && sig === "*") {
+      i += 2;
+      while (i < n && !(codigo[i] === "*" && codigo[i + 1] === "/")) {
+        if (codigo[i] === "\n") resultado += "\n";
+        else resultado += " ";
+        i++;
+      }
+      i += 2;
+      resultado += " ";
+      continue;
+    }
+
+    if (ch === "'" || ch === '"' || ch === "`") {
+      const delimitador = ch;
+      resultado += ch;
+      i++;
+      while (i < n && codigo[i] !== delimitador) {
+        if (codigo[i] === "\\" && i + 1 < n) {
+          resultado += codigo[i] + codigo[i + 1];
+          i += 2;
+          continue;
+        }
+        resultado += codigo[i];
+        i++;
+      }
+      if (i < n) {
+        resultado += codigo[i];
+        i++;
+      }
+      continue;
+    }
+
+    resultado += ch;
+    i++;
+  }
+
+  return resultado;
+}
+
+/**
  * Extrae todas las rutas y paquetes importados o reexportados en codigo TypeScript.
  */
 function extraerImportsDeCodigo(contenido: string): string[] {
+  const sinComentarios = eliminarComentarios(contenido);
   const patrones = [
     /(?:^|[\s;])(?:import|export)\s+(?:type\s+)?[\s\S]*?\s+from\s+['"]([^'"]+)['"]/gm,
     /(?:^|[\s;])import\s+['"]([^'"]+)['"]/gm,
@@ -14,7 +72,7 @@ function extraerImportsDeCodigo(contenido: string): string[] {
 
   for (const patron of patrones) {
     let match: RegExpExecArray | null;
-    while ((match = patron.exec(contenido)) !== null) {
+    while ((match = patron.exec(sinComentarios)) !== null) {
       imports.push(match[1]);
     }
   }
@@ -93,29 +151,47 @@ function obtenerArchivosTypeScript(dirPath: string): string[] {
 }
 
 Deno.test("Arquitectura - Autoverificacion sintetica de reglas de generacion de UUID", () => {
+  const generadorSintetico = "src/dominio/compartido/generarUuid.ts";
+
   // 1. Caso valido: usa generarUuid
   const codigoValido = `
     import { generarUuid } from "@dominio/compartido/generarUuid.ts";
     const id = generarUuid();
   `;
-  const v1 = detectarViolacionesUuid("src/aplicacion/usecases/MiCaso.ts", codigoValido);
+  const v1 = detectarViolacionesUuid(
+    "src/aplicacion/usecases/MiCaso.ts",
+    codigoValido,
+    generadorSintetico,
+  );
   assertEquals(v1.length, 0);
 
   // 2. Caso valido: el generador autorizado puede importar uuid
   const codigoAutorizado =
     `import { v7 } from "uuid"; export function generarUuid() { return v7(); }`;
-  const v2 = detectarViolacionesUuid(ARCHIVO_GENERADOR_AUTORIZADO, codigoAutorizado);
+  const v2 = detectarViolacionesUuid(
+    generadorSintetico,
+    codigoAutorizado,
+    generadorSintetico,
+  );
   assertEquals(v2.length, 0);
 
   // 3. Caso invalido: otro archivo importa uuid
   const codigoInvalidoImport = `import { v4 } from "uuid";`;
-  const v3 = detectarViolacionesUuid("src/interfaz/controlador.ts", codigoInvalidoImport);
+  const v3 = detectarViolacionesUuid(
+    "src/interfaz/controlador.ts",
+    codigoInvalidoImport,
+    generadorSintetico,
+  );
   assertEquals(v3.length, 1);
   assert(v3[0].motivo.includes("Importacion directa"));
 
   // 4. Caso invalido: uso de crypto.randomUUID
   const codigoInvalidoCrypto = `const id = crypto.randomUUID();`;
-  const v4 = detectarViolacionesUuid("src/infraestructura/repo.ts", codigoInvalidoCrypto);
+  const v4 = detectarViolacionesUuid(
+    "src/infraestructura/repo.ts",
+    codigoInvalidoCrypto,
+    generadorSintetico,
+  );
   assertEquals(v4.length, 1);
   assert(v4[0].motivo.includes("randomUUID"));
 });

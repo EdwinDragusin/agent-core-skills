@@ -5,7 +5,17 @@
  * En meta/_journal.json solo se permite agregar nuevas entradas al final de la lista.
  */
 
-import { type EstandarConfig, estandarConfig } from "../../estandar.config.ts";
+import { estandarConfig } from "../../estandar.config.ts";
+
+export interface ConfigMigracionesBack {
+  raiz: string;
+  directorioMigraciones: string;
+  archivoEsquema: string | string[];
+}
+
+export interface ConfigMigraciones {
+  back: ConfigMigracionesBack;
+}
 
 export interface CambioArchivo {
   estado: string;
@@ -40,14 +50,18 @@ export function componerRutaBack(raiz: string, subruta: string): string {
  */
 export function esArchivoMigracion(
   ruta: string,
-  config: EstandarConfig = estandarConfig,
+  config: ConfigMigraciones = estandarConfig,
 ): boolean {
   const norm = normalizarRuta(ruta);
-  const dirMig = normalizarRuta(
+  const dirMigCompleto = normalizarRuta(
     componerRutaBack(config.back.raiz, config.back.directorioMigraciones),
   );
-  const nombreDir = dirMig.split("/").pop() ?? "migraciones";
-  return norm.includes(dirMig) ||
+  const dirMigRelativo = normalizarRuta(config.back.directorioMigraciones)
+    .replace(/^\/+/, "");
+  const nombreDir = dirMigRelativo.split("/").pop() ?? "migraciones";
+  return norm.includes(dirMigCompleto) ||
+    norm.startsWith(`${dirMigRelativo}/`) ||
+    norm.includes(`/${dirMigRelativo}/`) ||
     norm.startsWith(`${nombreDir}/`) ||
     norm.includes(`/${nombreDir}/`);
 }
@@ -57,7 +71,7 @@ export function esArchivoMigracion(
  */
 export function esJournalMigraciones(
   ruta: string,
-  config: EstandarConfig = estandarConfig,
+  config: ConfigMigraciones = estandarConfig,
 ): boolean {
   const norm = normalizarRuta(ruta);
   return esArchivoMigracion(norm, config) &&
@@ -65,20 +79,67 @@ export function esJournalMigraciones(
 }
 
 /**
- * Determina si la ruta corresponde al archivo fuente del esquema Drizzle.
+ * Determina si la ruta corresponde al archivo fuente o directorio del esquema Drizzle.
+ * Soporta un archivo unico, lista de archivos o directorio (indicado con barra final,
+ * el cual coincide con cualquier archivo .ts contenido bajo el).
  */
 export function esArchivoEsquema(
   ruta: string,
-  config: EstandarConfig = estandarConfig,
+  config: ConfigMigraciones = estandarConfig,
 ): boolean {
   const norm = normalizarRuta(ruta);
-  const esquemaConfig = normalizarRuta(
-    componerRutaBack(config.back.raiz, config.back.archivoEsquema),
-  );
-  const nombreEsquema = esquemaConfig.split("/").pop() ?? "esquema.ts";
-  return norm.endsWith(esquemaConfig) ||
-    norm === nombreEsquema ||
-    norm.endsWith(`/${nombreEsquema}`);
+  const patrones = Array.isArray(config.back.archivoEsquema)
+    ? config.back.archivoEsquema
+    : [config.back.archivoEsquema];
+
+  for (const patron of patrones) {
+    const patronNorm = normalizarRuta(patron);
+    if (!patronNorm) continue;
+
+    const esDirectorio = patronNorm.endsWith("/");
+    if (esDirectorio) {
+      if (!norm.endsWith(".ts")) continue;
+      const dirCompleto = normalizarRuta(
+        componerRutaBack(config.back.raiz, patronNorm),
+      );
+      const dirConBarra = dirCompleto.endsWith("/")
+        ? dirCompleto
+        : `${dirCompleto}/`;
+      const dirRelativo = patronNorm.replace(/^\/+/, "");
+      const dirRelConBarra = dirRelativo.endsWith("/")
+        ? dirRelativo
+        : `${dirRelativo}/`;
+
+      if (
+        norm.startsWith(dirConBarra) ||
+        norm.includes(`/${dirConBarra}`) ||
+        norm.startsWith(dirRelConBarra) ||
+        norm.includes(`/${dirRelConBarra}`)
+      ) {
+        return true;
+      }
+    } else {
+      const esquemaCompleto = normalizarRuta(
+        componerRutaBack(config.back.raiz, patronNorm),
+      );
+      const esquemaRelativo = patronNorm.replace(/^\/+/, "");
+      const nombreEsquema = patronNorm.split("/").pop() ?? "esquema.ts";
+
+      if (
+        norm === esquemaCompleto ||
+        norm.endsWith(`/${esquemaCompleto}`) ||
+        norm === esquemaRelativo ||
+        norm.endsWith(`/${esquemaRelativo}`) ||
+        norm === nombreEsquema ||
+        (esquemaRelativo.split("/").length <= 1 &&
+          norm.endsWith(`/${nombreEsquema}`))
+      ) {
+        return true;
+      }
+    }
+  }
+
+  return false;
 }
 
 /**
@@ -227,7 +288,7 @@ export async function verificarCambiosMigraciones(
   obtenerContenidoHead?: (
     ruta: string,
   ) => Promise<string | null> | string | null,
-  config: EstandarConfig = estandarConfig,
+  config: ConfigMigraciones = estandarConfig,
 ): Promise<ResultadoVerificacionMigraciones> {
   const errores: string[] = [];
 
@@ -247,10 +308,19 @@ export async function verificarCambiosMigraciones(
     );
 
     if (!tieneNuevaMigracion) {
-      const nombreEsquema = config.back.archivoEsquema.split("/").pop() ??
-        "esquema.ts";
-      const nombreDirMig = config.back.directorioMigraciones.split("/").pop() ??
-        "migraciones";
+      const patrones = Array.isArray(config.back.archivoEsquema)
+        ? config.back.archivoEsquema
+        : [config.back.archivoEsquema];
+      const nombreEsquema = patrones
+        .map((p) => {
+          const limpio = p.replace(/\/+$/, "");
+          return limpio.split("/").pop() ?? "esquema.ts";
+        })
+        .join(", ");
+      const nombreDirMig =
+        config.back.directorioMigraciones.replace(/\/+$/, "").split("/")
+          .pop() ??
+          "migraciones";
       errores.push(
         `El esquema de persistencia (${nombreEsquema}) fue modificado pero no se incluyo ninguna nueva migracion (.sql) en ${nombreDirMig}/.`,
       );

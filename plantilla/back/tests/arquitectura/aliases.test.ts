@@ -3,9 +3,67 @@ import { dirname, join, normalize } from "@std/path/posix";
 import { filtrarConListaBase, resolverRutaBack } from "../../../estandar.config.ts";
 
 /**
+ * Elimina comentarios preservando saltos de linea y sin alterar literales de cadena ni plantillas.
+ */
+function eliminarComentarios(codigo: string): string {
+  let resultado = "";
+  let i = 0;
+  const n = codigo.length;
+
+  while (i < n) {
+    const ch = codigo[i];
+    const sig = codigo[i + 1];
+
+    if (ch === "/" && sig === "/") {
+      i += 2;
+      while (i < n && codigo[i] !== "\n") i++;
+      continue;
+    }
+
+    if (ch === "/" && sig === "*") {
+      i += 2;
+      while (i < n && !(codigo[i] === "*" && codigo[i + 1] === "/")) {
+        if (codigo[i] === "\n") resultado += "\n";
+        else resultado += " ";
+        i++;
+      }
+      i += 2;
+      resultado += " ";
+      continue;
+    }
+
+    if (ch === "'" || ch === '"' || ch === "`") {
+      const delimitador = ch;
+      resultado += ch;
+      i++;
+      while (i < n && codigo[i] !== delimitador) {
+        if (codigo[i] === "\\" && i + 1 < n) {
+          resultado += codigo[i] + codigo[i + 1];
+          i += 2;
+          continue;
+        }
+        resultado += codigo[i];
+        i++;
+      }
+      if (i < n) {
+        resultado += codigo[i];
+        i++;
+      }
+      continue;
+    }
+
+    resultado += ch;
+    i++;
+  }
+
+  return resultado;
+}
+
+/**
  * Extrae todas las rutas y paquetes importados o reexportados en codigo TypeScript.
  */
 function extraerImportsDeCodigo(contenido: string): string[] {
+  const sinComentarios = eliminarComentarios(contenido);
   const patrones = [
     /(?:^|[\s;])(?:import|export)\s+(?:type\s+)?[\s\S]*?\s+from\s+['"]([^'"]+)['"]/gm,
     /(?:^|[\s;])import\s+['"]([^'"]+)['"]/gm,
@@ -15,7 +73,7 @@ function extraerImportsDeCodigo(contenido: string): string[] {
 
   for (const patron of patrones) {
     let match: RegExpExecArray | null;
-    while ((match = patron.exec(contenido)) !== null) {
+    while ((match = patron.exec(sinComentarios)) !== null) {
       imports.push(match[1]);
     }
   }

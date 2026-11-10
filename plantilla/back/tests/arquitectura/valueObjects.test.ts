@@ -101,6 +101,8 @@ function obtenerArchivosTypeScript(dirPath: string): string[] {
 }
 
 Deno.test("Arquitectura - Autoverificacion sintetica de Value Objects (inmutabilidad y factory crear)", () => {
+  const claseBaseVoSintetica = "ValueObject";
+
   // 1. VO valido que extiende ValueObject con static crear
   const codigoValido1 = `
     export class Telefono extends ValueObject<{ valor: string }> {
@@ -109,7 +111,11 @@ Deno.test("Arquitectura - Autoverificacion sintetica de Value Objects (inmutabil
       }
     }
   `;
-  const v1 = detectarViolacionesValueObject("src/dominio/Telefono.ts", codigoValido1);
+  const v1 = detectarViolacionesValueObject(
+    "src/dominio/Telefono.ts",
+    codigoValido1,
+    claseBaseVoSintetica,
+  );
   assertEquals(v1.length, 0);
 
   // 2. VO valido que usa Object.freeze con static crear
@@ -125,7 +131,11 @@ Deno.test("Arquitectura - Autoverificacion sintetica de Value Objects (inmutabil
       }
     }
   `;
-  const v2 = detectarViolacionesValueObject("src/dominio/Dinero.ts", codigoValido2);
+  const v2 = detectarViolacionesValueObject(
+    "src/dominio/Dinero.ts",
+    codigoValido2,
+    claseBaseVoSintetica,
+  );
   assertEquals(v2.length, 0);
 
   // 3. VO invalido: extiende ValueObject pero no tiene static crear
@@ -134,7 +144,11 @@ Deno.test("Arquitectura - Autoverificacion sintetica de Value Objects (inmutabil
       constructor(props: any) { super(props); }
     }
   `;
-  const v3 = detectarViolacionesValueObject("src/dominio/CodigoPostal.ts", codigoInvalido1);
+  const v3 = detectarViolacionesValueObject(
+    "src/dominio/CodigoPostal.ts",
+    codigoInvalido1,
+    claseBaseVoSintetica,
+  );
   assertEquals(v3.length, 1);
   assertEquals(v3[0].clase, "CodigoPostal");
 
@@ -146,7 +160,11 @@ Deno.test("Arquitectura - Autoverificacion sintetica de Value Objects (inmutabil
       }
     }
   `;
-  const v4 = detectarViolacionesValueObject("src/dominio/Direccion.ts", codigoInvalido2);
+  const v4 = detectarViolacionesValueObject(
+    "src/dominio/Direccion.ts",
+    codigoInvalido2,
+    claseBaseVoSintetica,
+  );
   assertEquals(v4.length, 1);
   assertEquals(v4[0].clase, "Direccion");
 });
