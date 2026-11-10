@@ -1883,11 +1883,196 @@ export async function verificarPlantillaCli(
   return 0;
 }
 
+export interface ComandoVerificacionEsqueleto {
+  etiqueta: string;
+  cmd: string;
+  args: string[];
+  cwdRelativo?: string;
+}
+
+/**
+ * Construye la lista determinista de suites de verificacion que deben ejecutarse
+ * sobre el repositorio temporal ensamblado a partir de plantilla/ + plantilla/esqueleto/.
+ */
+export function construirComandosVerificacionEsqueleto(): ComandoVerificacionEsqueleto[] {
+  return [
+    {
+      etiqueta: "deno task lint:docs",
+      cmd: "deno",
+      args: ["task", "lint:docs"],
+    },
+    {
+      etiqueta: "deno task test:scripts",
+      cmd: "deno",
+      args: ["task", "test:scripts"],
+    },
+    {
+      etiqueta: "deno test --allow-read back/tests/arquitectura/",
+      cmd: "deno",
+      args: ["test", "--allow-read", "back/tests/arquitectura/"],
+    },
+    {
+      etiqueta: "(cd front && deno test -A tests/)",
+      cmd: "deno",
+      args: ["test", "-A", "tests/"],
+      cwdRelativo: "front",
+    },
+    {
+      etiqueta: "deno task ci:rapido",
+      cmd: "deno",
+      args: ["task", "ci:rapido"],
+    },
+  ];
+}
+
+/**
+ * Copia el espejo de plantilla/ (excluyendo esqueleto/) a un directorio destino
+ * y superpone encima el contenido de plantilla/esqueleto/.
+ * Retorna el conteo de archivos copiados del espejo y superpuestos del esqueleto.
+ */
+export async function ensamblarEsqueletoEnDirectorio(
+  dirPlantilla: string,
+  dirDestino: string,
+): Promise<{ copiadosEspejo: number; superpuestosEsqueleto: number }> {
+  const raizPlantilla = path.resolve(dirPlantilla);
+  const raizEsqueleto = path.join(raizPlantilla, "esqueleto");
+  const destinoAbs = path.resolve(dirDestino);
+
+  let copiadosEspejo = 0;
+  let superpuestosEsqueleto = 0;
+
+  // 1. Copiar plantilla/ excluyendo esqueleto/
+  for await (const entry of walk(raizPlantilla, { includeDirs: false })) {
+    const rel = path.relative(raizPlantilla, entry.path).replaceAll("\\", "/");
+    if (rel === "esqueleto" || rel.startsWith("esqueleto/")) {
+      continue;
+    }
+    const rutaDest = path.join(destinoAbs, rel);
+    await Deno.mkdir(path.dirname(rutaDest), { recursive: true });
+    await Deno.copyFile(entry.path, rutaDest);
+    copiadosEspejo++;
+  }
+
+  // 2. Superponer plantilla/esqueleto/ encima
+  for await (const entry of walk(raizEsqueleto, { includeDirs: false })) {
+    const rel = path.relative(raizEsqueleto, entry.path).replaceAll("\\", "/");
+    const rutaDest = path.join(destinoAbs, rel);
+    await Deno.mkdir(path.dirname(rutaDest), { recursive: true });
+    await Deno.copyFile(entry.path, rutaDest);
+    superpuestosEsqueleto++;
+  }
+
+  return { copiadosEspejo, superpuestosEsqueleto };
+}
+
+/**
+ * Ensambla plantilla/ + plantilla/esqueleto/ en un directorio temporal unico,
+ * inicializa un repositorio git local con commit inicial y ejecuta todas las
+ * suites de verificacion del estandar. Limpia siempre el directorio temporal.
+ */
+export async function verificarEsqueletoCli(
+  dirPlantilla: string = "plantilla",
+): Promise<number> {
+  const rutaCompleta = path.resolve(dirPlantilla);
+  const rutaEsqueleto = path.join(rutaCompleta, "esqueleto");
+
+  try {
+    const statP = await Deno.stat(rutaCompleta);
+    const statE = await Deno.stat(rutaEsqueleto);
+    if (!statP.isDirectory || !statE.isDirectory) {
+      console.error(
+        `[ERROR] No se encontro directorio valido en ${rutaCompleta} o ${rutaEsqueleto}`,
+      );
+      return 1;
+    }
+  } catch (e) {
+    console.error(
+      `[ERROR] No se pudo acceder a la plantilla o su esqueleto: ${(e as Error).message}`,
+    );
+    return 1;
+  }
+
+  const tmpDir = await Deno.makeTempDir({ prefix: "verificar-esqueleto-" });
+
+  try {
+    const { copiadosEspejo, superpuestosEsqueleto } =
+      await ensamblarEsqueletoEnDirectorio(rutaCompleta, tmpDir);
+    console.log(
+      `[INFO] Esqueleto ensamblado en temporal (${copiadosEspejo} archivos de espejo + ${superpuestosEsqueleto} superpuestos de esqueleto).`,
+    );
+
+    // Inicializar repo git local + commit inicial
+    const pasosGit: { args: string[]; desc: string }[] = [
+      { args: ["init", "-b", "main"], desc: "git init" },
+      { args: ["config", "user.email", "ci@estandar.local"], desc: "git config email" },
+      { args: ["config", "user.name", "ci"], desc: "git config name" },
+      { args: ["add", "."], desc: "git add ." },
+      {
+        args: ["commit", "-m", "chore(esqueleto): inicializar proyecto nuevo"],
+        desc: "git commit",
+      },
+    ];
+
+    for (const paso of pasosGit) {
+      const out = await new Deno.Command("git", {
+        args: paso.args,
+        cwd: tmpDir,
+        stdout: "piped",
+        stderr: "piped",
+      }).output();
+      if (!out.success) {
+        const errTxt = new TextDecoder().decode(out.stderr).trim();
+        console.error(`[ERROR] Fallo en preparacion Git (${paso.desc}): ${errTxt}`);
+        return 1;
+      }
+    }
+
+    const comandos = construirComandosVerificacionEsqueleto();
+
+    for (const item of comandos) {
+      const cwdEjecucion = item.cwdRelativo
+        ? path.join(tmpDir, item.cwdRelativo)
+        : tmpDir;
+      console.log(`[RUN] ${item.etiqueta}`);
+      const res = await new Deno.Command(item.cmd, {
+        args: item.args,
+        cwd: cwdEjecucion,
+        stdout: "piped",
+        stderr: "piped",
+      }).output();
+
+      const stdoutTxt = new TextDecoder().decode(res.stdout).trim();
+      const stderrTxt = new TextDecoder().decode(res.stderr).trim();
+
+      if (!res.success) {
+        if (stdoutTxt) console.error(stdoutTxt);
+        if (stderrTxt) console.error(stderrTxt);
+        console.error(
+          `[FAIL] Suite fallida en verificacion de esqueleto: ${item.etiqueta} (exit ${res.code})`,
+        );
+        return res.code !== 0 ? res.code : 1;
+      }
+      console.log(`[PASS] ${item.etiqueta}`);
+    }
+
+    console.log(
+      `[OK] Verificacion completa del esqueleto exitosa (${comandos.length} suites en verde).`,
+    );
+    return 0;
+  } finally {
+    try {
+      await Deno.remove(tmpDir, { recursive: true });
+    } catch {
+      // Ignorar errores de limpieza en sistema de archivos
+    }
+  }
+}
+
 if (import.meta.main) {
   const args = Deno.args;
   if (args.length === 0) {
     console.error(
-      "Uso: deno run -A scripts/extraer-plantilla.ts <ruta-examen> [<ruta-destino>]\n     deno run -A scripts/extraer-plantilla.ts --verificar [<ruta-plantilla>]",
+      "Uso: deno run -A scripts/extraer-plantilla.ts <ruta-examen> [<ruta-destino>]\n     deno run -A scripts/extraer-plantilla.ts --verificar [<ruta-plantilla>]\n     deno run -A scripts/extraer-plantilla.ts --verificar-esqueleto [<ruta-plantilla>]",
     );
     Deno.exit(1);
   }
@@ -1895,6 +2080,12 @@ if (import.meta.main) {
   if (args[0] === "--verificar" || args[0] === "--check") {
     const dirPlantilla = args[1] || "plantilla";
     const codigo = await verificarPlantillaCli(dirPlantilla);
+    Deno.exit(codigo);
+  }
+
+  if (args[0] === "--verificar-esqueleto") {
+    const dirPlantilla = args[1] || "plantilla";
+    const codigo = await verificarEsqueletoCli(dirPlantilla);
     Deno.exit(codigo);
   }
 

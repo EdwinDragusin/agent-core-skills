@@ -102,3 +102,13 @@ jobs:
           else
             echo "plantilla/ no existe aun; omitiendo verificacion."
           fi
+
+      - name: Verificar Ensamblaje y Suites del Esqueleto de Proyecto Nuevo
+        run: |
+          if [ -d "plantilla/esqueleto" ]; then
+            command -v pwsh >/dev/null 2>&1 || { echo "::error::pwsh no esta disponible en el runner"; exit 1; }
+            command -v git >/dev/null 2>&1 || { echo "::error::git no esta disponible en el runner"; exit 1; }
+            deno run --allow-run --allow-read --allow-write --allow-env ./scripts/extraer-plantilla.ts --verificar-esqueleto ./plantilla
+          else
+            echo "plantilla/esqueleto no existe aun; omitiendo verificacion de esqueleto."
+          fi
