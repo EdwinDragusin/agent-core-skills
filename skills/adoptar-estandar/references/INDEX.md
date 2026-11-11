@@ -19,15 +19,15 @@ Leer este indice primero. Luego leer solo el rango necesario (read_file con Star
 | 203 | ## Ola 4: Higiene y Calidad Estatica |
 | 228 | ## Ola 5: Gobernanza Documental, Estructura del Vault, Doc-Linter y Trazabilidad |
 
-## auditoria-inicial.md (4 KB)
+## auditoria-inicial.md (6 KB)
 
 | Linea | Seccion |
 |:--|:--|
 | 1 | # Plantilla y Protocolo de Auditoria Inicial (Fase 1) |
-| 9 | ## 1. Reglas del Informe |
-| 18 | ## 2. Comprobaciones Obligatorias |
-| 36 | ## 3. Plantilla del Informe |
-| 71 | ## 4. Doc-Linter de la Plantilla |
+| 13 | ## 1. Reglas del Informe |
+| 22 | ## 2. Comprobaciones Obligatorias |
+| 41 | ## 3. Plantilla del Informe |
+| 82 | ## 4. Doc-Linter de la Plantilla |
 
 ## cobertura.md (4 KB)
 
