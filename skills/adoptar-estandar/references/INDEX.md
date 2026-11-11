@@ -2,22 +2,32 @@
 
 Leer este indice primero. Luego leer solo el rango necesario (read_file con StartLine/EndLine). Regenerar si cambia un archivo.
 
-## olas.md (15 KB)
+## olas.md (23 KB)
 
 | Linea | Seccion |
 |:--|:--|
 | 1 | # Catalogo de Olas de Adopcion, Modo Proyecto Nuevo y Verificacion por Mutacion |
 | 9 | ## Modo Proyecto Nuevo (Repositorio Vacio o Sin Estructura) |
-| 27 | ## Ola 1: CI Unica y Cobertura Bloqueante |
-| 56 | ## Ola 2: Hooks de Git y Convenciones de Commits |
-| 75 | ### Puntero Minimo CLAUDE.md (Advertencia Obligatoria) |
-| 95 | ## Ola 3: Tests de Arquitectura de Capas, Cobertura de Config y Listas Base |
-| 123 | ### Marcadores de Plantilla (Sustitucion Obligatoria) |
-| 131 | ### Topologia Frontend: SPA Unica vs Multiples SPAs |
-| 138 | ### Configuracion de Esquema de Base de Datos (archivoEsquema) |
-| 145 | ### Clases Base y Utilidades de Arquitectura (No viajan en el espejo) |
-| 178 | ## Ola 4: Higiene y Calidad Estatica |
-| 203 | ## Ola 5: Gobernanza Documental, Estructura del Vault, Doc-Linter y Trazabilidad |
+| 27 | ## Ola 0: Manifiestos de Instruccion y Puntero CLAUDE.md |
+| 59 | ## Ola 1: CI Unica y Cobertura Bloqueante |
+| 88 | ## Ola 2: Hooks de Git y Convenciones de Commits |
+| 120 | ## Ola 3: Tests de Arquitectura de Capas, Cobertura de Config y Listas Base |
+| 148 | ### Marcadores de Plantilla (Sustitucion Obligatoria) |
+| 156 | ### Topologia Frontend: SPA Unica vs Multiples SPAs |
+| 163 | ### Configuracion de Esquema de Base de Datos (archivoEsquema) |
+| 170 | ### Clases Base y Utilidades de Arquitectura (No viajan en el espejo) |
+| 203 | ## Ola 4: Higiene y Calidad Estatica |
+| 228 | ## Ola 5: Gobernanza Documental, Estructura del Vault, Doc-Linter y Trazabilidad |
+
+## auditoria-inicial.md (4 KB)
+
+| Linea | Seccion |
+|:--|:--|
+| 1 | # Plantilla y Protocolo de Auditoria Inicial (Fase 1) |
+| 9 | ## 1. Reglas del Informe |
+| 18 | ## 2. Comprobaciones Obligatorias |
+| 36 | ## 3. Plantilla del Informe |
+| 71 | ## 4. Doc-Linter de la Plantilla |
 
 ## cobertura.md (4 KB)
 

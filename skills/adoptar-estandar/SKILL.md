@@ -38,15 +38,17 @@ Olas en `superpowers:writing-plans`; ramas en `superpowers:subagent-driven-devel
 
 **Compuerta:** Prohibido modificar o crear archivos en el proyecto destino.
 
-1. **Detectar modo y stack** (`references/stack.md`): `nuevo` (repo vacio) vs `existente`. Stack completo (Deno+Hono+Drizzle+React FSD) o agnostico (commits, ramas, higiene, doc-linter, marcas, proteccion main).
-2. **Puntero CLAUDE.md obligatorio:** Si el repositorio destino contiene `CLAUDE.md` (o `.claude/CLAUDE.md`, `CLAUDE.local.md`), Claude Code ignora `AGENTS.md` en la raiz. Mantener `CLAUDE.md` como puntero minimo que importe `AGENTS.md` (`@AGENTS.md`) sin duplicar reglas, y verificarlo en esta fase.
-3. **Cotejo con plantilla:** Contrastar contra `RAIZ_PLUGIN/plantilla/MANIFIESTO.md`.
-4. **Tabla de brechas:** Matriz de mecanismos ausentes/parciales con columna de **estructura del vault** (`scripts/doc-linter.ps1#Estructura`) y **violaciones previas esperadas** (para calibrar `listasBase`).
+Informe y reglas obligatorias en `references/auditoria-inicial.md`.
+1. **Modo y stack** (`references/stack.md`): `nuevo` vs `existente`.
+2. **Instrucciones y reglas previas:** `CLAUDE.md` (oculta `AGENTS.md` a Claude Code), otros archivos de agentes y directrices, con capa destino para la Ola 0.
+3. **Cotejo con plantilla:** Contra `RAIZ_PLUGIN/plantilla/MANIFIESTO.md`: tabla de manifiestos y de brechas por mecanismo con violaciones previas (calibran `listasBase`).
+4. **Comprobaciones obligatorias:** `main`, esquema, migraciones, mapeo de carpetas, topologia y vault (doc-linter con `-DocsPath`, seccion propia).
 5. **Pausa de compuerta:** Solicitar aprobacion humana antes de planificar.
 
 ### Fase 2: Planificacion por Olas Iterativas
 
 **Compuerta:** Un PR aislado por ola en proyectos existentes (prohibido lote masivo). Detalle en `references/olas.md`:
+- **Ola 0: Manifiestos:** 13 `AGENTS.md`, puntero `CLAUDE.md` y fusion de reglas previas como `[PROYECTO]`. Siempre primera.
 - **Ola 1: CI Unica y Cobertura:** Workflow CI, runner local y umbrales (`references/cobertura.md`).
 - **Ola 2: Hooks de Git y Commits:** `commit-msg`, `pre-push`, validadores de commits y ramas.
 - **Ola 3: Tests de Arquitectura, Cobertura de Config y Listas Base:** Aislamiento backend/frontend, cobertura de config (`scripts/estandar/cobertura-config.test.ts`, `cobertura.rutasAdicionales`, `listasBase["cobertura/config"]`) y trinquete (`back/tests/arquitectura/listasBase.test.ts`). Primera accion: configurar `estandar.config.ts` y sustituir marcadores reales (`{{APP_1}}`, `{{APP_2}}`, etc.; pasos SPA unica en `references/olas.md`). Clases base (`Entidad`, `AgregadoRaiz`, `ValueObject`, `generarUuid`, `LoggerConsola`, composicion DI) no viajan en espejo: crear o mapear via `estandar.config.ts`.
@@ -88,5 +90,6 @@ Para cada ola aprobada:
 - [references/INDEX.md](./references/INDEX.md): Indice y mapa de contenidos.
 - [references/olas.md](./references/olas.md): Checklists por ola, marcadores y pruebas de mutacion.
 - [references/cobertura.md](./references/cobertura.md): Medicion de linea base y politica de umbrales.
+- [references/auditoria-inicial.md](./references/auditoria-inicial.md): Plantilla del informe de Fase 1.
 - [references/auditoria-final.md](./references/auditoria-final.md): Plantilla AUDIT-NNN y riesgo residual.
 - [references/stack.md](./references/stack.md): Deteccion de stack y catalogo de piezas agnosticas.
