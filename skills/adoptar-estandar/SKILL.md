@@ -36,7 +36,7 @@ Olas en `superpowers:writing-plans`; ramas en `superpowers:subagent-driven-devel
 
 ### Fase 1: Auditoria de Solo Lectura
 
-**Compuerta:** Prohibido modificar o crear archivos en el proyecto destino.
+**Compuerta:** Prohibido modificar o crear archivos en el destino, incluidos ignorados (sin tests ni `deno task`; huella `git status --short --ignored` identica al cerrar).
 
 Informe y reglas obligatorias en `references/auditoria-inicial.md`.
 1. **Modo y stack** (`references/stack.md`): `nuevo` vs `existente`.
