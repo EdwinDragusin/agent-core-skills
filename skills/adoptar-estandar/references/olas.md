@@ -1,6 +1,6 @@
 # Catalogo de Olas de Adopcion, Modo Proyecto Nuevo y Verificacion por Mutacion
 
-Este documento define el flujo de inicializacion en modo **proyecto nuevo**, la lista de comprobacion, los marcadores de sustitucion, el mecanismo de **listas base con trinquete**, el **test de cobertura de config** y el protocolo de verificacion por mutacion para cada una de las 5 olas iterativas de adopcion del estandar.
+Este documento define el flujo de inicializacion en modo **proyecto nuevo**, la lista de comprobacion, los marcadores de sustitucion, el mecanismo de **listas base con trinquete**, el **test de cobertura de config** y el protocolo de verificacion por mutacion para cada una de las 6 olas iterativas de adopcion del estandar (Ola 0 a Ola 5).
 
 > **RUTAS DEL PLUGIN:** `RAIZ_PLUGIN` corresponde a tres niveles arriba de este archivo (`../../../` relativo a `references/olas.md`, raiz del plugin instalador). Toda plantilla se lee desde `RAIZ_PLUGIN/plantilla/`.
 
@@ -16,11 +16,43 @@ Cuando en la Fase 1 se detecta que el repositorio destino esta vacio o carece de
 3. **Superposicion del esqueleto:** Copiar `RAIZ_PLUGIN/plantilla/esqueleto/` encima de la raiz del proyecto destino:
    - El `estandar.config.ts` concreto del esqueleto (configurado con SPA unica `web` en `front/src`, capas FSD `["app", "pages", "widgets", "features", "entities", "shared"]`, `listasBase: {}` y `cobertura.rutasAdicionales: []`) reemplaza al `estandar.config.ts` con marcadores del espejo.
    - El `front/deno.json` concreto del esqueleto reemplaza al `front/deno.json` con marcadores del espejo.
-4. **Parametrizacion de manifiestos:** Sustituir en los `AGENTS.md` los marcadores institucionales (`{{NOMBRE_PROYECTO}}`, `{{DESCRIPCION_PROYECTO}}`, `{{SLUG_PROYECTO}}`).
+4. **Parametrizacion de manifiestos:** Sustituir en los `AGENTS.md` los marcadores institucionales (`{{NOMBRE_PROYECTO}}`, `{{DESCRIPCION_PROYECTO}}`, `{{SLUG_PROYECTO}}`) y crear el puntero `CLAUDE.md` (pasos 2, 5 y 7 de la Ola 0).
 5. **Renombrado del dominio de juguete (`Tarea`/`Proyecto`):** Reemplazar el dominio de ejemplo `Tarea` por las entidades, casos de uso, adaptadores, rutas HTTP y slices FSD del dominio real del proyecto (ver lista completa en `RAIZ_PLUGIN/plantilla/esqueleto/README.md`).
 6. **Rellenado del vault de documentacion sembrado:** El esqueleto incluye `docs/` pre-sembrado con todas las carpetas y archivos exigidos por `scripts/doc-linter.ps1#Estructura` (capitulos arc42 01 a 11, `ADR-001`, `glosario.md`, `ONBOARDING.md`, `TODO.md`, `README.md`, `auditorias/README.md`). Completar el contenido funcional y arquitectonico real del proyecto.
 7. **Prohibicion de listas base en modo nuevo:** En modo proyecto nuevo **NO se usan listas base** (`listasBase` permanece `{}`). Toda discrepancia de arquitectura, cobertura de config o documentacion se resuelve de inmediato antes del primer PR.
 8. **Verificacion y Fase 4:** Ejecutar verificacion completa (`deno task lint:docs`, `deno task test:scripts`, tests de arquitectura backend/frontend y `deno task ci`) y ejecutar las mismas actividades de la Fase 4 (pruebas de mutacion en worktree desechable, blindaje de `main` con `protect-main-branch.ps1` y auditoria adversarial `AUDIT-NNN`).
+
+---
+
+## Ola 0: Manifiestos de Instruccion y Puntero CLAUDE.md
+
+### Objetivo
+Instalar los 13 manifiestos `AGENTS.md` antes de cualquier mecanismo. Son la fuente de las reglas que las Olas 1 a 5 hacen cumplir (cada fila de `MANIFIESTO.md` cita su manifiesto de origen) y deben estar cargados para los agentes que ejecuten esas olas. Sin esta ola el destino recibe mecanismos sin las reglas que verifican.
+
+### Insumos de Plantilla
+- `RAIZ_PLUGIN/plantilla/AGENTS.md` (raiz).
+- Manifiestos por capa: `back/`, `back/src/dominio/`, `back/src/aplicacion/`, `back/src/infraestructura/`, `back/src/interfaz/`, `front/`, `front/shared/`, `docs/`, `docs/adr/`, `docs/arquitectura/`, `docs/auditorias/`, `docs/guia/` (cada uno `AGENTS.md`).
+- Inventario de reglas previas y tabla de manifiestos de la Fase 1 (`references/auditoria-inicial.md`).
+
+### Lista de Comprobacion
+1. **Ubicacion:** Copiar cada manifiesto a la carpeta real equivalente del destino. Si la capa vive en otra ruta, colocarlo en la ruta real y registrar el mapeo en el PR. Si la capa no existe en el destino (ej. sin `front/shared/`), omitir el manifiesto y anotarlo en el PR.
+2. **Marcadores:** Sustituir `{{NOMBRE_PROYECTO}}`, `{{DESCRIPCION_PROYECTO}}`, `{{SLUG_PROYECTO}}`, `{{APP_1}}` y `{{APP_2}}`. En SPA unica, quitar las referencias a `{{APP_2}}` de `front/AGENTS.md` y `front/shared/AGENTS.md`. Los enlaces a manifiestos por aplicacion (`{{APP_1}}/AGENTS.md`) se quitan salvo que el proyecto tenga reglas propias de esa aplicacion (en ese caso, crear el manifiesto con bloque `[PROYECTO]`).
+3. **Rutas concretas:** Adaptar en los bloques `[ESTANDAR]` las rutas y comandos de ejemplo (archivo de esquema, migraciones, directorio de casos de uso, `docker compose`) a la topologia real, sin alterar el contenido de la regla. Si una regla no puede cumplirse hoy en el destino, conservarla y registrarla como brecha de su ola.
+4. **Fusion de reglas previas:** Por cada regla del inventario de la Fase 1 (directrices del vault, `CLAUDE.md`, `.cursorrules`, `.github/copilot-instructions.md`, `GEMINI.md`, README o CONTRIBUTING):
+   - **Duplica una regla `[ESTANDAR]`:** no copiarla. Si la fuente previa es una nota viva del vault, enlazarla desde la regla estandar.
+   - **Propia del proyecto:** agregarla al manifiesto de su capa dentro de un bloque `<!-- [PROYECTO] -->`, preferentemente como enlace a la nota de origen (fuente unica) en lugar de copiar su texto.
+   - **Contradice una regla `[ESTANDAR]`:** no resolver en silencio. Pausar, consultar al usuario y registrar la decision en un ADR.
+5. **Puntero CLAUDE.md:** Crear `CLAUDE.md` en la raiz o reducirlo a la directiva `@AGENTS.md` (Claude Code ignora `AGENTS.md` raiz si existe `CLAUDE.md`, `.claude/CLAUDE.md` o `CLAUDE.local.md`). El contenido previo de esos archivos se migra con el paso 4; prohibido duplicar reglas en el puntero.
+6. **Etiquetas `verifica:`:** Conservar las que apuntan a mecanismos aun no instalados; son el contrato que cumplen las Olas 1 a 5. La Ola 5 (`doc-linter.ps1`) y la auditoria final comprueban que resuelvan.
+7. **Verificacion de carga:** Abrir una sesion nueva del agente en el destino y pedirle que cite una regla de un manifiesto de capa (ej. `back/src/dominio/AGENTS.md`). Si no la cita, los manifiestos no se cargan y la ola no esta terminada.
+
+### Protocolo de Verificacion por Mutacion (Ola 0)
+- **Mutacion 0A (Marcador sin sustituir):** Dejar `{{NOMBRE_PROYECTO}}` en un manifiesto.
+  - *Comando:* `! grep -rn "{{" --include=AGENTS.md .`
+  - *Resultado esperado:* Exit code != 0 listando el marcador pendiente.
+- **Mutacion 0B (Reglas duplicadas en el puntero):** Agregar una regla en `CLAUDE.md` ademas de `@AGENTS.md`.
+  - *Comando:* `test "$(tr -d '\r' < CLAUDE.md | grep -cv '^[[:space:]]*$')" -eq 1 && tr -d '\r' < CLAUDE.md | grep -qx '@AGENTS.md'`
+  - *Resultado esperado:* Exit code != 0.
 
 ---
 
@@ -70,14 +102,7 @@ Impedir commits con formato invalido, emojis, lineas de atribucion ajenas o bran
    - `git config core.hooksPath .githooks`
 3. Asegurar que los scripts de validacion tengan permisos de ejecucion.
 4. Integrar la ejecucion de `validar-commit.test.ts` y `validar-rama.test.ts` en `deno task ci`.
-5. Si el repositorio destino cuenta con `CLAUDE.md` (o `.claude/CLAUDE.md`, `CLAUDE.local.md`), mantenerlo como puntero minimo importando `@AGENTS.md` sin duplicar reglas (Claude Code ignora `AGENTS.md` raiz si detecta `CLAUDE.md`).
-
-### Puntero Minimo CLAUDE.md (Advertencia Obligatoria)
-Si el repositorio destino utiliza Claude Code y cuenta con `CLAUDE.md`, `.claude/CLAUDE.md` o `CLAUDE.local.md`, Claude Code ignora completamente `AGENTS.md` en la raiz.
-Para preservar la gobernanza unificada:
-1. Mantener `CLAUDE.md` exclusivamente como un puntero minimo que importe `AGENTS.md` via directiva `@AGENTS.md`.
-2. Prohibido duplicar reglas de ingenieria o gobernanza dentro de `CLAUDE.md`.
-3. Verificar en la Fase 1 que no existan discrepancias ni reglas paralelas.
+5. Puntero `CLAUDE.md`: se instala en la Ola 0 (paso 5); aqui solo comprobar que sigue siendo `@AGENTS.md`.
 
 ### Protocolo de Verificacion por Mutacion (Ola 2)
 - **Mutacion 2A (Mensaje invalido):** Intentar commit con texto libre (ej. `arreglos varios`).
@@ -219,7 +244,7 @@ Verificar que la documentacion tecnica cumpla la estructura canonica del vault (
    - Los 11 capitulos de arc42 (`docs/arquitectura/capitulo-01-*.md` a `capitulo-11-*.md`, exactamente un archivo por capitulo).
    - Archivos base obligatorios: `docs/ONBOARDING.md` (con seccion de rutas de lectura), `docs/glosario.md` (estructura dual Negocio + DDD/Arquitectura), `docs/TODO.md` (bloques colapsables Dataview), `docs/README.md` y `docs/auditorias/README.md` (con frontmatter y formato `AUDIT-NNN`).
    - En proyectos que carezcan de estos archivos base, sembrarlos tomando como base `RAIZ_PLUGIN/plantilla/esqueleto/docs/` y rellenarlos con la informacion del proyecto.
-3. Verificar que cada manifiesto `AGENTS.md` y regla de gobernanza cuente con su marca `[ESTANDAR]`/`[PROYECTO]` y su ancla de verificacion (`verifica:`).
+3. Verificar que cada manifiesto `AGENTS.md` (instalados en la Ola 0) y regla de gobernanza cuente con su marca `[ESTANDAR]`/`[PROYECTO]` y su ancla de verificacion (`verifica:`).
 4. Integrar `deno task lint:docs` (`scripts/lint-docs.ts`) en `deno task ci` y en el job de CI.
 
 ### Protocolo de Verificacion por Mutacion (Ola 5)
