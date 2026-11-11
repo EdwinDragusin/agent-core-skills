@@ -31,38 +31,38 @@ function autenticarUsuario(credenciales) { ... }
 
 ```javascript
 /**
- * Agregado raiz del dominio de postulaciones.
+ * Agregado raiz del dominio de pedidos.
  *
  * @class
  * @extends AgregadoRaiz
- * @fires Postulacion#estado-cambiado
+ * @fires Pedido#estado-cambiado
  */
-class Postulacion extends AgregadoRaiz {
+class Pedido extends AgregadoRaiz {
   /**
-   * Identificador del usuario asociado a esta postulacion.
+   * Identificador del cliente asociado a este pedido.
    *
    * @type {string}
    * @private
    */
-  #usuarioId;
+  #clienteId;
 
   /**
-   * Aprueba la postulacion y emite el evento de cambio de estado.
+   * Aprueba el pedido y emite el evento de cambio de estado.
    *
-   * @param {string} motivoAprobacion - Justificacion del dictamen favorable.
-   * @fires Postulacion#estado-cambiado
-   * @throws {ExcepcionDominio} Si la postulacion ya fue dictaminada previamente.
+   * @param {string} motivoAprobacion - Justificacion de la aprobacion.
+   * @fires Pedido#estado-cambiado
+   * @throws {ExcepcionDominio} Si el pedido ya fue aprobado o rechazado previamente.
    */
   aprobar(motivoAprobacion) { ... }
 }
 
 /**
- * Evento emitido cuando el estado de una postulacion cambia.
+ * Evento emitido cuando el estado de un pedido cambia.
  *
- * @event Postulacion#estado-cambiado
+ * @event Pedido#estado-cambiado
  * @type {Object}
  * @property {string} estadoAnterior - Estado previo al cambio.
- * @property {string} estadoNuevo - Estado resultante del dictamen.
+ * @property {string} estadoNuevo - Estado resultante de la transicion.
  */
 ```
 
@@ -112,7 +112,7 @@ class RepositorioExpediente { ... }
  * Valida los criterios de admision de un usuario a una convocatoria especifica.
  *
  * @memberof AdministracionSeleccion
- * @param {PerfilUsuario} usuario - Perfil completo del candidato.
+ * @param {PerfilUsuario} usuario - Perfil completo del usuario.
  * @returns {ResultadoAdmision} Dictamen de admisibilidad con justificacion.
  */
 function validarAdmision(usuario) { ... }
