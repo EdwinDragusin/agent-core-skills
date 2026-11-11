@@ -104,7 +104,7 @@ try {
 } catch (error) {
   throw new ExcepcionDominio(
     "ERROR_PERSISTENCIA",
-    "No fue posible guardar el registro de postulacion",
+    "No fue posible guardar el registro del pedido",
     { cause: error }
   );
 }
